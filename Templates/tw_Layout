@@ -1,0 +1,63 @@
+object tw_Layout: TccDialogWindow
+  Tag = -1
+  Left = 10
+  Top = 10
+  AutoScroll = False
+  BorderIcons = [biSystemMenu]
+  Caption = 'tw_Layout'
+  ClientHeight = 184
+  ClientWidth = 207
+  Color = 3289650
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  BtnHelpEnabled = True
+  BtnHelpVisible = False
+  BtnPreviewEnabled = True
+  BtnPreviewVisible = False
+  BtnCustomEnabled = True
+  BtnCustomVisible = False
+  BtnCustomCaption = 'Cu&stom'
+  BtnOKVisible = True
+  BtnOKEnabled = True
+  BtnCancelVisible = True
+  BtnCancelEnabled = True
+  ShowButtonFrame = True
+  CloseAfterPreviewClick = False
+  CloseAfterCustomClick = False
+  CloseAfterOKClick = True
+  CloseAfterCancelClick = True
+  CloseAfterHelpClick = True
+  ID = '{E509BC13-46CF-45BA-8CD1-CFAB6CCF459B}'
+  PixelsPerInch = 96
+  TextHeight = 13
+  EventDataNames = 'OnOKExecute=Layout_Click'
+  object layout: TptRadioGroup
+    Left = 10
+    Top = 10
+    Width = 185
+    Height = 105
+    Caption = ' SPIEL LAYOUT '
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWhite
+    Font.Height = -13
+    Font.Name = 'Trebuchet MS'
+    Font.Style = [fsBold]
+    ItemIndex = 0
+    Items.WideStrings = (
+      'Bundesliga'
+      'Champions League'
+      'Europa League'
+      'Talk und Tore')
+    ParentFont = False
+    TabOrder = 1
+    Data = '0'
+    Locked = False
+    ExtendedFocusing = True
+  end
+end

@@ -1,0 +1,72 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub update_treffer(Sender)
+    dim ball_idx : ball_idx = right(Sender.Name, 2)
+    dim zeile    : zeile = left(ball_idx,1)
+    dim i, treffer
+    
+    if not IsNumeric(zeile) then exit sub
+    treffer = 0
+    for i = 1 to 5
+        if tw_Torwand.ComponentByName("ball" & zeile & i).BrushColor = clGreen then treffer = treffer + 1
+    next
+    tw_Torwand.ComponentByName("ed_result" & zeile).Text = treffer & " Treffer"
+end sub
+
+sub tw_Torwand_Shape1Click (Sender)
+    if Sender.BrushColor = clGreen then
+        Sender.BrushColor = clRed
+    elseif Sender.BrushColor = clRed then
+        Sender.BrushColor = clGray
+    else
+        Sender.BrushColor = clGreen
+    end if
+    update_treffer(Sender)
+end sub
+
+sub tw_Torwand_bt_show_tableClick (Sender)
+    dim i,j,k
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    k = 0
+    for i = 1 to 5
+        if Trim(tw_Torwand.ComponentByName("ed_name" & i).Text) <> "" then
+            k = k + 1
+            Data.Item("NAME"   & k) = tw_Torwand.ComponentByName("ed_name" & i).Text
+            Data.Item("RESULT" & k) = tw_Torwand.ComponentByName("ed_result" & i).Text
+            for j = 1 to 4
+                select case tw_Torwand.ComponentByName("ball" & i & j).BrushColor
+                    case clGray     Data.Item("BALL" & k & j) = 0
+                    case clGreen    Data.Item("BALL" & k & j) = 1
+                    case clRed      Data.Item("BALL" & k & j) = 2
+                end select
+            next
+        end if
+    next
+    if k = 0 then exit sub
+    Data.Item("TITLE") = tw_Torwand.ed_title.Text
+    Data.Item("ITEMCOUNT") = k
+    Hide_DSS
+    AllTV.TV__Show_Torwand_Table Data
+    set Data = Nothing
+end sub
+
+sub tw_Torwand_bt_show_liveClick (Sender)
+    dim i
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("NAME") = tw_Torwand.ed_Player.Text
+    for i = 1 to 4
+        select case tw_Torwand.ComponentByName("ball" & i).BrushColor
+            case clGray     Data.Item("BALL" & i) = 0
+            case clGreen    Data.Item("BALL" & i) = 1
+            case clRed      Data.Item("BALL" & i) = 2
+        end select
+    next
+    AllTV.TV__Show_Torwand_BB Data
+    set Data = Nothing
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,16 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_spiel_bt_ReserveCrawlMouseDown (Sender, Button, Shift, X, Y)
+  if Button = 0 then
+
+    else
+        tw_crawl_bt_ReserveCrawlClick  Nothing   ' Manuellen Crawl Triggern
+    end if
+
+end sub
+
+</script_body>
+</script>

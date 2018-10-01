@@ -1,0 +1,106 @@
+object tw_info_ext: TccToolWindow
+  Tag = 3
+  FloatingBorderStyle = bsNone
+  Caption = 'Info Text'
+  Color = 3289650
+  ClientAreaHeight = 66
+  ClientAreaWidth = 545
+  DockableTo = []
+  DockRow = 1
+  LastDock = frmMain.dckTop
+  Resizable = False
+  TabOrder = 0
+  Visible = False
+  Floating = True
+  ParentColor = False
+  Float = True
+  SavedAtRunTime = True
+  object cb_text_1: TptComboBox
+    Left = 10
+    Top = 20
+    Width = 201
+    Height = 21
+    TabOrder = 0
+    Text = 'Team A'
+    Items.WideStrings = (
+      'Team A'
+      'Team B'
+      'Team A Powerplay'
+      'Team B Powerplay'
+      '2. Drittel'
+      '3. Drittel')
+    ItemIndex = 0
+    DroppedWidth = 201
+    DropDownAutoSize = False
+    FixedStyle = False
+    SaveStyle = cbssStandard
+    Locked = False
+    EventDataNames = 'OnChange=tw_info_ext_cb_text_1Change'
+  end
+  object cb_text_2: TptComboBox
+    Left = 225
+    Top = 20
+    Width = 81
+    Height = 21
+    TabOrder = 1
+    Text = '0'
+    Items.WideStrings = (
+      '0'
+      '1'
+      '2'
+      '3'
+      '4'
+      '5'
+      '6'
+      '7'
+      '8'
+      '9'
+      '10'
+      '11'
+      '12'
+      '13'
+      '14'
+      '15'
+      '16'
+      '17'
+      '18'
+      '19'
+      '20'
+      '21'
+      '22'
+      '23'
+      '24'
+      '25'
+      '26'
+      '27'
+      '28'
+      '29'
+      '30')
+    ItemIndex = 0
+    DroppedWidth = 81
+    DropDownAutoSize = False
+    FixedStyle = False
+    SaveStyle = cbssStandard
+    Locked = False
+    EventDataNames = 'OnChange=tw_info_ext_cb_text_1Change'
+  end
+  object cb_text_3: TptComboBox
+    Left = 320
+    Top = 20
+    Width = 206
+    Height = 21
+    TabOrder = 2
+    Text = 'Timeout'
+    Items.WideStrings = (
+      'Shots on Goal'
+      'Shot on Goal'
+      'Timeout')
+    ItemIndex = 2
+    DroppedWidth = 206
+    DropDownAutoSize = False
+    FixedStyle = False
+    SaveStyle = cbssStandard
+    Locked = False
+    EventDataNames = 'OnChange=tw_info_ext_cb_text_1Change'
+  end
+end

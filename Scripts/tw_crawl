@@ -1,0 +1,273 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+
+sub tw_crawl_bt_ReserveCrawlClick (Sender)
+    dim i, k
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    dim tmp   : Set tmp = CreateObject("Scripting.Dictionary")
+
+    Data.Item("TNAME")    = GetNameTranslation("T",  TSP.GetSTeam(TSP_db_id), TSP_long_name) ' TSP.GetSTeam(TSP_long_name)
+    Data.Item("LOGO")    = TSP.GetSTeam(TSP_logo)
+    Data.Item("TRAINER") = GetNameTranslation("C", TSP.GetSTeam("coach_1_id"), TSP_Player_name)
+    Data.Item("TRAINER") ="Reservespieler"
+    if Sender is tw_spiel.bt_ReserveCrawl then Data.Item("FOTO")=true
+    i = 0
+    TSP.SetPlayerPos TSP_First, TSP_ALL, TSP_Actual
+    Do
+        if (TSP.GetTPlayer(TSP_status) = "O") or (TSP.GetTPlayer(TSP_status) = "R") then
+            i = i + 1
+            tmp.Item("BIB"  & i) = TSP.GetTPlayer(TSP_dress_nr)
+            tmp.Item("NAME" & i) = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_second_name)
+            tmp.Item("TEXT" & i) = TSP.GetTPlayer(TSP_pos_in_game)
+        end if
+    Loop Until (TSP.SetPlayerPos("NEXT", "ALL", TSP_Actual) = False)
+
+    Data.Item("ITEMCOUNT") = i
+
+
+    i = 0
+    for k = 1 to Data.Item("ITEMCOUNT")
+        if ucase(tmp.Item("TEXT" & k) )= "GOALKEEPER" then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & k)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & k)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & k)
+        end if
+    next
+    for k = 1 to Data.Item("ITEMCOUNT")
+        if ucase(tmp.Item("TEXT" & k) )= "DEFENDER" then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & k)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & k)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & k)
+        end if
+    next
+    for k = 1 to Data.Item("ITEMCOUNT")
+        if ucase(tmp.Item("TEXT" & k) )= "MIDFIELDER" then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & k)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & k)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & k)
+        end if
+    next
+    for k = 1 to Data.Item("ITEMCOUNT")
+        if (UCase(tmp.Item("TEXT" & k)) = "STRIKER") or (UCase(tmp.Item("TEXT" & k)) = "FORWARD") then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & k)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & k)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & k)
+        end if
+    next
+
+
+    AllTV.TV__BB_LineupCrawl Data
+    set Data = Nothing
+end sub
+
+sub tw_crawl_bt_ReserveCrawl2Click (Sender)
+    'tw_freeCrawl.ed_logo.Text = TSP.GetSTeam(TSP_logo)
+
+    dim k,i
+    'If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'") Then
+    If TSP.LoadSQLData("SELECT * FROM TEAMS'") Then
+        If TSP.SetSQLPos("First") Then
+            tw_freeCrawl.cb_logo.UserData = tw_freeCrawl.cb_logo.Text
+            tw_freeCrawl.cb_logo.Items.Clear
+            Do
+                if tw_freeCrawl.cb_logo.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_freeCrawl.cb_logo.Items.Add TSP.GetSQLData("long_name")
+            Loop While TSP.SetSQLPos("Next")
+            tw_freeCrawl.cb_logo.ItemIndex = tw_freeCrawl.cb_logo.Items.IndexOf(tw_freeCrawl.cb_logo.UserData)
+        end if
+    end if
+    tw_freeCrawl.cb_logo.ItemIndex = tw_freeCrawl.cb_logo.Items.IndexOf(TSP.GetSTeam(TSP_LONG_NAME))
+    tw_freeCrawl.Visible = true
+    tw_freeCrawl.BringToFront
+end sub
+
+sub tw_crawl_bt_AufstellungsCrawlClick (Sender)
+    dim i, pos
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    dim tmp   : Set tmp = CreateObject("Scripting.Dictionary")
+    dim TeamId:TeamId=1
+    dim positions(11)     ' Spieler positionen
+    dim mapped_pos
+'    dim sorted_pos : sorted_pos = Array(1,2,5,6,3,7,4,8,11,10,9)  ' Die Reihenfolge der "Formation" Nummern wie ich sie brauche
+    dim sorted_pos : sorted_pos = Array(2,3,4,5,6,7,8,9,10,11,1)   ' Die Reihenfolge der "Formation" Nummern wie ich sie brauche
+    dim teama
+    TSP.SaveSelection
+    TSP.SetTeamPos("A") 'Werte TeamA
+    teama = GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_long_name)
+
+
+    Data.Item("TNAME")    = GetNameTranslation("T",  TSP.GetSTeam(TSP_db_id), TSP_long_name) ' TSP.GetSTeam(TSP_long_name)
+    Data.Item("LOGO")    = TSP.GetSTeam(TSP_logo)
+    Data.Item("TRAINER") = GetNameTranslation("C", TSP.GetSTeam("coach_1_id"), TSP_Player_name)
+    
+    if(Data.Item("TNAME") <> teama) then
+      TeamId=2
+    end if
+
+    i = 0
+    TSP.SetPlayerPos TSP_First, TSP_ALL, TSP_Actual
+    Do
+        if (TSP.GetTPlayer(TSP_status) = "I") or (TSP.GetTPlayer(TSP_status) = "G") then
+            i = i + 1
+            tmp.Item("BIB"  & i) = TSP.GetTPlayer(TSP_dress_nr)
+            tmp.Item("NAME" & i) = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_second_name)
+            tmp.Item("TEXT" & i) = TSP.GetTPlayer(TSP_pos_in_game)
+            pos = cint(EmptyToZero(TSP.GetTPlayer(TSP_DUMMY_2)))
+            if (TSP.GetTPlayer(TSP_POS_X) = "1") then
+                tmp.Item("HL"  & i) =true
+            else
+                tmp.Item("HL"  & i) =false
+            end if
+            if pos <=  11 then positions(pos) = i   '  Wir speichern mal den Index dieses Spielers an dessen positions nummer
+        end if
+    Loop Until (TSP.SetPlayerPos("NEXT", "ALL", TSP_Actual) = False)
+    
+    if i <> 11 then msgbox "11 nominated players expected! Use TeamSports OCX."
+    Data.Item("ITEMCOUNT") = i
+
+    i = 0
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos) )= "GOALKEEPER" then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+            Data.Item("HL" & i) = tmp.Item("HL" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos)) = "DEFENDER" then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+            Data.Item("HL" & i) = tmp.Item("HL" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos)) = "MIDFIELDER" then
+          i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+            Data.Item("HL" & i) = tmp.Item("HL" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if (UCase(tmp.Item("TEXT" & mapped_pos)) = "STRIKER") or (UCase(tmp.Item("TEXT" & mapped_pos)) = "FORWARD") then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+            Data.Item("HL" & i) = tmp.Item("HL" & mapped_pos)
+        end if
+    next
+
+    'TSP.SaveSelection
+    if TeamId=2 then
+        TSP.SetTeamPos("A")
+    else
+        TSP.SetTeamPos("B")
+    end if
+    Data.Item("TNAME2")    = GetNameTranslation("T",  TSP.GetSTeam(TSP_db_id), TSP_long_name) ' TSP.GetSTeam(TSP_long_name)
+    Data.Item("LOGO2")    = TSP.GetSTeam(TSP_logo)
+    Data.Item("TRAINER2") = GetNameTranslation("C", TSP.GetSTeam("coach_1_id"), TSP_Player_name)
+
+
+    i = 0
+    TSP.SetPlayerPos TSP_First, TSP_ALL, TSP_Actual
+    Do
+        if (TSP.GetTPlayer(TSP_status) = "I") or (TSP.GetTPlayer(TSP_status) = "G") then
+            i = i + 1
+            tmp.Item("BIB"  & i) = TSP.GetTPlayer(TSP_dress_nr)
+            tmp.Item("NAME" & i) = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_second_name)
+            tmp.Item("TEXT" & i) = TSP.GetTPlayer(TSP_pos_in_game)
+            pos = cint(EmptyToZero(TSP.GetTPlayer(TSP_DUMMY_2)))
+            if (TSP.GetTPlayer(TSP_POS_X) = "1") then
+                tmp.Item("HL"  & i) =true
+            else
+                tmp.Item("HL"  & i) =false
+            end if
+            if pos <=  11 then positions(pos) = i   '  Wir speichern mal den Index dieses Spielers an dessen positions nummer
+        end if
+    Loop Until (TSP.SetPlayerPos("NEXT", "ALL", TSP_Actual) = False)
+
+    if i <> 11 then msgbox "11 nominated players expected! Use TeamSports OCX."
+    Data.Item("ITEMCOUNT2") = i
+    'TSP.RestoreSelection
+    i = 0
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos) )= "GOALKEEPER" then
+            i = i + 1
+            Data.Item("BIB2"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME2" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT2" & i) = tmp.Item("TEXT" & mapped_pos)
+            Data.Item("HL2" & i) = tmp.Item("HL" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos)) = "DEFENDER" then
+            i = i + 1
+            Data.Item("BIB2"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME2" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT2" & i) = tmp.Item("TEXT" & mapped_pos)
+            Data.Item("HL2" & i) = tmp.Item("HL" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos)) = "MIDFIELDER" then
+          i = i + 1
+            Data.Item("BIB2"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME2" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT2" & i) = tmp.Item("TEXT" & mapped_pos)
+            Data.Item("HL2" & i) = tmp.Item("HL" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if (UCase(tmp.Item("TEXT" & mapped_pos)) = "STRIKER") or (UCase(tmp.Item("TEXT" & mapped_pos)) = "FORWARD") then
+            i = i + 1
+            Data.Item("BIB2"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME2" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT2" & i) = tmp.Item("TEXT" & mapped_pos)
+            Data.Item("HL2" & i) = tmp.Item("HL" & mapped_pos)
+        end if
+    next
+
+        TSP.RestoreSelection
+
+    if Sender is tw_crawl.bt_AufstellungsCrawl then
+        AllTV.TV__BB_LineupCrawl Data          ' Automatischen Crawl anzeigen
+    else
+        tw_manualLineupCrawl_SHOW Data      ' Manuellen Crawl laden und als Dialog anbieten
+    end if
+
+    set Data = Nothing
+    set Tmp = Nothing
+end sub
+
+
+
+sub tw_crawl_bt_AufstellungsCrawlMouseDown (Sender, Button, Shift, X, Y)
+    if Button = 0 then
+        tw_crawl_bt_AufstellungsCrawlClick  Sender
+    else
+        tw_crawl_bt_AufstellungsCrawlClick  Nothing   ' Manuellen Crawl Triggern
+    end if
+end sub
+
+</script_body>
+</script>

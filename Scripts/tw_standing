@@ -1,0 +1,152 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_standing_bt_Erg1Click (Sender)
+    dim i
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim k : k = 0
+    Data.Item("ANIM_TYPE")  = Right(Sender.Name, 1)  ' Es gibt 4 verschiedene Grafiken
+    for i = 1 to tw_standing.grid.RowCount - 1
+        if Trim(tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Club"))) <> "" then
+            k = k + 1
+            Data.Item("NAME"  & k) = tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Club"))
+            Data.Item("PLACE" & k) = Trim( tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "#")))
+            Data.Item("GAMES" & k) = tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Games"))
+            Data.Item("GOALS" & k) = tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Goals"))
+            Data.Item("DIFF"  & k) = tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Diff"))
+            Data.Item("PTS"   & k) = tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Pts"))
+            Data.Item("HL"    & k) =(tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "HL?")) = "X")
+            Data.Item("TREND" & k) = tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Trend"))
+            Data.Item("LOGO"  & k) = TSP_get_info_from_db("TEAMS","LOGO","LONG_NAME", Replace(Data.Item("NAME"  & k),"*",""))
+        end if
+    next
+
+    Data.Item("ITEMCOUNTTAB")  = k
+    'if Data.Item("ANIM_TYPE")=6 or Data.Item("ANIM_TYPE")=5 then Data.Item("ITEMCOUNTTAB") =6
+    k = 0
+    for i = 1 to tw_standing.grid2.RowCount - 1
+        if Trim(tw_standing.grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 1"))) <> "" then
+            k = k + 1
+            Data.Item("NAME_A" & k) = tw_standing.grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 1"))
+            Data.Item("NAME_B" & k) = tw_standing.grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 2"))
+            Data.Item("RESULT" & k) = tw_standing.grid2.Cells(i, GetColIdx(tw_standing.grid2, "Result"))
+            Data.Item("THL"    & k) =(tw_standing.grid2.Cells(i, GetColIdx(tw_standing.grid2, "HL?")) = "X")
+            Data.Item("LOGO_A" & k) = TSP_get_info_from_db ("TEAMS","LOGO","LONG_NAME", Data.Item("NAME_A"  & k))
+            Data.Item("LOGO_B" & k) = TSP_get_info_from_db ("TEAMS","LOGO","LONG_NAME", Data.Item("NAME_B"  & k))
+        end if
+    next
+    Data.Item("ITEMCOUNT")  = k
+    'if Data.Item("ANIM_TYPE")=6 or Data.Item("ANIM_TYPE")=5 then Data.Item("ITEMCOUNT") =3
+    Data.Item("TITLE")      = tw_standing.ed_header.Text
+    Data.Item("OPT_TITLE")  = tw_standing.ed_opt_title.Text
+    Data.Item("OPT_ZUSATZ") = tw_standing.ed_opt_zusatz.Text
+    if   Data.Item("ANIM_TYPE") = 5 then
+        Data.Item("TITLE")  ="Platzierungsrunde"
+    end if
+   if   Data.Item("ANIM_TYPE") = 6 then
+        Data.Item("TITLE")  ="Qualifikationsrunde"
+    end if
+
+    
+  '  Data.Item("HEAD")      = tw_standing.rg_header.ItemIndex
+
+
+    
+    Hide_DSS
+    HideVorlaufLogos
+    AllTV.TV__VB_Standing Data
+    Set Data = Nothing
+end sub
+
+' Versucht die Daten direkt aus dem TSP Server zu bekommen
+sub fetch_standing_from_tsp()
+    dim rank, games,i,group
+    games = TSP.GetRound(TSP_ROUND)
+    tw_standing.grid.FixedCols=0
+    i = 0
+    If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'") then
+        If TSP.SetSQLPos("First") Then
+            Do
+                rank = cInt(EmptyToZero(TSP.GetSQLData("RANK")))
+                group = cInt(EmptyToZero(TSP.GetSQLData("TEXT_1")))*10
+                if (rank <= 12) and (rank > 0) then
+                    i = i + 1
+                     tw_standing.grid.Cells(i, 0)=group+rank &"."
+                    tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "#"))     = rank &"."
+                    tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Club"))  = TSP.GetSQLData("long_name") & TSP.GetSQLData("tv_name_2")
+                    tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Games")) = TSP.GetSQLData("ANZGAMES")
+                    if cInt(EmptyToZero(TSP.GetSQLData("ANZGAMES"))) > games then games = cInt(TSP.GetSQLData("ANZGAMES"))
+                    tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Goals")) = TSP.GetSQLData("GOALS") & ":" & TSP.GetSQLData("GOALS_AGAINST")
+                    tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Diff"))  = cInt(EmptyToZero(TSP.GetSQLData("GOALS"))) - cInt(EmptyToZero(TSP.GetSQLData("GOALS_AGAINST")))
+
+                    if cint(EmptyToZero(tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Diff")))) > 0 then
+                        tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Diff")) = "+" & tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Diff"))
+                    end if
+                    
+                    tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Pts"))   = TSP.GetSQLData("POINTS")
+                    tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "HL?"))   = "" ' Vielleicht sollte man die markieren die sich verändert/gespielt haben?!
+                    if     cInt(EmptyToZero(TSP.GetSQLData("RANK"))) < cInt(EmptyToZero(TSP.GetSQLData("RANK_PREV"))) then
+                        tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Trend")) = "+"
+                    elseif cInt(EmptyToZero(TSP.GetSQLData("RANK"))) > cInt(EmptyToZero(TSP.GetSQLData("RANK_PREV"))) then
+                        tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Trend")) = "-"
+                    else
+                        tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "Trend")) = ""
+                    end if
+                end if
+            Loop While TSP.SetSQLPos("Next")
+        end if
+    end if
+     call tw_standing.grid.SortByCol(0,true)
+     tw_standing.grid.FixedCols=1
+    tw_standing.ed_header.text = games & ". Runde"
+    tw_standing.grid2.FixedCols=0
+    If TSP.LoadSQLData("SELECT * FROM ROUNDS_LIST WHERE (round='" & games & "') and (league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "')") then
+        i = 0
+        If TSP.SetSQLPos("First") Then
+            Do
+                i = i + 1
+                if i <= 6 then
+                    tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 1")) = TSP.GetSQLData("team_a_name")
+                    tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 2")) = TSP.GetSQLData("team_b_name")
+                    tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "result")) = TSP.GetSQLData("score_a") & ":" & TSP.GetSQLData("score_b")
+                    tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "hl?"))   = ""
+                    tw_standing.Grid2.Cells(i, 0) = TSP.GetSQLData("gruppe")
+                end if
+            Loop While TSP.SetSQLPos("Next")
+        end if
+    end if
+    call tw_standing.grid2.SortByCol(0,true)
+    tw_standing.grid2.FixedCols=1
+end sub
+
+sub tw_standing_gridDblClick (Sender)
+    'if Sender.col <> 5 then
+        if  Sender.Cells(Sender.row, GetColIdx(Sender, "HL?")) = "X" then
+            Sender.Cells(Sender.row, GetColIdx(Sender, "HL?")) = ""
+        else
+            Sender.Cells(Sender.row, GetColIdx(Sender, "HL?")) = "X"
+        end if
+    'else
+    '   if  Sender.Cells(Sender.row, GetColIdx(Sender, "SHOW?")) = "X" then
+    '        Sender.Cells(Sender.row, GetColIdx(Sender, "SHOW?")) = ""
+    '    else
+    '        Sender.Cells(Sender.row, GetColIdx(Sender, "SHOW?")) = "X"
+    '    end if
+    'end if
+end sub
+
+sub tw_standing_gridMouseUp (Sender, Button, Shift, X, Y)
+    dim i : i = 0
+   for i = 1 to tw_standing.grid.RowCount - 1
+ '       Sender.Cells(i, 1)=i & "."
+   next
+end sub
+
+sub tw_standing_cb_templateChange (Sender)
+    tw_standing.ed_opt_title.Text = tw_standing.cb_template.Text
+end sub
+
+</script_body>
+</script>

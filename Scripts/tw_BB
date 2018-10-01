@@ -1,0 +1,38 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_BB_bt_torschutzeClick (Sender)
+    dim pID  : pID = TSP.GetTPlayer(TSP_OPTA_ID)
+
+    dim saison_tore, match_tore
+    if CURRENT_MATCH_DATA.count = 0 then
+        cc.sf.debugtext "CURRENT MATCH DATA MISSING!", clRed
+        match_tore = 0
+    else
+        match_tore  = cint(EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|G")))
+    end if
+    saison_tore = cint(EmptyToZero(TSP_get_info_from_db("PLAYERS_2", "G", "OPTA_ID", pID)))
+    
+    dim  pNName : pNName = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), "NICK_NAME")
+    dim pFName : pFName = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_first_name)
+    dim pName : pName = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_second_name)
+    if pNName <> "" then
+        tw_goalscorer.ed_Name.Text = pNName
+        tw_goalscorer.ed_FName.Text = ""
+    else
+        tw_goalscorer.ed_Name.Text = pName                          ' Wenn mal kein Name im Dialog Fenster erscheint, dann wurde der Spieler anscheinend ohne Namen in der Databar abgespeichert.
+        tw_goalscorer.ed_FName.Text = pFName
+    end if
+    tw_goalscorer.ed_NR.text=TSP.GetTPlayer(TSP_dress_nr)
+    tw_goalscorer.cb_logo.text = TSP.GetSTeam(TSP_logo)
+    tw_goalscorer.lb_info.Caption = "SaisonTore: " & saison_tore & " matchTore: " & match_tore & " + 1 = "
+    tw_goalscorer.ed_info.Text = saison_tore + match_tore + 1 & ". Saisontor"
+
+    tw_goalscorer.Visible = true
+    tw_goalscorer.BringToFront
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,43 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_info_ext_cb_text_1Change (Sender)
+    dim t1
+    dim t2
+    if tw_info_ext.cb_text_1.ItemIndex = 0 then
+        TSP.SaveSelection
+        TSP.SetTeamPos "A"
+        t1=GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_nick_name)
+        Tsp.RestoreSelection
+    elseif  tw_info_ext.cb_text_1.ItemIndex = 1 then
+        TSP.SaveSelection
+        TSP.SetTeamPos "B"
+        t1=GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_nick_name)
+        Tsp.RestoreSelection
+    elseif tw_info_ext.cb_text_1.ItemIndex = 2 then
+        TSP.SaveSelection
+        TSP.SetTeamPos "A"
+        t1=GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_nick_name)
+        t1=t1&" Powerplay"
+        Tsp.RestoreSelection
+    elseif  tw_info_ext.cb_text_1.ItemIndex = 3 then
+        TSP.SaveSelection
+        TSP.SetTeamPos "B"
+        t1=GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_nick_name)
+        t1=t1&" Powerplay"
+        Tsp.RestoreSelection
+    else
+        t1=tw_info_ext.cb_text_1.text
+    end if
+    if tw_info_ext.cb_text_2.ItemIndex = 0 then
+        t2=" "
+    else
+        t2=" "& tw_info_ext.cb_text_2.text  &" "
+    end if
+    pgMain.ed_dss.Text=t1&":"&t2&tw_info_ext.cb_text_3.Text
+end sub
+
+</script_body>
+</script>

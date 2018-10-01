@@ -1,0 +1,959 @@
+object tw_startingv_vb: TccToolWindow
+  Tag = 3
+  FloatingBorderStyle = bsNone
+  Caption = 'Starting 6 VB'
+  Color = clBtnFace
+  ClientAreaHeight = 396
+  ClientAreaWidth = 981
+  DockableTo = []
+  DockRow = 1
+  LastDock = frmMain.dckTop
+  Resizable = False
+  TabOrder = 0
+  Visible = False
+  Floating = True
+  ParentColor = False
+  Float = True
+  SavedAtRunTime = True
+  object Panel1: TptPanel
+    Left = -1
+    Top = 0
+    Width = 982
+    Height = 341
+    Color = 3289650
+    Locked = False
+    TabOrder = 0
+    object Label1: TptLabel
+      Left = 15
+      Top = 45
+      Width = 27
+      Height = 13
+      Caption = 'Team'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      Locked = False
+    end
+    object Label3: TptLabel
+      Left = 175
+      Top = 100
+      Width = 38
+      Height = 13
+      Caption = 'Player 1'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      Locked = False
+    end
+    object Label4: TptLabel
+      Left = 335
+      Top = 100
+      Width = 38
+      Height = 13
+      Caption = 'Player 2'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      Locked = False
+    end
+    object Label5: TptLabel
+      Left = 495
+      Top = 100
+      Width = 38
+      Height = 13
+      Caption = 'Player 3'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      Locked = False
+    end
+    object Label6: TptLabel
+      Left = 655
+      Top = 100
+      Width = 38
+      Height = 13
+      Caption = 'Player 4'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      Locked = False
+    end
+    object Label7: TptLabel
+      Left = 815
+      Top = 100
+      Width = 38
+      Height = 13
+      Caption = 'Player 5'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      Locked = False
+    end
+    object Label2: TptLabel
+      Left = 175
+      Top = 45
+      Width = 42
+      Height = 13
+      Caption = 'Headline'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      Locked = False
+    end
+    object Label8: TptLabel
+      Left = 20
+      Top = 100
+      Width = 18
+      Height = 13
+      Caption = 'TW'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      Locked = False
+    end
+    object DataBar1: TptDataBar
+      Left = 1
+      Top = 1
+      Width = 980
+      Height = 35
+      Align = alTop
+      Color = 13816530
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+      DataGroupName = 'tw_startingv_image'
+      DataGroupStyle = dsLocal
+      DataComboBoxWidth = 180
+      ButtonStyle = bsImageOnly
+      BorderWidth = 4
+      VisibleDataCbx = True
+      VisibleSaveBtn = True
+      VisibleRefreshBtn = True
+      VisibleDeleteBtn = True
+      VisibleNextBtn = False
+      VisiblePreviousBtn = False
+      DataVisibility = kfNone
+      Locked = False
+    end
+    object cb_logo: TptComboBox
+      Left = 15
+      Top = 65
+      Width = 145
+      Height = 21
+      TabOrder = 1
+      Text = 'black_wings'
+      ItemIndex = -1
+      DroppedWidth = 145
+      DropDownAutoSize = False
+      FixedStyle = False
+      SaveStyle = cbssStandard
+      Locked = False
+      EventDataNames = 'OnChange=tw_startingv_vb_cb_logoChange'
+    end
+    object tb_fname_1: TptEdit
+      Left = 175
+      Top = 120
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 2
+      Text = 'Jonathan'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_name_1: TptEdit
+      Left = 175
+      Top = 150
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 3
+      Text = 'D'#39'Aversa'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_fname_2: TptEdit
+      Left = 335
+      Top = 120
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 4
+      Text = 'Brian'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_name_2: TptEdit
+      Left = 335
+      Top = 150
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 5
+      Text = 'Lebler'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_fname_3: TptEdit
+      Left = 495
+      Top = 120
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 6
+      Text = 'Laurens'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_name_3: TptEdit
+      Left = 495
+      Top = 150
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 7
+      Text = 'Ober'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_fname_4: TptEdit
+      Left = 655
+      Top = 120
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 8
+      Text = 'Rick'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_name_4: TptEdit
+      Left = 655
+      Top = 150
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 9
+      Text = 'Schofield'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_fname_5: TptEdit
+      Left = 815
+      Top = 120
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 10
+      Text = 'Marc-Andre'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_name_5: TptEdit
+      Left = 815
+      Top = 150
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 11
+      Text = 'Dorion'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object cb_photo_1: TptComboBox
+      Left = 175
+      Top = 210
+      Width = 145
+      Height = 21
+      TabOrder = 12
+      Text = 'h_6'
+      Items.WideStrings = (
+        '10'
+        '11'
+        '13'
+        '14'
+        '15'
+        '17'
+        '18'
+        '19'
+        '21'
+        '22'
+        '23'
+        '24'
+        '26'
+        '27'
+        '29'
+        '31'
+        '34'
+        '38'
+        '41'
+        '55'
+        '58'
+        '61'
+        '66'
+        '7'
+        '72'
+        '74'
+        '78'
+        '8'
+        '88'
+        '9')
+      ItemIndex = -1
+      DroppedWidth = 145
+      DropDownAutoSize = False
+      FixedStyle = False
+      SaveStyle = cbssStandard
+      Locked = False
+    end
+    object cb_photo_2: TptComboBox
+      Left = 335
+      Top = 210
+      Width = 145
+      Height = 21
+      TabOrder = 13
+      Text = 'h_7'
+      Items.WideStrings = (
+        '10'
+        '11'
+        '13'
+        '14'
+        '15'
+        '17'
+        '18'
+        '19'
+        '21'
+        '22'
+        '23'
+        '24'
+        '26'
+        '27'
+        '29'
+        '31'
+        '34'
+        '38'
+        '41'
+        '55'
+        '58'
+        '61'
+        '66'
+        '7'
+        '72'
+        '74'
+        '78'
+        '8'
+        '88'
+        '9')
+      ItemIndex = -1
+      DroppedWidth = 145
+      DropDownAutoSize = False
+      FixedStyle = False
+      SaveStyle = cbssStandard
+      Locked = False
+    end
+    object cb_photo_3: TptComboBox
+      Left = 495
+      Top = 210
+      Width = 145
+      Height = 21
+      TabOrder = 14
+      Text = 'h_8'
+      Items.WideStrings = (
+        '10'
+        '11'
+        '13'
+        '14'
+        '15'
+        '17'
+        '18'
+        '19'
+        '21'
+        '22'
+        '23'
+        '24'
+        '26'
+        '27'
+        '29'
+        '31'
+        '34'
+        '38'
+        '41'
+        '55'
+        '58'
+        '61'
+        '66'
+        '7'
+        '72'
+        '74'
+        '78'
+        '8'
+        '88'
+        '9')
+      ItemIndex = -1
+      DroppedWidth = 145
+      DropDownAutoSize = False
+      FixedStyle = False
+      SaveStyle = cbssStandard
+      Locked = False
+    end
+    object cb_photo_4: TptComboBox
+      Left = 655
+      Top = 210
+      Width = 145
+      Height = 21
+      TabOrder = 15
+      Text = 'h_9'
+      Items.WideStrings = (
+        '10'
+        '11'
+        '13'
+        '14'
+        '15'
+        '17'
+        '18'
+        '19'
+        '21'
+        '22'
+        '23'
+        '24'
+        '26'
+        '27'
+        '29'
+        '31'
+        '34'
+        '38'
+        '41'
+        '55'
+        '58'
+        '61'
+        '66'
+        '7'
+        '72'
+        '74'
+        '78'
+        '8'
+        '88'
+        '9')
+      ItemIndex = -1
+      DroppedWidth = 145
+      DropDownAutoSize = False
+      FixedStyle = False
+      SaveStyle = cbssStandard
+      Locked = False
+    end
+    object cb_photo_5: TptComboBox
+      Left = 815
+      Top = 210
+      Width = 145
+      Height = 21
+      TabOrder = 16
+      Text = 'h_10'
+      Items.WideStrings = (
+        '10'
+        '11'
+        '13'
+        '14'
+        '15'
+        '17'
+        '18'
+        '19'
+        '21'
+        '22'
+        '23'
+        '24'
+        '26'
+        '27'
+        '29'
+        '31'
+        '34'
+        '38'
+        '41'
+        '55'
+        '58'
+        '61'
+        '66'
+        '7'
+        '72'
+        '74'
+        '78'
+        '8'
+        '88'
+        '9')
+      ItemIndex = -1
+      DroppedWidth = 145
+      DropDownAutoSize = False
+      FixedStyle = False
+      SaveStyle = cbssStandard
+      Locked = False
+    end
+    object tb_info_1_1: TptEdit
+      Left = 175
+      Top = 240
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 17
+      Text = '11 Spiele'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_1_2: TptEdit
+      Left = 175
+      Top = 270
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 18
+      Text = '1 Tor'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_1_3: TptEdit
+      Left = 175
+      Top = 300
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 19
+      Text = '4 Assists'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_2_1: TptEdit
+      Left = 335
+      Top = 240
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 20
+      Text = '12 Spiele'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_2_2: TptEdit
+      Left = 335
+      Top = 270
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 21
+      Text = '1 Tor'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_2_3: TptEdit
+      Left = 335
+      Top = 300
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 22
+      Text = '1 Assist'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_3_1: TptEdit
+      Left = 495
+      Top = 240
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 23
+      Text = '16 Spiele'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_3_2: TptEdit
+      Left = 495
+      Top = 270
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 24
+      Text = '4 Tore'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_3_3: TptEdit
+      Left = 495
+      Top = 300
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 25
+      Text = '9 Assists'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_4_1: TptEdit
+      Left = 655
+      Top = 240
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 26
+      Text = '7 Spiele'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_4_2: TptEdit
+      Left = 655
+      Top = 270
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 27
+      Text = '1 Tor'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_4_3: TptEdit
+      Left = 655
+      Top = 300
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 28
+      Text = '0 Assists'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_5_1: TptEdit
+      Left = 815
+      Top = 240
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 29
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_5_2: TptEdit
+      Left = 815
+      Top = 270
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 30
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_5_3: TptEdit
+      Left = 815
+      Top = 300
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 31
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_hl: TptEdit
+      Left = 175
+      Top = 65
+      Width = 471
+      Height = 21
+      MaxLength = 0
+      TabOrder = 32
+      Text = 'Starting 6 - Linz'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object cb_werbung: TptCheckBox
+      Left = 695
+      Top = 65
+      Width = 97
+      Height = 17
+      Caption = 'Werbung ?'
+      Color = 3289650
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 33
+      Visible = False
+      Locked = False
+      ColorFocused = 3289650
+      ColorMouseOver = 3289650
+    end
+    object tb_nr_1: TptEdit
+      Left = 175
+      Top = 180
+      Width = 50
+      Height = 21
+      MaxLength = 0
+      TabOrder = 34
+      Text = '6'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_nr_2: TptEdit
+      Left = 335
+      Top = 180
+      Width = 50
+      Height = 21
+      MaxLength = 0
+      TabOrder = 35
+      Text = '7'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_nr_3: TptEdit
+      Left = 495
+      Top = 180
+      Width = 50
+      Height = 21
+      MaxLength = 0
+      TabOrder = 36
+      Text = '8'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_nr_4: TptEdit
+      Left = 655
+      Top = 180
+      Width = 50
+      Height = 21
+      MaxLength = 0
+      TabOrder = 37
+      Text = '9'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_nr_5: TptEdit
+      Left = 815
+      Top = 180
+      Width = 50
+      Height = 21
+      MaxLength = 0
+      TabOrder = 38
+      Text = '10'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_fname_0: TptEdit
+      Left = 20
+      Top = 120
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 39
+      Text = 'Paul'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_name_0: TptEdit
+      Left = 20
+      Top = 150
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 40
+      Text = 'Mocher'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object cb_photo_0: TptComboBox
+      Left = 20
+      Top = 210
+      Width = 145
+      Height = 21
+      TabOrder = 41
+      Text = 'h_69'
+      Items.WideStrings = (
+        '10'
+        '11'
+        '13'
+        '14'
+        '15'
+        '17'
+        '18'
+        '19'
+        '21'
+        '22'
+        '23'
+        '24'
+        '26'
+        '27'
+        '29'
+        '31'
+        '34'
+        '38'
+        '41'
+        '55'
+        '58'
+        '61'
+        '66'
+        '7'
+        '72'
+        '74'
+        '78'
+        '8'
+        '88'
+        '9')
+      ItemIndex = -1
+      DroppedWidth = 145
+      DropDownAutoSize = False
+      FixedStyle = False
+      SaveStyle = cbssStandard
+      Locked = False
+    end
+    object tb_info_0_1: TptEdit
+      Left = 20
+      Top = 240
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 42
+      Text = '6 Spiele'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_0_2: TptEdit
+      Left = 20
+      Top = 270
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 43
+      Text = '1 Tor'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_info_0_3: TptEdit
+      Left = 20
+      Top = 300
+      Width = 146
+      Height = 21
+      MaxLength = 0
+      TabOrder = 44
+      Text = '1 Assist'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+    object tb_nr_0: TptEdit
+      Left = 20
+      Top = 180
+      Width = 50
+      Height = 21
+      MaxLength = 0
+      TabOrder = 45
+      Text = '69'
+      Numeric = False
+      InputType = itAnything
+      Locked = False
+    end
+  end
+  object btn_show: TptButton
+    Left = 784
+    Top = 345
+    Width = 116
+    Height = 41
+    Caption = 'Show'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -20
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ModalResult = mrNone
+    ParentFont = False
+    TabOrder = 1
+    ParentColor = False
+    Color = clBtnFace
+    ColorMouseOver = clBtnFace
+    ColorFocused = clBtnFace
+    DrawFocusRect = False
+    MultiLineCaption = False
+    Alignment = alMiddleCenter
+    FontFocused.Charset = DEFAULT_CHARSET
+    FontFocused.Color = clWindowText
+    FontFocused.Height = -11
+    FontFocused.Name = 'MS Sans Serif'
+    FontFocused.Style = []
+    FontMouseOver.Charset = DEFAULT_CHARSET
+    FontMouseOver.Color = clWindowText
+    FontMouseOver.Height = -11
+    FontMouseOver.Name = 'MS Sans Serif'
+    FontMouseOver.Style = []
+    PreferFocused = False
+    FrameSize = 2
+    BackgroundTransparent = False
+    BackgroundStretch = True
+    BackgroundTransparentColor = clBlack
+    Down = False
+    DrawFocusBorder = True
+    Checkable = False
+    RightPressDown = False
+    StoreBackground = True
+    Hotkey.Shift = []
+    Hotkey.IsLong = False
+    Hotkey.Enabled = True
+    Locked = False
+    EventDataNames = 'OnClick=tw_startingv_vb_btn_showClick'
+  end
+end

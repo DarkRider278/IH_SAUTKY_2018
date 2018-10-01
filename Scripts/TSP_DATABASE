@@ -1,0 +1,388 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+dim DB__SCHEME, DB__TEAMS_TABLE, DB__GROUPS_TABLE, DB__OFFICIALS_TABLE, DB__PENALTY_TABLE
+dim DB__PLAYERS_TABLE, DB__PLAYERS2_TABLE, DB__ROUNDS_TABLE, DB__TABLES_TABLE
+dim DB__PLAYERSD_TABLE, DB__TEAMSD_TABLE, DB__REFEREES_TABLE, DB__ACTIONS_TABLE
+
+set DB__SCHEME         = CreateObject("Scripting.Dictionary")
+set DB__TEAMS_TABLE    = CreateObject("Scripting.Dictionary")
+set DB__GROUPS_TABLE   = CreateObject("Scripting.Dictionary")
+set DB__OFFICIALS_TABLE= CreateObject("Scripting.Dictionary")
+set DB__PLAYERS_TABLE  = CreateObject("Scripting.Dictionary")
+set DB__PLAYERS2_TABLE = CreateObject("Scripting.Dictionary")
+set DB__ROUNDS_TABLE   = CreateObject("Scripting.Dictionary")
+set DB__TABLES_TABLE   = CreateObject("Scripting.Dictionary")
+set DB__PLAYERSD_TABLE = CreateObject("Scripting.Dictionary")
+set DB__TEAMSD_TABLE   = CreateObject("Scripting.Dictionary")
+set DB__REFEREES_TABLE = CreateObject("Scripting.Dictionary")
+set DB__ACTIONS_TABLE  = CreateObject("Scripting.Dictionary")
+set DB__PENALTY_TABLE  = CreateObject("Scripting.Dictionary")
+
+DB__TEAMS_TABLE.add "DB_ID"         , "AUTOINC"
+DB__TEAMS_TABLE.add "ID"            , "VARCHAR(25)"         ' From CP_ID
+DB__TEAMS_TABLE.add "LONG_NAME"     , "VARCHAR(50)"
+DB__TEAMS_TABLE.add "SHORT_NAME"    , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "NICK_NAME"     , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "TV_NAME"       , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "TV_NAME_2"     , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "TV_NAME_3"     , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "CITY"          , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "NATION"        , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "LOGO"          , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "COACH_1_ID"    , "INTEGER"
+DB__TEAMS_TABLE.add "COACH_2_ID"    , "INTEGER"
+DB__TEAMS_TABLE.add "COACH_3_ID"    , "INTEGER"
+DB__TEAMS_TABLE.add "PRESIDENT_ID"  , "INTEGER"
+DB__TEAMS_TABLE.add "MANAGER_ID"    , "INTEGER"
+DB__TEAMS_TABLE.add "OFFICIAL_1_ID" , "INTEGER"
+DB__TEAMS_TABLE.add "OFFICIAL_2_ID" , "INTEGER"
+DB__TEAMS_TABLE.add "OFFICIAL_3_ID" , "INTEGER"
+DB__TEAMS_TABLE.add "TEXT_1"        , "VARCHAR(50)"
+DB__TEAMS_TABLE.add "TEXT_2"        , "VARCHAR(50)"
+DB__TEAMS_TABLE.add "TEXT_3"        , "VARCHAR(50)"
+DB__TEAMS_TABLE.add "TEXT_4"        , "VARCHAR(50)"
+DB__TEAMS_TABLE.add "LEAGUE_ID"     , "INTEGER"
+DB__TEAMS_TABLE.add "WON"           , "INTEGER"
+DB__TEAMS_TABLE.add "LOST"          , "INTEGER"
+DB__TEAMS_TABLE.add "TIED"          , "INTEGER"
+DB__TEAMS_TABLE.add "GOALS"         , "INTEGER"
+DB__TEAMS_TABLE.add "GOALS_AGAINST" , "INTEGER"
+DB__TEAMS_TABLE.add "ANZGAMES"      , "INTEGER"
+DB__TEAMS_TABLE.add "POINTS"        , "INTEGER"
+DB__TEAMS_TABLE.add "RANK"          , "INTEGER"
+DB__TEAMS_TABLE.add "RANK_PREV"     , "INTEGER"   ' Rang des vorherigen Spieltages (wichtig um den Trend zu bestimmen)
+
+DB__TEAMS_TABLE.add "55_FA" , "INTEGER"
+DB__TEAMS_TABLE.add "PPGF" , "INTEGER"
+DB__TEAMS_TABLE.add "PPGA"   , "INTEGER"
+DB__TEAMS_TABLE.add "PP_PP"  , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "PPP"    , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "PKP"     , "VARCHAR(25)"
+DB__TEAMS_TABLE.add "TPP"       , "INTEGER"
+DB__TEAMS_TABLE.add "TSH"         , "INTEGER"
+DB__TEAMS_TABLE.add "S"        , "INTEGER"
+DB__TEAMS_TABLE.add "SA"       , "INTEGER"
+DB__TEAMS_TABLE.add "FOP"     , "VARCHAR(25)"   ' PROZENT!!!!
+DB__TEAMS_TABLE.add "FO_plusminus"      , "INTEGER"   ' PASS - Genauigkeit
+DB__TEAMS_TABLE.add "Streak"    , "INTEGER"
+
+DB__GROUPS_TABLE.add "DB_ID"        , "AUTOINC" ' "autoincrement"
+DB__GROUPS_TABLE.add "LONG_NAME"    , "VARCHAR(25)"
+DB__GROUPS_TABLE.add "YEAR"         , "INTEGER"
+DB__GROUPS_TABLE.add "SHORT_NAME"   , "VARCHAR(25)"
+DB__GROUPS_TABLE.add "TV_NAME"      , "VARCHAR(25)"
+DB__GROUPS_TABLE.add "LOGO"         , "VARCHAR(25)"
+DB__GROUPS_TABLE.add "TEXT_1"       , "VARCHAR(25)"
+DB__GROUPS_TABLE.add "TEXT_2"       , "VARCHAR(25)"
+DB__GROUPS_TABLE.add "TEXT_3"       , "VARCHAR(25)"
+DB__GROUPS_TABLE.add "WIN"          , "INTEGER"
+DB__GROUPS_TABLE.add "DRAW"         , "INTEGER"
+DB__GROUPS_TABLE.add "LOST"         , "INTEGER"
+DB__GROUPS_TABLE.add "TAB_CAL"      , "INTEGER"
+
+DB__OFFICIALS_TABLE.add "DB_ID"     , "AUTOINC"         ' new DBF ID
+DB__OFFICIALS_TABLE.add "ID"        , "VARCHAR(25)"     ' ID from the CP Database
+DB__OFFICIALS_TABLE.add "FIRST_NAME", "VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "LAST_NAME" , "VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "MID_NAME"  , "VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "NICK_NAME" , "VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "TV_NAME"   , "VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "NATIONALITY","VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "LOGO"      , "VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "BORN_DATE" , "VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "TEXT_1"    , "VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "TEXT_2"    , "VARCHAR(25)"
+DB__OFFICIALS_TABLE.add "TEXT_3"    , "VARCHAR(25)"
+
+DB__PLAYERS_TABLE.add "DB_ID"       , "AUTOINC"
+DB__PLAYERS_TABLE.add "FIRST_NAME"  , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "SECOND_NAME" , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "MID_NAME"    , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "TV_NAME"     , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "TV_NAME_1"   , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "TV_NAME_2"   , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "NICK_NAME"   , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "HEIGHT"      , "INTEGER"
+DB__PLAYERS_TABLE.add "WEIGHT"      , "INTEGER"
+DB__PLAYERS_TABLE.add "BORN_DATE"   , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "NATIONALITY" , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "TEXT1"       , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "TEXT2"       , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "TEXT3"       , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "TEXT4"       , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "HANDED"      , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "CLUB"        , "VARCHAR(25)"
+DB__PLAYERS_TABLE.add "ALTER"       , "VARCHAR(25)"
+
+DB__PLAYERS2_TABLE.add "DB_ID"          , "AUTOINC"
+DB__PLAYERS2_TABLE.add "DRESS_NR"       , "INTEGER"
+DB__PLAYERS2_TABLE.add "PLAYER_NAME"    , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "POS_IN_GAME"    , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "STATUS"         , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "POS_X"          , "INTEGER"
+DB__PLAYERS2_TABLE.add "POS_Y"          , "INTEGER"
+DB__PLAYERS2_TABLE.add "DUMMY_1"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "DUMMY_2"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "DUMMY_3"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "DUMMY_4"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "DUMMY_5"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "DUMMY_6"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "DUMMY_7"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "DUMMY_8"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "DUMMY_9"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "DUMMY_10"       , "VARCHAR(50)"
+
+DB__PLAYERS2_TABLE.add "PLAYER_ID"      , "INTEGER"
+DB__PLAYERS2_TABLE.add "TEAM_ID"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "OPTA_ID"        , "VARCHAR(50)"
+DB__PLAYERS2_TABLE.add "G"          , "INTEGER"
+DB__PLAYERS2_TABLE.add "A"  , "INTEGER"
+DB__PLAYERS2_TABLE.add "P"         , "INTEGER"
+DB__PLAYERS2_TABLE.add "PIM"             , "INTEGER"
+DB__PLAYERS2_TABLE.add "plusminus"             , "INTEGER"
+DB__PLAYERS2_TABLE.add "PPG"   , "INTEGER"
+DB__PLAYERS2_TABLE.add "PPA"   , "INTEGER"
+DB__PLAYERS2_TABLE.add "SH"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "SHA"  , "INTEGER"
+DB__PLAYERS2_TABLE.add "GWG"  , "INTEGER"
+DB__PLAYERS2_TABLE.add "OT"          , "INTEGER"
+DB__PLAYERS2_TABLE.add "S"    , "INTEGER"
+DB__PLAYERS2_TABLE.add "SP"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "TOI"    , "INTEGER"
+DB__PLAYERS2_TABLE.add "TOI_Shift", "INTEGER"
+DB__PLAYERS2_TABLE.add "Shift" , "INTEGER"
+DB__PLAYERS2_TABLE.add "FOW"            , "VARCHAR(25)"
+DB__PLAYERS2_TABLE.add "FOP"          , "VARCHAR(25)"
+DB__PLAYERS2_TABLE.add "FO_plusminus"            , "INTEGER"
+DB__PLAYERS2_TABLE.add "Streaks"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "Hits"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "SB"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "SA"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "GA"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "GAA"        , "VARCHAR(25)"
+DB__PLAYERS2_TABLE.add "SV"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "SVP"        , "VARCHAR(25)"
+DB__PLAYERS2_TABLE.add "SA_SH"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "SV_SH"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "TOI_SH"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "PIM"        , "INTEGER"
+DB__PLAYERS2_TABLE.add "GAMES"        , "INTEGER"
+
+DB__ROUNDS_TABLE.add "DB_ID"            , "AUTOINC"
+DB__ROUNDS_TABLE.add "ROUND"            , "INTEGER"
+DB__ROUNDS_TABLE.add "TEAM_A_NAME"      , "VARCHAR(50)"
+DB__ROUNDS_TABLE.add "TEAM_B_NAME"      , "VARCHAR(50)"
+DB__ROUNDS_TABLE.add "REFEREE_1_ID"     , "INTEGER"
+DB__ROUNDS_TABLE.add "REFEREE_2_ID"     , "INTEGER"
+DB__ROUNDS_TABLE.add "REFEREE_3_ID"     , "INTEGER"
+DB__ROUNDS_TABLE.add "REFEREE_4_ID"     , "INTEGER"
+DB__ROUNDS_TABLE.add "STATUS"           , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_A"          , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_B"          , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_A_1"        , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_B_1"        , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_A_2"        , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_B_2"        , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_A_3"        , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_B_3"        , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_A_4"        , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_B_4"        , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_A_5"        , "INTEGER"
+DB__ROUNDS_TABLE.add "SCORE_B_5"        , "INTEGER"
+DB__ROUNDS_TABLE.add "TEXT"             , "VARCHAR(49)"
+DB__ROUNDS_TABLE.add "MATCH_DATE"       , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "LEAGUE_ID"        , "INTEGER"
+DB__ROUNDS_TABLE.add "INDEX"            , "INTEGER"
+DB__ROUNDS_TABLE.add "TEAM_A_ID"        , "INTEGER"
+DB__ROUNDS_TABLE.add "TEAM_B_ID"        , "INTEGER"
+DB__ROUNDS_TABLE.add "EXTRA_POINTS_A"   , "INTEGER"
+DB__ROUNDS_TABLE.add "EXTRA_POINTS_B"   , "INTEGER"
+DB__ROUNDS_TABLE.add "HIGHLIGHT"        , "INTEGER"
+DB__ROUNDS_TABLE.add "STKZ"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "GRUPPE"           , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "SPIELBEZ_1"       , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "DATUM"            , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "ORT"              , "VARCHAR(50)"
+DB__ROUNDS_TABLE.add "LFDNR"            , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "ZEIT"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "SPECT"            , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "ANZVERL"          , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "MIN"              , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "SUMMIERT"         , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "SUMDATE"          , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "SUMTIME"          , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "SUMFILT"          , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "OFF1"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "OFF2"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "OFF3"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "OFF4"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "OFF5"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "OFF6"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "OFF7"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "OFF8"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "OFF9"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "SHIRT_A"          , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "SHIRT_B"          , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "APXSTR"           , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "FMTCOMP"          , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "GAME_NR"          , "INTEGER"
+DB__ROUNDS_TABLE.add "STAT"             , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "GK_SHIRT_A"       , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "GK_SHIRT_B"       , "VARCHAR(25)"
+DB__ROUNDS_TABLE.add "P_A_XX"           , "INTEGER"
+DB__ROUNDS_TABLE.add "P_B_XX"           , "INTEGER"
+
+DB__TABLES_TABLE.add "DB_ID"            , "AUTOINC"
+DB__TABLES_TABLE.add "TEAM_NAME"        , "VARCHAR(50)"
+DB__TABLES_TABLE.add "GROUP"            , "VARCHAR(25)"
+DB__TABLES_TABLE.add "HL"               , "VARCHAR(25)"
+DB__TABLES_TABLE.add "RANK"             , "INTEGER"
+DB__TABLES_TABLE.add "GAMES"            , "INTEGER"
+DB__TABLES_TABLE.add "WON"              , "INTEGER"
+DB__TABLES_TABLE.add "DRAW"             , "INTEGER"
+DB__TABLES_TABLE.add "LOST"             , "INTEGER"
+DB__TABLES_TABLE.add "POINTS_1"         , "INTEGER"
+DB__TABLES_TABLE.add "POINTS_2"         , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_A"          , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_B"          , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_A_1"        , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_B_1"        , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_A_2"        , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_B_2"        , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_A_3"        , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_B_3"        , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_A_4"        , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_B_4"        , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_A_5"        , "INTEGER"
+DB__TABLES_TABLE.add "SCORE_B_5"        , "INTEGER"
+DB__TABLES_TABLE.add "INDEX"            , "INTEGER"
+DB__TABLES_TABLE.add "LEAGUE_ID"        , "INTEGER"
+DB__TABLES_TABLE.add "TEAM_ID"          , "INTEGER"
+DB__TABLES_TABLE.add "ROUND"            , "INTEGER"
+DB__TABLES_TABLE.add "FICTION_NAME"     , "VARCHAR(25)"
+DB__TABLES_TABLE.add "EXTRA_POINTS_A"   , "INTEGER"
+DB__TABLES_TABLE.add "EXTRA_POINTS_B"   , "INTEGER"
+DB__TABLES_TABLE.add "POINTS_PLUS"      , "INTEGER"
+DB__TABLES_TABLE.add "POINTS_MINUS"     , "INTEGER"
+DB__TABLES_TABLE.add "SET_POINTS_PLUS"  , "INTEGER"
+DB__TABLES_TABLE.add "SET_POINTS_MINUS" , "INTEGER"
+DB__TABLES_TABLE.add "SET_POINTS_QUOTIENT","FLOAT"
+DB__TABLES_TABLE.add "MAIN_QUOTIENT"    , "FLOAT"
+
+DB__REFEREES_TABLE.add "DB_ID"          , "AUTOINC"
+DB__REFEREES_TABLE.add "FIRST_NAME"     , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "LAST_NAME"      , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "MID_NAME"       , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "NICK_NAME"      , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "TV_NAME"        , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "NATIONALITY"    , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "LOGO"           , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "BORN_DATE"      , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "TEXT_1"         , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "TEXT_2"         , "VARCHAR(25)"
+DB__REFEREES_TABLE.add "TEXT_3"         , "VARCHAR(25)"
+
+DB__ACTIONS_TABLE.add  "DB_ID"          , "AUTOINC"
+DB__ACTIONS_TABLE.add  "TEAM"           , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "ID"             , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "ACTION_NAME"    , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "MINUTES"        , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "SECONDS"        , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "PERIOD"         , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "DRESS_NR"       , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "ASSIST_1"       , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "ASSIST_2"       , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "PP"             , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "SH"             , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "ENG"            , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "PENALTY_TYPE"   , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "PENALTY_LENGTH" , "VARCHAR(25)"
+DB__ACTIONS_TABLE.add  "FACE_OFF_WON"   , "VARCHAR(25)"
+
+DB__PENALTY_TABLE.add  "DB_ID"          , "AUTOINC"
+DB__PENALTY_TABLE.add  "PLAYER_ID"      , "INTEGER"
+DB__PENALTY_TABLE.add  "TEAM_ID"        , "INTEGER"
+DB__PENALTY_TABLE.add  "EVENT_ID"       , "INTEGER"
+DB__PENALTY_TABLE.add  "PLAYDAY"        , "INTEGER"
+DB__PENALTY_TABLE.add  "OUTCOME"        , "INTEGER"
+DB__PENALTY_TABLE.add  "X"              , "INTEGER"
+DB__PENALTY_TABLE.add  "Y"              , "INTEGER"
+
+
+' THE MISSING COLUMNS ARE ADDED IN THE CREATE EMPTY TABLES ROUTINES
+
+DB__SCHEME.add "teams"       ,   DB__TEAMS_TABLE
+DB__SCHEME.add "groups"      ,   DB__GROUPS_TABLE
+DB__SCHEME.add "officials"   ,   DB__OFFICIALS_TABLE
+DB__SCHEME.add "players_1"   ,   DB__PLAYERS_TABLE
+DB__SCHEME.add "players_2"   ,   DB__PLAYERS2_TABLE
+DB__SCHEME.add "rounds_list" ,   DB__ROUNDS_TABLE
+DB__SCHEME.add "tables"      ,   DB__TABLES_TABLE
+DB__SCHEME.add "referees"    ,   DB__REFEREES_TABLE
+DB__SCHEME.add "team_actions",   DB__ACTIONS_TABLE
+DB__SCHEME.add "players_d"   ,   DB__PLAYERSD_TABLE
+DB__SCHEME.add "teams_d"     ,   DB__TEAMSD_TABLE
+DB__SCHEME.add "penalty"     ,   DB__PENALTY_TABLE
+
+
+'  This may come in handy. Just connect:
+'  - in_  to a TGrid connected to a DataStorage on a CP-Loader
+'  - out_ to a BDEDataSource
+dim out_ : set out_ = System.BdeDataSource1    ' Durch die Suchanfragen der BDEDataSource kann ich meine SQL Anfragen einschleusen
+
+
+' Create empty tables for the database
+' All Tables and their schemes are in the dictionary object (DB__SCHEME)
+function create_empty_tables()
+    dim table_name, table_scheme, table_fname, sql_cmd, col_name, col_type, i
+    create_empty_tables = False
+
+    '''''' The columns of both _d - Tables are missing and now I add them
+    on error resume next
+        for i = 1 to 64
+            DB__SCHEME.item("players_d").add CStr(i), "INTEGER"
+            DB__SCHEME.item("teams_d").add   CStr(i), "INTEGER"
+        next
+        for i = 1 to 10
+            DB__SCHEME.item("players_d").add "DUMMY_" & cstr(i), "INTEGER"
+            DB__SCHEME.item("teams_d").add   "DUMMY_" & cstr(i), "INTEGER"
+        next
+
+        DB__SCHEME.item("players_d").add "IDX", "INTEGER"
+        DB__SCHEME.item("teams_d").add "IDX", "INTEGER"
+    on error goto 0
+    '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    for each table_name in DB__SCHEME.Keys
+         CC.SF.DebugText "[CP_IMPORTER] Creating " & table_name & " ... ", clGreen
+         set table_scheme = DB__SCHEME.item(table_name)
+         table_fname  = out_.DatabasePath & "\" & table_name & ".DBF"
+
+         if CC.Files.FileExists(table_fname) then
+            dim answer
+            answer = msgbox("A database """&table_name&".DBF"" already exists." & vbNewline & "All existing data will be erased!", vbOKCancel + vbCritical, "CP database import")
+            if answer = vbCancel then
+                CC.SF.DebugText "[CP_IMPORTER] Database import aborted", clRed
+                Exit function
+            else
+                CC.Files.DeleteFile table_fname
+            end if
+        end if
+        sql_cmd = "CREATE TABLE """& table_name & ".DBF"" ("
+        for each col_name in table_scheme.Keys
+            col_type = table_scheme(col_name)
+            sql_cmd = sql_cmd & table_name & ".""" & col_name  & """ " & col_type & ", "
+        next
+        sql_cmd = left(sql_cmd, len(sql_cmd) - 2) & ")"
+        out_.SQL    = sql_cmd
+        on error resume next    ' ICH WEIß IST SCHEIßE PROGRAMMIERT ABER DIE EINZIGE MÖGLICHKEIT AUF DBASE 7.0 zuzugreifen
+        out_.Active = true
+        on error goto 0
+    next
+    create_empty_tables = True
+end function
+
+</script_body>
+</script>

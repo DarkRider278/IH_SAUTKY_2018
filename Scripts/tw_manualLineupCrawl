@@ -1,0 +1,290 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+dim savedata
+sub tw_manualLineupCrawl_SHOW(byref data)
+    Set savedata=data
+    dim i
+    tw_manualLineupCrawl.ListBox1.Items.Clear
+    tw_manualLineupCrawl.ListBox2.Items.Clear
+    for i = 1 to Data.Item("ITEMCOUNT")
+        tw_manualLineupCrawl.ListBox1.Items.Add Data.Item("BIB" & i) & " | " & Data.Item("NAME" & i) & " | " & Data.Item("TEXT" & i)  & " | " & Data.Item("HL" & i)
+    next
+    for i = 1 to Data.Item("ITEMCOUNT2")
+        tw_manualLineupCrawl.ListBox2.Items.Add Data.Item("BIB2" & i) & " | " & Data.Item("NAME2" & i) & " | " & Data.Item("TEXT2" & i) & " | " & Data.Item("HL2" & i)
+    next
+    tw_manualLineupCrawl.cb_foto.Visible=true
+    tw_manualLineupCrawl.bt_show.Visible=true
+    tw_manualLineupCrawl.bt_show1.Visible=true
+    tw_manualLineupCrawl.bt_show2.Visible=true
+    tw_manualLineupCrawl.bt_show3.Visible=false
+    tw_manualLineupCrawl.bt_show4.Visible=false
+    tw_manualLineupCrawl.Visible = True
+    tw_manualLineupCrawl.BringToFront
+end sub
+
+sub tw_manualLineupCrawl_SHOWTab(byref data)
+    Set savedata=data
+    dim i
+
+    tw_manualLineupCrawl.ListBox1.Items.Clear
+    tw_manualLineupCrawl.ListBox2.Items.Clear
+    for i = 1 to 22'Data.Item("ITEMCOUNT")
+        tw_manualLineupCrawl.ListBox1.Items.Add Data.Item("BIB" & i) & " | " & Data.Item("NAME" & i) & " | " & Data.Item("TEXT" & i) & " | " & Data.Item("HL" & i)
+    next
+
+    for i = 1 to 22'Data.Item("ITEMCOUNT2")
+        tw_manualLineupCrawl.ListBox2.Items.Add Data.Item("BIB3" & i) & " | " & Data.Item("NAME3" & i) & " | " & Data.Item("TEXT3" & i) & " | " & Data.Item("HL3" & i)
+    next
+    tw_manualLineupCrawl.cb_foto.Visible=false
+    tw_manualLineupCrawl.bt_show.Visible=false
+    tw_manualLineupCrawl.bt_show1.Visible=false
+    tw_manualLineupCrawl.bt_show2.Visible=false
+    tw_manualLineupCrawl.bt_show3.Visible=true
+    tw_manualLineupCrawl.bt_show4.Visible=true
+    tw_manualLineupCrawl.Visible = True
+    tw_manualLineupCrawl.BringToFront
+end sub
+
+
+sub old_tw_manualLineupCrawl_bt_showClick (Sender)
+    dim tmp, i
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("TNAME") = GetNameTranslation("T",  TSP.GetSTeam(TSP_db_id), TSP_long_name) ' TSP.GetSTeam(TSP_long_name)
+    Data.Item("LOGO") = TSP.GetSTeam(TSP_logo)
+    for i = 0 to tw_manualLineupCrawl.ListBox1.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox1.Items.Strings(i), " | ")
+        Data.Item("BIB"  & i+1) = tmp(0)
+        Data.Item("NAME" & i+1) = tmp(1)
+        Data.Item("TEXT"  & i+1) = tmp(2)
+        Data.Item("HL"  & i+1) = tmp(3)
+    next
+    Data.Item("TRAINER") = GetNameTranslation("C", TSP.GetSTeam("coach_1_id"), TSP_Player_name)
+    Data.Item("ITEMCOUNT") = tw_manualLineupCrawl.ListBox1.Items.Count
+
+    Data.Item("FOTO")=tw_manualLineupCrawl.cb_foto.Checked
+
+    AllTV.TV__BB_LineupCrawl Data
+    set Data = Nothing
+end sub
+
+sub tw_manualLineupCrawl_ListBox1KeyDown (Sender, Key, Shift)
+  if Key = 38 then
+     call Sender.Items.Exchange(sender.Itemindex - 1, Sender.ItemIndex)
+     Sender.ItemIndex = sender.Itemindex + 1
+  elseif Key = 40 then
+     call Sender.Items.Exchange(sender.Itemindex + 1, Sender.ItemIndex)
+     Sender.ItemIndex = sender.Itemindex - 1
+  end if
+end sub
+
+sub tw_manualLineupCrawl_bt_showClick (Sender)
+    dim tmp, i
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("TNAME") = savedata.Item("TNAME")
+    Data.Item("LOGO") = savedata.Item("LOGO")
+    for i = 0 to tw_manualLineupCrawl.ListBox1.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox1.Items.Strings(i), " | ")
+        Data.Item("BIB"  & i+1) = tmp(0)
+        Data.Item("NAME" & i+1) = tmp(1)
+        Data.Item("TEXT"  & i+1) = tmp(2)
+        Data.Item("HL"  & i+1) = tmp(3)
+    next
+    Data.Item("TRAINER") = "Trainer: "&savedata.Item("TRAINER")
+    Data.Item("ITEMCOUNT") = savedata.Item("ITEMCOUNT")
+
+    Data.Item("FOTO")=tw_manualLineupCrawl.cb_foto.Checked
+
+    AllTV.TV__BB_LineupCrawl Data
+    set Data = Nothing
+end sub
+
+sub tw_manualLineupCrawl_bt_show1Click (Sender)
+    dim tmp, i
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("TNAME") = savedata.Item("TNAME2")
+    Data.Item("LOGO") = savedata.Item("LOGO2")
+    for i = 0 to tw_manualLineupCrawl.ListBox2.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox2.Items.Strings(i), " | ")
+        Data.Item("BIB"  & i+1) = tmp(0)
+        Data.Item("NAME" & i+1) = tmp(1)
+        Data.Item("TEXT"  & i+1) = tmp(2)
+        Data.Item("HL"  & i+1) = tmp(3)
+    next
+    Data.Item("TRAINER") = "Trainer: "&savedata.Item("TRAINER2")
+    Data.Item("ITEMCOUNT") = savedata.Item("ITEMCOUNT2")
+
+    Data.Item("FOTO")=tw_manualLineupCrawl.cb_foto.Checked
+
+    AllTV.TV__BB_LineupCrawl Data
+    set Data = Nothing
+end sub
+
+sub tw_manualLineupCrawl_bt_show2Click (Sender)
+    dim tmp, i
+    dim text
+    dim first
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("TNAME") = savedata.Item("TNAME")
+    Data.Item("TNAME2") = savedata.Item("TNAME2")
+    text="Tor: "
+    first=false
+    for i = 0 to tw_manualLineupCrawl.ListBox1.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox1.Items.Strings(i), " | ")
+        if lcase(tmp(2)) = "goalkeeper" then
+            if first then text =text&", "
+            text=text&tmp(1)
+            first=true
+        end if
+    next
+    text=text&" - Abwehr: "
+    first=false
+    for i = 0 to tw_manualLineupCrawl.ListBox1.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox1.Items.Strings(i), " | ")
+        if lcase(tmp(2)) = "defender" then
+            if first then text =text&", "
+            text=text&tmp(1)
+            first=true
+        end if
+    next
+    text=text&" - Mittelfeld: "
+    first=false
+    for i = 0 to tw_manualLineupCrawl.ListBox1.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox1.Items.Strings(i), " | ")
+        if lcase(tmp(2)) = "midfielder" then
+            if first then text =text&", "
+            text=text&tmp(1)
+            first=true
+        end if
+    next
+    text=text&" - Angriff: "
+    first=false
+    for i = 0 to tw_manualLineupCrawl.ListBox1.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox1.Items.Strings(i), " | ")
+        if lcase(tmp(2)) = "forward" then
+            if first then text =text&", "
+            text=text&tmp(1)
+            first=true
+        end if
+    next
+    Data.Item("TEXT")=(text& " +++ "&text )
+    
+    text="Tor: "
+    first=false
+    for i = 0 to tw_manualLineupCrawl.ListBox2.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox2.Items.Strings(i), " | ")
+        if lcase(tmp(2)) = "goalkeeper" then
+            if first then text =text&", "
+            text=text&tmp(1)
+            first=true
+        end if
+    next
+    text=text&" - Abwehr: "
+    first=false
+    for i = 0 to tw_manualLineupCrawl.ListBox2.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox2.Items.Strings(i), " | ")
+        if lcase(tmp(2)) = "defender" then
+            if first then text =text&", "
+            text=text&tmp(1)
+            first=true
+        end if
+    next
+    text=text&" - Mittelfeld: "
+    first=false
+    for i = 0 to tw_manualLineupCrawl.ListBox2.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox2.Items.Strings(i), " | ")
+        if lcase(tmp(2)) = "midfielder" then
+            if first then text =text&", "
+            text=text&tmp(1)
+            first=true
+        end if
+    next
+    text=text&" - Angriff: "
+    first=false
+    for i = 0 to tw_manualLineupCrawl.ListBox2.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox2.Items.Strings(i), " | ")
+        if lcase(tmp(2)) = "forward" then
+            if first then text =text&", "
+            text=text&tmp(1)
+            first=true
+        end if
+    next
+    Data.Item("TEXT2")=(text& " +++ "&text )
+    AllTV.TV__BB_LineupCrawlSmall Data
+    set Data = Nothing
+end sub
+
+sub tw_manualLineupCrawl_bt_show3Click (Sender)
+    dim tmp, i
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("TNAME") = savedata.Item("TNAME")
+    Data.Item("LOGO") = savedata.Item("LOGO")
+    cc.sf.DebugText tw_manualLineupCrawl.ListBox1.Items.Count
+    for i = 0 to tw_manualLineupCrawl.ListBox1.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox1.Items.Strings(i), " | ")
+        cc.sf.DebugText  tw_manualLineupCrawl.ListBox1.Items.Strings(i)&i
+
+        Data.Item("BIB"  & i+1) = "#"&tmp(0)
+        Data.Item("NAME" & i+1) = tmp(1)
+        Data.Item("TEXT"  & i+1) = tmp(2)
+        Data.Item("HL"  & i+1) = tmp(3)
+        if tmp(3)="" then  Data.Item("HL"  & i+1)=false
+        if tmp(0) ="" Then Data.Item("BIB"  & i+1)=""
+    next
+    Data.Item("TRAINER") = savedata.Item("TRAINER")
+    Data.Item("ITEMCOUNT") = savedata.Item("ITEMCOUNT")
+
+   ' Data.Item("TNAME2") = savedata.Item("TNAME2")
+   ' Data.Item("LOGO2") = savedata.Item("LOGO2")
+   ' for i = 0 to tw_manualLineupCrawl.ListBox2.Items.Count - 1
+   '     tmp = split(tw_manualLineupCrawl.ListBox2.Items.Strings(i), " | ")
+   '     Data.Item("BIB3"  & i+1) = tmp(0)
+   '     Data.Item("NAME3" & i+1) = tmp(1)
+   '     Data.Item("TEXT3"  & i+1) = tmp(2)
+   '     Data.Item("HL3"  & i+1) = tmp(3)
+   ' next
+   ' Data.Item("TRAINER2") = savedata.Item("TRAINER2")
+   ' Data.Item("ITEMCOUNT2") = savedata.Item("ITEMCOUNT2")
+     AllTV.TV__VB_LineupTab Data
+    set Data = Nothing
+
+end sub
+
+sub tw_manualLineupCrawl_bt_show4Click (Sender)
+  dim tmp, i
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    'Data.Item("TNAME2") = savedata.Item("TNAME")
+'    Data.Item("LOGO2") = savedata.Item("LOGO")
+'    for i = 0 to tw_manualLineupCrawl.ListBox1.Items.Count - 1
+'        tmp = split(tw_manualLineupCrawl.ListBox1.Items.Strings(i), " | ")
+'        Data.Item("BIB3"  & i+1) = "#"&tmp(0)
+'        Data.Item("NAME3" & i+1) = tmp(1)
+'        Data.Item("TEXT3"  & i+1) = tmp(2)
+'        Data.Item("HL3"  & i+1) = tmp(3)
+'        if tmp(3)="" then  Data.Item("HL3"  & i+1)=false
+'        if tmp(0) ="" Then Data.Item("BIB3"  & i+1)=""
+'    next
+'    Data.Item("TRAINER2") = savedata.Item("TRAINER")
+'    Data.Item("ITEMCOUNT2") = savedata.Item("ITEMCOUNT")
+
+    Data.Item("TNAME") = savedata.Item("TNAME2")
+    Data.Item("LOGO") = savedata.Item("LOGO2")
+    for i = 0 to tw_manualLineupCrawl.ListBox2.Items.Count - 1
+        tmp = split(tw_manualLineupCrawl.ListBox2.Items.Strings(i), " | ")
+        Data.Item("BIB"  & i+1) = "#"&tmp(0)
+        Data.Item("NAME" & i+1) = tmp(1)
+        Data.Item("TEXT"  & i+1) = tmp(2)
+        Data.Item("HL"  & i+1) = tmp(3)
+        if tmp(3)="" then  Data.Item("HL"  & i+1)=false
+        if tmp(0) ="" Then Data.Item("BIB"  & i+1)=""
+    next
+    Data.Item("TRAINER") = savedata.Item("TRAINER2")
+    Data.Item("ITEMCOUNT") = savedata.Item("ITEMCOUNT2")
+    AllTV.TV__VB_LineupTab Data
+    set Data = Nothing
+
+end sub
+
+</script_body>
+</script>

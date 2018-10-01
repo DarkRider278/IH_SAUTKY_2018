@@ -1,0 +1,4432 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+Class cls__TV_VIZ_SKY_AUSTRIA_2016
+     Private s__VizPath
+     Private ActionList
+     Private s__LastAnim
+     Private s__FotoPath, s__LogoPath, s__SymbolPath, s__PhotoPath, s__BibPath, s__VartafelPath , s__PlayerFotoPath,s__LogoPathDiv, s__FotoPathPlayerBig
+     private b__VisibleDSS, b__VisibleClock, b__VisibleADD, b__VisibleText,b__VisibleTextL ,b__VisiblePenH1,b__VisiblePenH2,b__VisiblePenG1,b__VisiblePenG2
+     Public objNames(13), objID(13)
+     Private i__TVContent
+     Private obj__TV
+     Private i__TVLanguage
+     private PAGE_IDX   ' Für wechsel Animationen
+     Private sScene
+     Private dssishiding
+     private databuffer
+    private data
+
+    Private Sub Class_Initialize
+        s__VizPath    = "scene/SKY/Redesign_2016/Austria/Eishockey"
+        s__LastAnim   = GetIniOption("LAST_SCENE", "")
+        s__LogoPath   = "image/SKY/Redesign_2016/Logos/Austria/Eishockey"
+        s__LogoPathDiv   = "image/SKY/Redesign_2016/Logos/Diverse"
+        s__FotoPath   = "image/SKY/Redesign_2016/Fotos/Kommentatoren"
+        s__PlayerFotoPath   = "image/SKY/Redesign_2016/Fotos/Spieler/AUTIH"
+        s__FotoPathPlayerBig    = "image/SKY/Redesign_2016/Fotos/Spieler/AUTIH/BIG"
+        s__VartafelPath = "scene/SKY/Redesign_2016/Vartafeln/Austria"
+        Set Obj__TV     = Nothing
+        b__VisibleDSS   = cBool(GetIniOption("VISIBLE_DSS", "false"))         ' DSS allgemein
+        b__VisibleClock = cBool(GetIniOption("VISIBLE_CLOCK", "False"))       ' DSS mit Rolling Time
+        b__VisibleADD   = cBool(GetIniOption("VISIBLE_ADD", "False"))         ' DSS Zusatz  Overtime clock
+        b__VisibleText  = cBool(GetIniOption("VISIBLE_TEXT", "False"))        ' DSS Zusatz Infotext
+        b__VisiblePenH1 = false
+        b__VisiblePenH2 = false
+        b__VisiblePenG1 = false
+        b__VisiblePenG2 = false
+        dssishiding=false
+         databuffer=off
+    End Sub
+
+    Private Sub Class_Terminate()
+    End Sub
+    
+
+
+    public Sub SetVizData(id, value)
+        If obj__TV is Nothing Then Exit Sub
+        if databuffer then
+            data=data & id&" SET "&value&"\0"
+        else
+            obj__TV.SendCommand("RENDERER*MAIN_LAYER*TREE*$object*FUNCTION*ControlObject*in SET ON " &id&" SET "&value)
+        end if
+    end sub
+
+    public Sub SetVizDataUpper(id, value)
+        If obj__TV is Nothing Then Exit Sub
+        if databuffer then
+            data=data & id&" SET "&(value)&"\0"
+        else
+            obj__TV.SendCommand("RENDERER*MAIN_LAYER*TREE*$object*FUNCTION*ControlObject*in SET ON " &id&" SET "&(value))
+        end if
+    end sub
+    
+    public sub SetVizDataBufferOn
+        data="RENDERER*MAIN_LAYER*TREE*$object*FUNCTION*ControlObject*in SET ON "
+        databuffer=true
+    end sub
+    public sub SetVizDataBufferOff
+        obj__TV.SendCommand(data)
+        databuffer=false
+    end sub
+    
+    public Sub SetVizDataFL(id, value)
+        If obj__TV is Nothing Then Exit Sub
+        obj__TV.SendCommand("RENDERER*FRONT_LAYER*TREE*$object*FUNCTION*ControlObject*in SET ON " &id&" SET "&value)
+    end sub
+
+    public Sub SetVizDataUpperFL(id, value)
+        If obj__TV is Nothing Then Exit Sub
+        obj__TV.SendCommand("RENDERER*FRONT_LAYER*TREE*$object*FUNCTION*ControlObject*in SET ON " &id&" SET "&(value))
+    end sub
+    
+    public Sub SetVizDataBL(id, value)
+        If obj__TV is Nothing Then Exit Sub
+        obj__TV.SendCommand("RENDERER*BACK_LAYER*TREE*$object*FUNCTION*ControlObject*in SET ON " &id&" SET "&value)
+    end sub
+
+    public Sub SetVizDataUpperBL(id, value)
+        If obj__TV is Nothing Then Exit Sub
+        obj__TV.SendCommand("RENDERER*BACK_LAYER*TREE*$object*FUNCTION*ControlObject*in SET ON " &id&" SET "&UCase(value))
+    end sub
+    
+    public Sub SetPFirstName(value)
+        SetVizDataUpper "0100",value
+    end sub
+    public Sub SetPLastName(value)
+        SetVizDataUpper "0102",value
+    end sub
+    
+    public Sub SetPFirstName2(value)
+        SetVizDataUpper "0104",value
+    end sub
+    public Sub SetPLastName2(value)
+        SetVizDataUpper "0106",value
+    end sub
+    public Sub SetPNummer(value)
+        SetVizData "0095",value
+    end sub
+    public Sub SetTName(value)
+        SetVizDataUpper "0100",value
+    end sub
+    public Sub SetTLogo(value)
+        if value="" then
+            SetVizData "0089" ,0
+        else
+            SetVizData "0089",1
+            SetVizData "0090","IMAGE*"&s__LogoPath & "/" &value
+        end if
+    end sub
+    public Sub SetTName2(value)
+        SetVizDataUpper "0200",value
+    end sub
+    public Sub SetTLogo2(value)
+        SetVizData "0190","IMAGE*"&s__LogoPath & "/" &value
+    end sub
+    public Sub SetPHSOff()
+        SetVizData "0092",0
+    end sub
+    public Sub SetPHS(team,value)
+        SetVizData "0092",1
+        SetVizData "0093","IMAGE*"&s__PlayerFotoPath & "/" & team & "/"&value
+    end sub
+    
+    public Sub SetMHS(valuel, valuer)
+        SetVizData "0092",1
+        SetVizData "0093","IMAGE*"&s__FotoPath & "/" & valuel
+        SetVizData "0094","IMAGE*"&s__FotoPath & "/" & valuer
+    end sub
+    
+   public sub SetScore(value)
+        SetVizData "0149",1
+        SetVizData "0150",value
+   end sub
+   
+   public Sub SetSubLine (value)
+        SetVizDataUpper "0500",value
+    end sub
+    public Sub SetTitle(value)
+        SetVizDataUpper "0100",value
+        SetVizDataUpper "0102",""
+    end sub
+    public Sub SetTitleSubLine (value)
+        SetVizDataUpper "0200",value
+    end sub
+    public Sub SetDropLine (value)
+        SetVizDataUpper "9000",value
+    end sub
+    
+    public Sub SetTitleLogo(value,league)
+        if value="" then
+            SetVizData "0085" ,0
+        else
+            if league = true then
+                SetVizData "0085" ,2
+                SetVizData "0095","IMAGE*"&s__LogoPathDiv & "/" &value
+            else
+                SetVizData "0085" ,1
+                SetVizData "0090","IMAGE*"&s__LogoPath & "/" &value
+            end if
+        end if
+    end sub
+    
+    public Sub SetTitelDefaultHeader
+        if pgMain.cb_hide_logo.Checked= true then
+            SetVizData "0085" ,0
+        else
+            SetVizData "0085" ,2
+            SetVizData "0095","IMAGE*"&s__LogoPathDiv & "/" &"ebel"
+        end if
+end sub
+    
+    public Sub SetTitleLogoLF(value,league)
+        if value="" then
+            SetVizData "000085" ,0
+        else
+            if league = true then
+                SetVizData "000085" ,2
+                SetVizData "000095","IMAGE*"&s__LogoPathDiv & "/" &value
+            else
+                SetVizData "000085" ,1
+                SetVizData "000090","IMAGE*"&s__LogoPath & "/" &value
+            end if
+        end if
+    end sub
+public Sub SetTitelDefaultHeaderLF
+        SetVizData "000085" ,2
+        SetVizData "000095","IMAGE*"&s__LogoPathDiv & "/" &"ebel"
+    end sub
+    
+    public Sub SetTeamLogo(id,value)
+        SetVizData id,"IMAGE*"&s__LogoPath & "/" &value
+    end sub
+    public Sub SetPlayerHS(id,team,value)
+        SetVizData id,"IMAGE*"&s__PlayerFotoPath & "/" & team & "/"&value
+    end sub
+     public Sub SetPlayerBigHS(id,team,value)
+        SetVizData id,"IMAGE*"&s__FotoPathPlayerBig & "/" & team & "/"&value
+    end sub
+    
+    public Sub SetLFTitle(value)
+        SetVizDataUpper "000100",value
+        SetVizDataUpper "000102",""
+    end sub
+
+    public sub SetBGOnOff()
+        if pgmain.cb_background.Checked then
+            SetVizData "0002",1
+        else
+            SetVizData "0002",0
+        end if
+    end sub
+    
+    public sub SetIBSide()
+        if pgmain.cb_ib_right.Checked = true then
+            SetVizData "0002",1
+        else
+            SetVizData "0002",0
+        end if
+    end sub
+    
+    public sub SetShow()
+        SetVizData "0000",3
+    end sub
+    
+    public function get_available_logos()
+        dim fList
+        on error resume next
+        fList = obj__TV.GetGroupItems(s__LogoPath, gkImage)
+        if Err.Number <> 0 Then
+             MsgBox "Please connect to an everest provider first! " & Err.Number & " " & Err.Description
+             Err.Clear
+             exit function
+        end if
+        on error goto 0
+        get_available_logos = fList
+    end function
+
+    public function get_available_fotos()
+        dim fList
+        on error resume next
+        fList = obj__TV.GetGroupItems(s__FotoPath, gkImage)
+        if Err.Number <> 0 Then
+             MsgBox "Please connect to an everest provider first! " & Err.Number & " " & Err.Description
+             Err.Clear
+             exit function
+        end if
+        on error goto 0
+        get_available_fotos = fList
+    end function
+
+    public function get_available_playerfotos()
+        dim fList
+        on error resume next
+        fList = obj__TV.GetGroupItems(s__PlayerFotoPath, gkImage)
+        if Err.Number <> 0 Then
+             MsgBox "Please connect to an everest provider first! " & Err.Number & " " & Err.Description
+             Err.Clear
+             exit function
+        end if
+        on error goto 0
+        get_available_playerfotos = fList
+    end function
+    
+    public function get_available_player_photos(subdir)
+        on error resume next
+        get_available_player_photos = obj__TV.GetGroupItems(s__PlayerFotoPath & "/"&subdir, gkImage)
+        if Err.Number <> 0 Then
+             MsgBox "Please connect to an everest provider first! " & Err.Number & " " & Err.Description
+             Err.Clear
+             exit function
+        end if
+        on error goto 0
+    end function
+
+     public function get_available_player_photos_big(subdir)
+        on error resume next
+        get_available_player_photos_big = obj__TV.GetGroupItems(s__FotoPathPlayerBig & "/"&subdir, gkImage)
+        if Err.Number <> 0 Then
+             MsgBox "Please connect to an everest provider first! " & Err.Number & " " & Err.Description
+             Err.Clear
+             exit function
+        end if
+        on error goto 0
+    end function
+
+    public function get_available_scenes()
+        dim fList
+        on error resume next
+        fList = obj__TV.GetGroupItems(s__VartafelPath, gkScene)
+        if Err.Number <> 0 Then
+             MsgBox "Please connect to an everest provider first! " & Err.Number & " " & Err.Description
+             Err.Clear
+             exit function
+        end if
+        on error goto 0
+        get_available_scenes = fList
+    end function
+
+    public Sub Kill_Bill()
+        obj__TV.DoEffect elFrontLayer, "ALL", efReset
+        obj__TV.DoEffect elMainLayer,  "ALL", efReset
+        obj__TV.DoEffect elBackLayer,  "ALL", efReset
+        obj__TV.SendCommand "RENDERER PREVIEW CURRENT VIDEO ALL 0.0"
+        s__LastAnim = ""
+        SetIniOption "LAST_SCENE", s__LastAnim
+        ReDim ActionList(1, 0)
+        ActionList(0, 0) = ""
+        b__VisibleDSS   = False
+        b__VisibleClock = False
+        b__VisibleADD   = False
+        b__VisibleText  = False
+        b__VisiblePenH1 = false
+        b__VisiblePenH2 = false
+        b__VisiblePenG1 = false
+        b__VisiblePenG2 = false
+
+        call SetIniOption("VISIBLE_DSS", b__VisibleDSS)
+        call SetIniOption("VISIBLE_CLOCK", b__VisibleClock)
+        call SetIniOption("VISIBLE_ADD",  b__VisibleADD)
+        call SetIniOption("VISIBLE_TEXT", b__VisibleText)
+
+    end sub
+
+    Public Sub Anzeigen()
+        dim i
+        If obj__TV is Nothing Then Exit Sub
+        If not IsArray(ActionList) Then Exit Sub
+
+        For i = 1 to UBound(ActionList, 2)
+'            msgbox ActionList(1, i) & " " & ActionList(2, i)
+            obj__TV.DoEffect elMainLayer, ActionList(1, i), ActionList(2, i)
+        Next
+        s__LastAnim = ActionList(1, 0)
+        SetIniOption "LAST_SCENE", s__LastAnim
+    End Sub
+
+    Public Sub Continue(Director)
+        dim i
+        If obj__TV is Nothing Then Exit Sub
+
+        for i = 1 to 15     ' Echt scheiße programmiert ich weiß. Aber es muss jetzt schnell fertig werden
+            obj__TV.DoEffect elMainLayer, "H" & i, efReset
+        next
+        obj__TV.DoEffect elMainLayer, Director, efContinue
+        s__LastAnim = "Default" ' Damit clear All wieder funktioniert
+        SetIniOption "LAST_SCENE", s__LastAnim
+    End Sub
+    
+    Public Sub Start(Director)
+        dim i
+        If obj__TV is Nothing Then Exit Sub
+
+
+        obj__TV.DoEffect elMainLayer, Director, efPlay
+        s__LastAnim = "Default" ' Damit clear All wieder funktioniert
+        SetIniOption "LAST_SCENE", s__LastAnim
+    End Sub
+
+    public Sub PlayChange(dir, dir2)
+        If obj__TV is Nothing Then Exit Sub
+
+        obj__TV.DoEffect elMainLayer, dir2, efReset
+        obj__TV.DoEffect elMainLayer, dir, efContinue
+        obj__TV.DoEffect elMainLayer, dir2, efPlay
+        s__LastAnim = "Default" ' Damit clear All wieder funktioniert
+        SetIniOption "LAST_SCENE", s__LastAnim
+    end sub
+
+
+    Public Sub Init_Layouts(machine_type)
+        dim Tmp : Tmp = obj__TV.GetGroupItems(s__VizPath, gkScene)
+        dim i,res
+        If IsArray(Tmp) Then
+           obj__TV.RendererUpdate false
+           For i = 0 to UBound(Tmp)
+                CC.SF.ShowSplashForm "Please wait while initializing scenes... (" & Tmp(i) & ")" , RGB(128,12,89)
+'               LoadScene 2, Tmp(i)
+                obj__TV.OpenProject s__VizPath
+                obj__TV.SendCommandEx("POOLS CLEANUP")
+                obj__TV.SetScene Tmp(i)
+                res = obj__TV.SendCommandEx("RENDERER*MAIN_LAYER SET_OBJECT SCENE*" & s__VizPath & "/" & Tmp(i))
+                res = obj__TV.SendCommandEx("RENDERER*MAIN_LAYER*NAME GET")
+                Prepare_Layer  elMainLayer
+                CC.SF.Wait 100
+           Next
+
+           obj__TV.SetScene "DSS_Uhr"
+           obj__TV.LoadScene elFrontLayer
+           obj__TV.DoEffect elFrontLayer, "ALL", efReset
+           b__VisibleDSS     = True
+           b__VisibleADD     = False
+           b__VisibleText    = False
+
+            obj__TV.SetScene "CB_Konf_Ergebnisse"
+           obj__TV.LoadScene elBacklayer
+           obj__TV.DoEffect elBacklayer, "ALL", efReset
+
+           obj__TV.RendererUpdate true
+        End If
+        ' BLACKBURST BUG IM VIZ 3.5
+        select case machine_type
+            case 0      ' Matrox --> Nix zu tune
+            case 1      ' DVE BlackBurst
+                obj__TV.SendCommand "MAIN*CONFIGURATION*VIDEO_OUTPUT*GENLOCK SET FREERUN"
+                obj__TV.SendCommand "MAIN*CONFIGURATION*VIDEO_OUTPUT*GENLOCK SET BLACKBURST"
+                cc.sf.wait 2000
+            case 2      ' DVE TriLevel
+                obj__TV.SendCommand "MAIN*CONFIGURATION*VIDEO_OUTPUT*GENLOCK SET FREERUN"
+                obj__TV.SendCommand "MAIN*CONFIGURATION*VIDEO_OUTPUT*GENLOCK SET TRILEVEL"
+                cc.sf.wait 2000
+        end select
+        s__LastAnim = ""
+        SetIniOption "LAST_SCENE", s__LastAnim
+        ReDim ActionList(1, 0)
+        ActionList(0, 0) = ""
+        cc.SF.HideSplashForm
+    End Sub
+
+    ' Spieler BB,  Zeilen = [1-3]
+    public sub BB_Player(byRef Data, byVal bContinue)
+        if not bContinue then
+            ClearAll
+            if     Data.Item("SUBLINE2") <> "" then
+                sScene = "BB_3z_"
+            elseif Data.Item("SUBLINE1") <> "" then
+                sScene = "BB_2z_"
+            else
+                sScene = "BB_1z_"
+            end if
+            if Data.Item("LOGO") <> "" then
+                sScene = sScene & "Logo"
+            else
+                sScene = sScene & "Neutral"
+            end if
+
+            LoadScene elMainLayer, sScene
+            SetShow
+            SetVizData "0475", 0
+            SetPLastName Data.Item("NAME")
+            SetPFirstName Data.Item("FNAME")
+            if Data.Item("NR")<>"00" then
+            SetPNummer Data.Item("NR")
+            else
+                SetPNummer ""
+            end if
+            if Data.Item("LOGO") <> "" then
+                SetTLogo LCase(Data.Item("LOGO"))
+            end if
+            if Data.item("SHOWHS") and Data.Item("NR")<>"" then
+                SetPHS LCase(Data.Item("LOGO")),Data.Item("NR")
+            else
+                SetPHSOff
+            end if
+            dim st,tag,st2,tag2
+            select case Data.item("BBTYP")
+                case 0
+                    SetVizData "0190",0
+                    SetVizDataUpper "0200",Data.Item("SUBLINE1")
+                    SetVizDataUpper "0300",Data.Item("SUBLINE2")
+                    SetVizData "0195",0
+                    SetVizData "0196",0
+                case 1
+                    st= Data.Item("SUBLINE1")
+                    if instr(st,"/")>0 then
+                        tag= split(st,"/")(1)
+                        st= trim(split(st,"/")(0))
+                        if st<>"" then st=st&"/"
+                    end if
+                    st2= Data.Item("SUBLINE2")
+                    if instr(st2,"/")>0 then
+                        tag2= split(st2,"/")(1)
+                        st2= trim(split(st2,"/")(0))
+                        if st2<>"" then st2=st2&"/"
+                    end if
+                    SetVizData "0190",1
+                    SetVizData "0195",2
+                    SetVizData "0196",2
+                    SetVizData "0197",2
+                    SetVizDataUpper "0210", st
+                    SetVizDataUpper "0212",st2
+                    SetVizDataUpper "0211",tag
+                    SetVizDataUpper "0213",tag2
+                case 2
+                    st= Data.Item("SUBLINE1")
+                    if instr(st,"/")>0 then
+                        tag= split(st,"/")(1)
+                        st= trim(split(st,"/")(0))
+                        if st<>"" then st=st&"/"
+                    end if
+                    st2= Data.Item("SUBLINE2")
+                    if instr(st2,"/")>0 then
+                        tag2= split(st2,"/")(1)
+                        st2= trim(split(st2,"/")(0))
+                        if st2<>"" then st2=st2&"/"
+                    end if
+                    SetVizData "0190",1
+                    SetVizData "0195",1
+                    SetVizData "0196",1
+                    SetVizData "0197",1
+                    SetVizDataUpper "0210",st
+                    SetVizDataUpper "0212",st2
+                    SetVizDataUpper "0211",tag
+                    SetVizDataUpper "0213",tag2
+                case 3
+                    SetVizData "0190",2
+                    SetVizDataUpper "0220",Data.Item("SUBLINE1")
+                    SetVizDataUpper "0222",Data.Item("SUBLINE2")
+                case 4
+                    st= Data.Item("SUBLINE1")
+                    if instr(st,"/")>0 then
+                        tag= split(st,"/")(1)
+                        st= trim(split(st,"/")(0))
+                        if st<>"" then st=st&"/"
+                    end if
+                    st2= Data.Item("SUBLINE2")
+                    if instr(st2,"/")>0 then
+                        tag2= split(st2,"/")(1)
+                        st2= trim(split(st2,"/")(0))
+                        if st2<>"" then st2=st2&"/"
+                    end if
+                    SetVizData "0190",1
+                    SetVizData "0195",3
+                    SetVizData "0196",3
+                    SetVizData "0197",3
+                    SetVizDataUpper "0210",st
+                    SetVizDataUpper "0212",st2
+                    SetVizDataUpper "0211",tag
+                    SetVizDataUpper "0213",tag2
+            end select
+
+            SetVizDataUpper "0200",Data.Item("SUBLINE1")
+            SetVizDataUpper "0300",Data.Item("SUBLINE2")
+            GetPreview "Default 2.0", "WECHSEL 0.0", sScene        ' ACHTUNG!!!!!
+            Redim ActionList(2, 1)
+            ActionList(1, 0) = "Default"
+            ActionList(1, 1) = "Default"
+            ActionList(2, 1) = efPlay
+
+            PAGE_IDX = 1
+        else
+            if PAGE_IDX mod 2 then
+                SetVizDataUpper "0202",Data.Item("SUBLINE1")
+                SetVizDataUpper "0302",Data.Item("SUBLINE2")
+                SetVizDataUpper "0201",Data.Item("SUBLINE1")
+                SetVizDataUpper "0301",Data.Item("SUBLINE2")
+                GetPreview "Default 2.0", "WECHSEL 1.0", sScene
+                Redim ActionList(2, 1)
+                ActionList(1, 0) = "Default"
+                ActionList(1, 1) = "WECHSEL"
+                ActionList(2, 1) = efPlay
+            else
+                SetVizDataUpper "0202",Data.Item("SUBLINE1")
+                SetVizDataUpper "0302",Data.Item("SUBLINE2")
+                SetVizDataUpper "0204",Data.Item("SUBLINE1")
+                SetVizDataUpper "0304",Data.Item("SUBLINE2")
+                GetPreview "Default 2.0", "WECHSEL 2.0", sScene
+                Redim ActionList(2, 1)
+                ActionList(1, 0) = "Default"
+                ActionList(1, 1) = "WECHSEL"
+                ActionList(2, 1) = efContinue
+            end if
+            PAGE_IDX = PAGE_IDX + 1
+        end if
+    end sub
+
+    public sub Trenner(byVal anim)
+        select case anim
+            case 1  sScene = "VB_KK_Trenner_Admiral_HD"
+            case 2  sScene = "VB_KK_Trenner_Austria_HD"
+            case 3  sScene = "VB_KK_Trenner_Austria_2_HD"
+            case 4  sScene = "VB_KK_Trenner_Austria_3_HD"
+            case 5  sScene = "VB_KK_Trenner_Beukeler"
+            case else exit sub
+        end select
+
+        obj__TV.OpenProject s__VizPath
+        obj__TV.RendererUpdate false
+        obj__TV.SendCommandEx("POOLS CLEANUP")
+        obj__TV.SetScene sScene
+        obj__TV.SendCommandEx("RENDERER*FRONT_LAYER SET_OBJECT SCENE*" & s__VizPath & "/" & sScene)
+        obj__TV.SendCommandEx("RENDERER*FRONT_LAYER*NAME GET")
+        Prepare_Layer 1
+        obj__TV.RendererUpdate true
+
+        obj__TV.DoEffect elFrontLayer, "Default", efPlay
+        cc.SF.wait 1000
+        obj__TV.DoEffect elMainLayer, "ALL", efReset   ' Ich mach mal ne Art Clear All auf den MainLayer
+        s__LastAnim = ""
+        ReDim ActionList(1, 0)
+        ActionList(0, 0) = ""
+        SetIniOption "LAST_SCENE", s__LastAnim
+    end sub
+
+    public sub Hashtag(ByVal typ, ByVal bLinks)
+        sScene = "CB_Hashtag"
+        LoadScene elMainLayer, sScene
+        dim side
+
+        if bLinks then
+            SetVizData "0002",0
+        else
+            SetVizData "0002",1
+        end if
+
+        if typ=0 then
+            SetVizData "1100","#SkyTuT"
+        elseif typ=1 then
+            SetVizData "1100","#SkyBuliAT"
+        else
+            SetVizData "1100","#SkyGoEL"
+        end if
+
+        GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub Watermark
+        if pg_settings.cb_watermark.Checked then
+            obj__TV.SendCommandEx("RENDERER*BACK_LAYER SET_OBJECT SCENE*" & s__VizPath & "/Wasserzeichen")
+            obj__TV.DoEffect elBackLayer, "Default", efPlay
+        else
+            obj__TV.SendCommandEx("RENDERER*BACK_LAYER SET_OBJECT")
+        end if
+    end sub
+
+    public sub BB_Crawl(title, msg, logo, bLoop, speed)
+        dim strCmd
+        if trim(title) <> "" then
+            sScene    = "BB_Crawl_2z_Neutral"
+        else
+            sScene    = "BB_Crawl_1z_Neutral"
+        end if
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetTLogo LCase(logo)
+        SetTitle title
+
+        strCmd    = "SCENE*" & s__VizPath & "/" & sScene & "*TREE*$txt_Crawl"
+        obj__TV.SetCrawl "txt_Crawl", crClear,  ""
+        if trim(title) <> "" then
+            obj__TV.SetCrawl "txt_Crawl", crScript, "<SET Scaling 27>" & msg
+        else
+            obj__TV.SetCrawl "txt_Crawl", crScript, "<SET Scaling 35>" & msg
+        end if
+        obj__TV.SetCrawl "txt_Crawl", crReset, ""
+        obj__TV.SendCommand strCmd & "*GEOM*loopmode SET " & -CInt(bLoop) ' Micha, das "Minus" hat einen Grund!   ;-)
+        obj__TV.SendCommand strCmd & "*GEOM*time SET " & speed
+
+        GetPreview "Default", "2.0", sScene ' Preview von Crawl scheint nicht zu gehen
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+     public sub BB_LineupCrawl(byRef Data)
+        dim i
+        sScene = "BB_Aufstellungscrawl"
+        if Data.Item("FOTO") = true then
+        sScene = "BB_Fotocrawl"
+        end if
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetTitle Data.Item("TNAME")
+        SetTitleSubLine Data.Item("TRAINER")
+        SetTLogo LCase(Data.Item("LOGO"))
+
+        dim ids: ids=1100
+        for i = 1 to 11
+            SetVizDataUpper ids+1,Data.Item("BIB"  & i)
+            SetVizDataUpper ids+2,Data.Item("NAME" & i)
+            SetVizDataUpper ids+3, GetString(Data.Item("TEXT" & i), i__TVLanguage)
+            if Data.Item("FOTO") = true then
+                SetPlayerHS ids,LCase(Data.Item("LOGO")),Data.Item("BIB"  & i)
+            end if
+            if  Data.Item("HL"  & i) then
+                obj__TV.SendCommand "RENDERER*MAIN_LAYER*TREE*$ANIM_CRAWL$"&i&"$img_Showcolor*TEXTURE*POSITION SET -10.0 5.5"
+                obj__TV.SendCommand "RENDERER*MAIN_LAYER*TREE*$ANIM_CRAWL$"&i&"$txt_Number*MATERIAL*COLOR SET 1.0 1.0 1.0"
+            else
+               obj__TV.SendCommand "RENDERER*MAIN_LAYER*TREE*$ANIM_CRAWL$"&i&"$img_Showcolor*TEXTURE*POSITION SET 500.0 5.5"
+               obj__TV.SendCommand "RENDERER*MAIN_LAYER*TREE*$ANIM_CRAWL$"&i&"$txt_Number*MATERIAL*COLOR SET 0.0 0.0 0.0"
+            end if
+            ids=ids+100
+        next
+        SetVizData "0005",Data.Item("ITEMCOUNT")
+
+        GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    
+    public sub BB_LineupCrawlSmall(byRef Data)
+        dim i
+        sScene = "Crawl_Aufstellungen"
+
+        LoadScene elMainLayer, sScene
+
+        SetShow
+        SetVizDataUpper "4100", "Aufstellung "&Data.Item("TNAME")
+        SetVizDataUpper "4101", Data.Item("TNAME")
+        SetVizDataUpper "4200", "Aufstellung "&Data.Item("TNAME2")
+        SetVizDataUpper "4201", Data.Item("TNAME2")
+        if tw_Layout.layout.ItemIndex = 0 then
+        if CURRENT_LEAGUE = "119" then
+            SetVizDataUpper "9000","tipico Bundesliga"
+        else
+                SetVizDataUpper "9000","sky Go Erste Liga"
+        end if
+        elseif tw_Layout.layout.ItemIndex =1 then
+            SetVizDataUpper "9000","Champions League"
+        elseif tw_Layout.layout.ItemIndex =2 then
+            SetVizDataUpper "9000","Europa League"
+        else
+            SetVizDataUpper "9000","Talk und Tore"
+        end if
+
+        strCmd    = "SCENE*" & s__VizPath & "/" & sScene & "*TREE*$txt_Crawl_Aufstellung_1"
+        'obj__TV.SendCommand strCmd & "*GEOM*clear INVOKE"
+        obj__TV.SendCommand strCmd & "*GEOM*text SET "&Data.Item("TEXT")
+        obj__TV.SendCommand strCmd & "*GEOM*build INVOKE"
+        obj__TV.SendCommand strCmd & "*GEOM*reset INVOKE"
+
+        strCmd    = "SCENE*" & s__VizPath & "/" & sScene & "*TREE*$txt_Crawl_Aufstellung_2"
+        'obj__TV.SendCommand strCmd & "*GEOM*clear INVOKE"
+        obj__TV.SendCommand strCmd & "*GEOM*text SET "&Data.Item("TEXT2")
+        obj__TV.SendCommand strCmd & "*GEOM*build INVOKE"
+        obj__TV.SendCommand strCmd & "*GEOM*reset INVOKE"
+
+        obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE SHOW 0.0"
+        GetPreview "Default", "0.6", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+
+    public sub AdmiralCrawl(msg)
+        sScene = "ADMIRAL-Crawl"
+        LoadScene elMainLayer, sScene
+        SetText "txt_Wetten", msg
+        GetPreview "Default", "1.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub Vartafel(scene)
+        ClearAll
+        CC.SF.ShowSplashForm "VIZ is loading scene " & sScene & " ... ", clYellow
+        obj__TV.OpenProject s__VartafelPath
+        obj__TV.RendererUpdate false
+        obj__TV.SendCommandEx("POOLS CLEANUP")
+        obj__TV.SetScene scene
+        obj__TV.SendCommandEx("RENDERER*MAIN_LAYER SET_OBJECT SCENE*" & s__VartafelPath & "/" & scene)
+        obj__TV.SendCommandEx("RENDERER*MAIN_LAYER*NAME GET")
+        Prepare_Layer elMainLayer
+        obj__TV.RendererUpdate true
+        CC.SF.HideSplashForm
+        obj__TV.SendCommand "RENDERER PREVIEW SCENE*" & s__VartafelPath & "/" & scene & " VIDEO Default 1.8"
+        'If tw_preview.Visible Then
+           call obj__TV.GetPreview("Default", "1.8", 1, "C:\Preview.jpg")
+           tw_preview.img_preview.LoadFromFile "C:\Preview.jpg"
+        'end If
+
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub SkyScraper(name1, name2, quoten, LFrame)
+        if LFrame then
+            sScene = "Lframe_Admiral_key"
+        else
+            sScene = "ASW_Skyscraper"
+        end if
+        LoadScene elMainLayer, sScene
+        SetText "txt_TeamHeim", UCase(name1)
+        SetText "txt_TeamGast", UCase(name2)
+        if LFrame then
+            SetText "txt_Quote_1", quoten(0)
+            SetText "txt_Quote_2", quoten(1)
+            SetText "txt_Quote_3", quoten(2)
+        else
+            SetText "txt_Quote_1", quoten(0)
+            SetText "txt_Quote_X", quoten(1)
+            SetText "txt_Quote_2", quoten(2)
+        end if
+        GetPreview "Default", "0.3", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub AdmiralInsert()
+        'sScene = "ADMIRAL-Insert"
+        sScene = "Live_Insert_Admiral"
+        LoadScene elMainLayer, sScene
+        GetPreview "Default", "1.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub Kurier_SS(nr)
+        sScene = "Skyscraper_Kurier"
+        LoadScene elMainLayer, sScene
+        obj__TV.SendCommand "SCENE*" & s__VizPath & "/" & sScene & "*TREE*$MOTIV_SELECT*FUNCTION*Omo*vis_con SET " & nr - 1
+        GetPreview "Default", "1.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub FreeGfx(gfx)
+        sScene =gfx
+        LoadScene elMainLayer, sScene
+        GetPreview "Default", "1.8", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub SkyButton()
+        sScene = "BB_Sky_at_Button"
+        LoadScene elMainLayer, sScene
+        GetPreview "Default", "1.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub FBButton()
+        sScene = "Facebook_Aufruf"
+        LoadScene elMainLayer, sScene
+        GetPreview "Default", "1.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub FB_BB(head, subline)
+        sScene = "BB_Facebook"
+        LoadScene elMainLayer, sScene
+        SetText "txt_Zeile_1", head
+        SetText "txt_Zeile_2", subline
+        GetPreview "Default", "1.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub SkyMediathek()
+        sScene = "BB_Sky_at_Videos_BL"
+        LoadScene elMainLayer, sScene
+        GetPreview "Default", "2.4", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub BB_Social(head, subline,subline2)
+        sScene = "BB_Facebook_Twitter"
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetVizDataUpper "0110",head
+        SetVizDataUpper "0120",head
+        SetVizDataUpper "0210",subline
+        SetVizDataUpper "0220",subline2
+        
+        GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub BB_Comment(name, foto,sl,fname)
+        sScene = "BB_2z_Neutral"
+        LoadScene elMainLayer, sScene
+       SetShow
+       SetPFirstName fname
+
+        SetPLastName name
+
+
+        SetVizDataUpper "0200",sl
+
+
+        if foto <> "" then
+            SetMHS foto,""
+         else
+            SetPHSOff
+         end if
+
+        GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub BB_Comment2(name, foto,sl,name2, foto2,sl2,fname,fname2)
+
+        sScene = "BB_Kommentatoren"
+
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetPFirstName fname
+        SetPFirstName2 fname2
+        SetPLastName name
+        SetPLastName2 name2
+        
+        SetVizDataUpper "0200",sl
+        SetVizDataUpper "0205",sl2
+
+        if foto <> "" then
+            SetMHS foto,foto2
+         else
+            SetPHSOff
+         end if
+
+
+        GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub MatchBB(ByRef Data)
+        if (Len(Data.Item("NAME1")) > 17) or (Len(Data.Item("NAME2")) > 17) then
+            sScene = "BB_Opening_breit"
+        else
+            sScene = "BB_Opening"
+        end if
+        LoadScene elMainLayer, sScene
+
+        SetText "txt_TeamHeim", UCase(Data.Item("NAME1"))
+        SetText "txt_TeamGast", UCase(Data.Item("NAME2"))
+        SetText "txt_Zeile_2",  UCase(GetString("ABSCHNITT_" & Data.Item("ROUND"), i__TVLanguage))
+        SetImg  "img_LogoHeim", s__LogoPath & "\" & LCase(Data.Item("LOGO1"))
+        SetImg  "img_LogoGast", s__LogoPath & "\" & LCase(Data.Item("LOGO2"))
+
+        GetPreview "Default", "1.8", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub BB_Wechsel(ByRef Data)
+        if Data.Item("DOPPEL") = true then
+            sScene = "BB_Wechsel_2_Players"
+        else
+            sScene = "BB_Wechsel_1_Player"
+        end if
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetTName Data.Item("TEAMNAME")
+        SetVizData "1100",Data.Item("P_NR_OUT")
+        SetVizDataUpper "1101" ,Data.Item("P_LNAME_OUT")
+        SetVizData "1102",""
+        SetVizData "1200",Data.Item("P_NR_IN")
+        SetVizDataUpper "1201" ,Data.Item("P_LNAME_IN")
+
+        SetTLogo Data.Item("LOGO")
+        if Data.Item("DOPPEL") = true then
+            SetVizData "1103",Data.Item("P_NR_OUT2")
+            SetVizDataUpper "1104" ,Data.Item("P_LNAME_OUT2")
+            SetVizData "1105",""
+            SetVizData "1203",Data.Item("P_NR_IN2")
+            SetVizDataUpper "1204" ,Data.Item("P_LNAME_IN2")
+        end if
+
+
+        GetPreview "Default 2.0", "CHANGE 0.0", sScene
+        Redim ActionList(2, 2)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+        ActionList(1, 2) = "CHANGE"
+        ActionList(2, 2) = efReset
+    end sub
+
+    Public Sub PageChange(ByRef Data)
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "CHANGE"
+        ActionList(2, 1) = efPlay
+    End Sub
+
+    public sub vbStanding_HL(ByRef Data)
+        dim i
+        select case Data.Item("ANIM_TYPE")
+            case 1
+                for i = 1 to 6
+                    if Data.Item("THL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & i, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+            case 2
+                for i = 1 to 6
+                    if Data.Item("THL" & i) then
+                        obj__TV.DoEffect elMainLayer, "E" & i, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+            case 4
+                for i = 1 to 12
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & i, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+            case 5
+               for i = 1 to 3
+                    if Data.Item("THL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & i, efPlay
+                        'CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+                for i = 1 to 6
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "T" & i, efPlay
+                        'CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+            case 6
+               for i = 4 to 6
+                    if Data.Item("THL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & i-3, efPlay
+                        'CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+                for i = 7 to 12
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "T" & i-6, efPlay
+                        'CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+        end select
+    end sub
+    
+    public sub vbErgStanding_HL(ByRef Data,side)
+        dim i
+        dim count,hcount
+        count = Data.Item("ITEMCOUNTTAB")
+        hcount=count
+        if count>9 then
+            page2=true
+            hcount=Ceil(count/2.0)
+        end if
+        select case side
+            case 1
+                for i = 1 to hcount
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "T" & i, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+            case 2
+                DIM k:k=10
+                for i = (hcount+1) to hcount*2
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "T" & k, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                    k=k+1
+                next
+        end select
+    end sub
+    
+    public sub vbErgStanding_HL2(ByRef Data,side)
+        dim i
+        dim count,hcount
+        count = Data.Item("ITEMCOUNTTAB")
+        hcount=count
+        if count>10 then
+            page2=true
+            hcount=Ceil(count/2.0)
+        end if
+        select case side
+            case 1
+                for i = 1 to hcount
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & i, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+            case 2
+                DIM k:k=11
+                for i = (hcount+1) to hcount*2
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & k, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                    k=k+1
+                next
+        end select
+    end sub
+
+    public sub vbStanding20_HL(ByRef Data,side)
+        dim i
+        dim count,hcount
+        count = Data.Item("ITEMCOUNTTAB")
+        hcount=count
+        if count>10 then
+            page2=true
+            hcount=Ceil(count/2.0)
+        end if
+        select case side
+            case 1
+                for i = 1 to hcount
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & i, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+            case 2
+                DIM k:k=10
+                for i = (hcount+1) to hcount*2
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & k, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                    k=k+1
+                next
+        end select
+    end sub
+    
+    public sub vbErg20_HL(ByRef Data,side)
+        dim i
+        dim count,hcount
+        count = Data.Item("ITEMCOUNT")
+        hcount=count
+        if count>10 then
+            page2=true
+            hcount=Ceil(count/2.0)
+        end if
+        select case side
+            case 1
+                for i = 1 to hcount
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & i, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                next
+            case 2
+                DIM k:k=11
+                for i = hcount to hcount*2
+                    if Data.Item("HL" & i) then
+                        obj__TV.DoEffect elMainLayer, "H" & k, efPlay
+                        CC.SF.Wait 100      ' SIEMIC:  Lieber ohne zeitlichen Versatz?
+                    end if
+                    k=k+1
+                next
+        end select
+    end sub
+
+    public sub vbStanding_Preview(ByRef Data)
+        'GetPreview "Default",  "3.2", sScene
+    end sub
+
+
+    public sub VB_Standing(ByRef Data)
+        dim i, sCont,ii
+        dim showp
+        showp=false
+        select case Data.Item("ANIM_TYPE")
+            case 1  sScene = "VB_Erg"
+            case 2  sScene = "VB_Erg_Tab"
+            case 3  sScene = "VB_Tab_Erg"
+            case 4  sScene = "VB_Tab"
+            case 5  sScene = "VB_Erg3_Tab6"
+            case 6  sScene = "VB_Erg3_Tab6_1"
+        end select
+        LoadScene elMainLayer, sScene
+        if  Data.Item("ANIM_TYPE") = 1 then
+            showp=true
+        end if
+        SetBGOnOff
+        SetShow
+        SetTitelDefaultHeader
+        
+        SetTitle Data.item("OPT_TITLE")
+        SetTitleSubLine Data.item("TITLE")
+        SetDropLine ""
+        if Data.Item("ANIM_TYPE")=4 or Data.Item("ANIM_TYPE")=2 then
+            'SetSubLine "Klub"
+        else
+            'SetSubLine "Ergebnisse"
+        end if
+
+
+        if Data.Item("ANIM_TYPE") <> 4 then
+            SetVizData "0004",2
+            dim ids : ids=1101
+            ii=1
+            if Data.Item("ANIM_TYPE")=6 then ii=4
+            for i=ii to Data.Item("ITEMCOUNT")  ' DAILY RESULTS
+               SetVizDataBufferOn
+               SetVizData ids,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO_A"&i)
+               SetVizDataUpper ids+1,Data.Item("NAME_A" & i)
+
+               SetVizData ids+3, Data.Item("RESULT" & i)
+
+               SetVizDataUpper ids+5,Data.Item("NAME_B" & i)
+               SetVizData ids+6,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO_B"&i)
+               SetVizDataBufferOff
+               ids=ids+100
+            next
+            if Data.Item("ANIM_TYPE") =5 or Data.Item("ANIM_TYPE") =6 then
+                SetVizData "0003",3'Data.Item("ITEMCOUNT")
+            else
+                SetVizData "0004",Data.Item("ITEMCOUNT")
+            end if
+
+        end if
+
+
+        if Data.Item("ANIM_TYPE") <> 1 then
+            dim count,hcount
+            dim page2:page2=false
+            count = Data.Item("ITEMCOUNTTAB")
+            hcount=count
+            if Data.Item("ANIM_TYPE") =2 then
+                if count>9 then
+                    page2=true
+                    hcount=Ceil(count/2.0)
+                end if
+            elseif Data.Item("ANIM_TYPE") =6 then
+
+            else
+                if count>10 then
+                    page2=true
+                    hcount=Ceil(count/2.0)
+                end if
+            end if
+            ids =1100
+            if Data.Item("ANIM_TYPE") =2 or Data.Item("ANIM_TYPE") =3 then ids=ids+1000
+			if Data.Item("ANIM_TYPE") =5  or Data.Item("ANIM_TYPE") =6 then ids=ids+400
+            ii=1
+            if Data.Item("ANIM_TYPE")=6 then ii=7
+			for i=ii to hcount
+                SetVizDataBufferOn
+                SetVizData ids,Data.Item("PLACE" & i)
+                SetVizData ids+1,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO"&i)
+                SetVizDataUpper ids+2,Data.Item("NAME" & i)
+                SetVizData ids+3,Data.Item("GAMES" & i)
+                SetVizData ids+4,Data.Item("GOALS" & i)
+                SetVizData ids+5,Data.Item("DIFF" & i)
+                SetVizData ids+6,Data.Item("PTS" & i)
+                select case Data.Item("TREND" & i)
+                    case "+"    SetVizData ids+9,1
+                    case ""     SetVizData ids+9,0
+                    case "-"    SetVizData ids+9,2
+                end select
+                SetVizDataBufferOff
+                ids=ids+100
+              next
+
+            ids =2100
+            if Data.Item("ANIM_TYPE") =2 or Data.Item("ANIM_TYPE") =3 then ids=ids+1000
+            for i = hcount+1 to hcount*2   ' FULL STANDINGS TABLE
+                SetVizDataBufferOn
+                SetVizData ids,Data.Item("PLACE" & i)
+                SetVizData ids+1,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO"&i)
+                SetVizDataUpper ids+2,Data.Item("NAME" & i)
+                SetVizData ids+3,Data.Item("GAMES" & i)
+                SetVizData ids+4,Data.Item("GOALS" & i)
+                SetVizData ids+5,Data.Item("DIFF" & i)
+                SetVizData ids+6,Data.Item("PTS" & i)
+                SetVizData ids+8 ,0
+                select case Data.Item("TREND" & i)
+                    case "+"    SetVizData ids+9,1
+                    case ""     SetVizData ids+9,0
+                    case "-"    SetVizData ids+9,2
+                end select
+                SetVizDataBufferOff
+                ids=ids+100
+              next
+         if Data.Item("ANIM_TYPE") =2 then
+              SetVizData "0014",hcount
+              SetVizData "0024",hcount
+         elseif Data.Item("ANIM_TYPE") =5 or Data.Item("ANIM_TYPE") =6 then
+             SetVizData "0004",6
+         else
+             SetVizData "0004",hcount
+            end if
+        end if
+        GetPreview "Default 3.5", "L1 3.5 L2 3.5 L3 3.5 L4 3.5 L5 3.5 L6 3.5 L7 3.5 L8 3.5 L9 3.5 L10 L11 3.5", sScene
+        Redim ActionList(2, 1)
+        if (Data.Item("ANIM_TYPE") = 2) or (Data.Item("ANIM_TYPE") = 3) then
+            ActionList(1, 0) = "ALL_OUT"
+        else
+            ActionList(1, 0) = "Default"
+        end if
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+
+'        if (Data.Item("ANIM_TYPE") = 2) or (Data.Item("ANIM_TYPE") = 3) then         ActionList(1, 0) = ""  ' Ich will verhindern das jemand die Doppelgrafik mit ClearALL versucht rauszunehmen
+    end sub
+    
+    
+    public sub VB_Standing20(ByRef Data)
+        dim i, sCont
+        dim count,hcount
+        dim page2:page2=false
+        showp=false
+        sScene = "VB_Tab"
+        LoadScene elMainLayer, sScene
+
+        SetBGOnOff
+        SetShow
+        SetVizData "0085",0
+
+        SetTitle Data.item("OPT_TITLE")
+        SetTitleSubLine Data.item("OPT_ZUSATZ")
+        SetDropLine ""
+        count = Data.Item("ITEMCOUNTTAB")
+        hcount=count
+        if count>10 then
+            page2=true
+            hcount=Ceil(count/2.0)
+        end if
+
+            ids =1100
+            for i = 1 to hcount   ' FULL STANDINGS TABLE
+                SetVizDataBufferOn
+
+                SetVizData ids,Data.Item("PLACE" & i)
+                SetVizData ids+1,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO"&i)
+                SetVizDataUpper ids+2,Data.Item("NAME" & i)
+                SetVizData ids+3,Data.Item("GAMES" & i)
+                SetVizData ids+4,Data.Item("GOALS" & i)
+                SetVizData ids+5,Data.Item("DIFF" & i)
+                SetVizData ids+6,Data.Item("PTS" & i)
+                SetVizData ids+8 ,0
+                select case Data.Item("TREND" & i)
+                    case "+"    SetVizData ids+9,1
+                    case ""     SetVizData ids+9,0
+                    case "-"    SetVizData ids+9,2
+                end select
+                SetVizDataBufferOff
+                ids=ids+100
+              next
+
+        ids =2100
+            for i = hcount+1 to hcount*2   ' FULL STANDINGS TABLE
+                SetVizDataBufferOn
+                SetVizData ids,Data.Item("PLACE" & i)
+                SetVizData ids+1,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO"&i)
+                SetVizDataUpper ids+2,Data.Item("NAME" & i)
+                SetVizData ids+3,Data.Item("GAMES" & i)
+                SetVizData ids+4,Data.Item("GOALS" & i)
+                SetVizData ids+5,Data.Item("DIFF" & i)
+                SetVizData ids+6,Data.Item("PTS" & i)
+                SetVizData ids+8 ,0
+                select case Data.Item("TREND" & i)
+                    case "+"    SetVizData ids+9,1
+                    case ""     SetVizData ids+9,0
+                    case "-"    SetVizData ids+9,2
+                end select
+                SetVizDataBufferOff
+                ids=ids+100
+              next
+         SetVizData "0004",hcount
+
+        GetPreview "Default", "3.5", sScene
+
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    
+    public sub VB_Erg20(ByRef Data)
+        dim i, sCont
+        dim count,hcount
+        dim page2:page2=false
+        showp=false
+        sScene = "VB_Erg_20"
+        LoadScene elMainLayer, sScene
+
+        SetBGOnOff
+        SetShow
+        SetVizData "0085",0
+
+        SetTitle Data.item("OPT_TITLE")
+        SetTitleSubLine Data.item("OPT_ZUSATZ")
+        SetDropLine ""
+        SetVizData "0500",""
+        count = Data.Item("ITEMCOUNT")
+        hcount=count
+        if count>10 then
+            page2=true
+            hcount=Ceil(count/2.0)
+        end if
+
+            ids =1101
+            for i = 1 to hcount   ' FULL STANDINGS TABLE
+                SetVizDataBufferOn
+               SetVizData ids,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO_A"&i)
+               SetVizDataUpper ids+1,Data.Item("NAME_A" & i)
+
+               SetVizData ids+3, Data.Item("RESULT" & i)
+
+               SetVizDataUpper ids+5,Data.Item("NAME_B" & i)
+               SetVizData ids+6,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO_B"&i)
+               SetVizDataBufferOff
+               ids=ids+100
+              next
+
+        ids =2101
+            for i = hcount+1 to hcount*2   ' FULL STANDINGS TABLE
+                SetVizDataBufferOn
+               SetVizData ids,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO_A"&i)
+               SetVizDataUpper ids+1,Data.Item("NAME_A" & i)
+
+               SetVizData ids+3, Data.Item("RESULT" & i)
+
+               SetVizDataUpper ids+5,Data.Item("NAME_B" & i)
+               SetVizData ids+6,"IMAGE*"&s__LogoPath & "/" &Data.Item("LOGO_B"&i)
+               SetVizDataBufferOff
+               ids=ids+100
+              next
+         SetVizData "0004",hcount
+
+        GetPreview "Default 3.5", "L1 3.5 L2 3.5 L3 3.5 L4 3.5 L5 3.5", sScene
+
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+
+    public sub VB_Opening(ByRef Data)
+        if trim(Data.Item("LOGO2")) = "" then
+            sScene = "VB_Singlelogo"
+        else
+            sScene = "VB_Doppellogos"
+        end if
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetBGOnOff
+        SetTeamLogo "0060",LCase(Data.Item("LOGO1"))
+        SetTeamLogo "0070",LCase(Data.Item("LOGO2"))
+
+        if Trim(Data.Item("RESULT")) <> "" then
+            SetVizData "0095",1
+            SetVizDataUpper "0100",Data.Item("RESULT")
+        else
+            SetVizData "0095",0
+        end if
+
+        GetPreview "Default", "2.5 ", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+     public sub vbReserve(byRef Data)
+        dim i
+        sScene = "VB_Reservebaenke"
+        LoadScene elMainLayer, sScene
+
+        SetImg  "img_LogoHeim", s__LogoPath & "\" & LCase(Data.Item("LOGO_A"))
+        SetImg  "img_LogoGast", s__LogoPath & "\" & LCase(Data.Item("LOGO_B"))
+        SetText "txt_TeamHeim", UCase(Data.Item("NAME_A"))
+        SetText "txt_TeamGast", UCase(Data.Item("NAME_B"))
+        SetText "txt_Titel", UCase(GetString("RESERVEPLAYERS", i__TVLanguage))
+
+        if Data.Item("BACKGROUND") then
+            obj__TV.ShowObject "EINAUS_HINTERGRUND"
+        else
+            obj__TV.HideObject "EINAUS_HINTERGRUND"
+        end if
+
+
+        for i = 1 to Data.Item("ITEMCOUNT")
+            SetText "ZEILE_" & i & "$TEAMHEIM$txt_Nr",      Data.Item("BIB_A"  & i)
+            SetText "ZEILE_" & i & "$TEAMHEIM$txt_Spieler", UCase(Data.Item("NAME_A" & i))
+            SetText "ZEILE_" & i & "$TEAMGAST$txt_Nr",      Data.Item("BIB_B"  & i)
+            SetText "ZEILE_" & i & "$TEAMGAST$txt_Spieler", UCase(Data.Item("NAME_B" & i))
+        next
+
+        select case Data.Item("ITEMCOUNT")
+            case 3      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.4"
+            case 4      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.3"
+            case 5      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.2"
+            case 6      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.1"
+            case 7      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.0"
+        end select
+
+        GetPreview "Default", "1.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub TVTipps(ByRef Data)
+        dim i
+        sScene = "BB_Sendehinweis_" & Data.Item("ITEMCOUNT") & "z"
+        LoadScene elMainLayer, sScene
+
+        SetText "ZEILE_1" & i & "$txt_Zeile_1", UCase(Data.Item("HEADER"))
+        for i = 1 to Data.Item("ITEMCOUNT")
+            SetText "ZEILE_" & 1+i & "$txt_Tag"    , UCase(Data.Item("DAY"  & i))
+            SetText "ZEILE_" & 1+i & "$txt_Uhrzeit", UCase(Data.Item("TIME" & i))
+            if Data.Item("LIVE" & i) then
+                obj__TV.ShowObject "ZEILE_" & 1+i & "$EINHAUS_LIVE"
+                obj__TV.HideObject "ZEILE_" & 1+i & "$EINHAUS_NORMAL"
+                SetText "ZEILE_" & 1+i & "$EINHAUS_LIVE$txt_Info", UCase(Data.Item("EVENT" & i))
+            else
+                obj__TV.HideObject "ZEILE_" & 1+i & "$EINHAUS_LIVE"
+                obj__TV.ShowObject "ZEILE_" & 1+i & "$EINHAUS_NORMAL"
+                SetText "ZEILE_" & 1+i & "$EINHAUS_NORMAL$txt_Info", UCase(Data.Item("EVENT" & i))
+            end if
+        next
+
+        GetPreview "Default", "1.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub BB_Score(ByRef Data)
+        dim i
+        ' Wieviele TS
+
+        sScene = "BB_Spielstand_2z"
+
+
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetTName Data.Item("NAME1")
+        SetTName2 Data.Item("NAME2")
+        SetTLogo LCase(Data.Item("LOGO1"))
+        SetTLogo2 LCase(Data.Item("LOGO2"))
+        
+        SetVizDataUpper "0500",GetString("ABSCHNITT_" & Data.Item("ROUND"), i__TVLanguage)
+        SetScore Data.Item("SCORE")
+        dim c
+        c= Data.Item("ITEMCOUNT")
+        if c>2 then c=2
+        SetVizData "0005",c
+        
+        dim ids
+        ids=1110
+
+        for i = 1 to (1+Data.Item("ITEMCOUNT"))
+            SetVizDataUpper (ids) , Data.Item("NAME_A"& i)
+            SetVizDataUpper (ids+10) , Data.Item("NAME_B"& i)
+            SetVizDataUpper (ids+5) , Data.Item("MIN_A"& i)
+            SetVizDataUpper (ids+15) , Data.Item("MIN_B"& i)
+            ids=ids+100
+        next
+
+        GetPreview "Default 2.0", "L1 2.0 L2 2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub BB_Highlight(min, Name, info, logo1, logo2)
+        if trim(Name) <> "" then
+            if trim(info) <> "" then
+
+            else
+                sScene = "BB_Highlight_Info"
+            end if
+        else
+            sScene = "BB_Highlight"
+        end if
+        sScene = "BB_Highlight_Info_2z"
+        LoadScene elMainLayer, sScene
+        SetShow
+        
+        p=Name
+        'pos=CC.Strings.StrPos(" ",p)
+        'if(pos>0 )then
+        '    fn=Left(p,1)&"."
+        '    n=Right(p,Len(p)-pos)
+        'else
+            n=p
+            fn=""
+        'end if
+        SetPFirstName fn
+        if Trim(info) <> "" then
+            SetPLastName n &" - "&info
+        else
+            SetPLastName n
+        end if
+
+        'SetText "txt_Zeile_2", UCase(info)
+        SetTeamLogo "0090",LCase(logo1)
+        SetTeamLogo "0190",LCase(logo2)
+        SetVizDataUpper "0500",min
+
+        GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub IB_Infobox(title, subline, subtitle2, subtitle3)
+        sScene = "IB_Gleich_Livein"
+
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetIBSide
+        SetVizDataUpper "0100",title
+        SetVizDataUpper "0200",subline
+        SetVizDataUpper "0300",subtitle2
+        SetVizDataUpper "0400",subtitle3
+        GetPreview "Default", "3.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub FB_Frage_BB(text, text2)
+        dim strCmd
+        sScene = "Facebook_Fragenbox"
+        LoadScene elMainLayer, sScene
+        SetText "txt_Frage", UCase(text2)
+        strCmd    = "SCENE*" & s__VizPath & "/" & sScene & "*TREE*$txt_Crawl"
+
+        obj__TV.SetCrawl "txt_Crawl", crClear,  ""
+        obj__TV.SetCrawl "txt_Crawl", crScript, text
+        obj__TV.SetCrawl "txt_Crawl", crReset, ""
+        obj__TV.SendCommand strCmd & "*GEOM*loopmode SET " & false
+
+        GetPreview "Default 2.0", "LOOPS 1.8", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub Crawl_Social(text, hashtag, speed,logo)
+        dim strCmd
+        sScene = "Crawl_Livestrecke"
+        LoadScene elMainLayer, sScene
+
+        SetTitle hashtag
+        strCmd    = "SCENE*" & s__VizPath & "/" & sScene & "*TREE*$txt_Crawl"
+
+        obj__TV.SetCrawl "txt_Crawl", crClear,  ""
+        obj__TV.SetCrawl "txt_Crawl", crScript, text
+        obj__TV.SetCrawl "txt_Crawl", crReset, ""
+        obj__TV.SendCommand strCmd & "*GEOM*loopmode SET 1"
+        obj__TV.SendCommand strCmd & "*GEOM*time SET " & speed
+        SetVizData "0090","IMAGE*"&s__LogoPathDiv & "/" &logo
+
+        GetPreview "Default", "1.8", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub VB_IB_BB_FreeText(title, subline, msg, typ,maxcount)
+    dim t
+        select case typ
+            case 1
+                sScene = "VB_Freetext_Zitat"
+                t="3.5"
+            case 2
+                sScene = "IB_Freetext"
+                t="3.0"
+            case 3
+                sScene = "BB_SM_Freetext_Lrg"
+                t="2.0"
+            case 4
+                sScene = "BB_SM_Freetext_Lrg"
+                t="2.0"
+        end select
+        dim ids
+        LoadScene elMainLayer, sScene
+        SetShow
+
+        SetTitle title    '100
+        SetSubline subline '500
+
+        if typ >2 then
+            SetVizData "0195",typ-2
+            SetVizDataUpper "0205" ,msg
+            if maxcount <4 then
+                SetVizData "0210",2
+            elseif maxcount>4 then
+                SetVizData "0210",0
+            else
+                SetVizData "0210",1
+            end if
+            '210
+        elseif typ=2 then
+            SetIBSide
+            SetTitelDefaultHeader
+            ids=1102
+            for i=0 to maxcount-1
+                SetVizDataUpper ids, msg.Strings(i)
+                ids=ids+100
+            next
+            SetVizData "0004",maxcount
+        else
+            SetBGOnOff
+            SetTitleSubLine subline
+            SetTitelDefaultHeader
+            SetVizDataUpper "1100" ,msg
+            SetVizData "1101",""
+            SetVizData "1102",""
+            SetVizData "1103",""
+        end if
+
+        GetPreview "Default", t, sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub FB_FreeTable(ByRef Data)
+        dim i
+        sScene = "Facebook_Freetext_Tabelle"
+        LoadScene elMainLayer, sScene
+        SetText "txt_Titel", UCase(Data.Item("TITLE"))
+        SetText "txt_Url",   Data.Item("SUBLINE")
+        for i = 1 to 5
+            SetText "INFO$ZEILE_" & i & "$txt_Rang", Data.Item("NR"   & i)
+            SetText "INFO$ZEILE_" & i & "$txt_Team", UCase(Data.Item("TEXT" & i))
+        next
+        select case Data.Item("ITEMCOUNT")
+            case 1      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.4"
+            case 2      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.3"
+            case 3      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.2"
+            case 4      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.1"
+            case 5      obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*POS SHOW 0.0"
+        end select
+        GetPreview "Default", "1.8", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+     public sub BB_Card(byRef Data)
+        sScene = "BB_2z_Logo"
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetTLogo LCase(Data.Item("LOGO"))
+        SetPFirstName Data.Item("FNAME")
+        SetPLastName Data.Item("NAME")
+        SetPNummer Data.Item("NR")
+        if Data.item("SHOWHS") and Data.Item("NR")<>"" then
+            SetPHS LCase(Data.Item("LOGO")),Data.Item("NR")
+        else
+        SetPHSOff
+        end if
+
+        SetVizDataUpper "0200",Data.Item("SUBLINE")
+        SetVizData "0475", Data.Item("CARD_CODE")
+
+        GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+     public sub Quiz_BB(byRef Data)
+        sScene = "BB_Quiz"
+        LoadScene elMainLayer, sScene
+
+        SetText "txt_TelNr", Data.Item("PHONE")
+        SetText "txt_Info", UCase(Data.Item("HINT"))
+        SetText "txt_Frage", UCase(Data.Item("TEXT"))
+        SetText "ANTWORT_1$txt_Antwort", UCase(Data.Item("CHOICE1"))
+        SetText "ANTWORT_2$txt_Antwort", UCase(Data.Item("CHOICE2"))
+        GetPreview "Default", "1.8", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+     public sub BB_Referee(Data)
+        sScene = "BB_Referee"
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetPLastName Data.Item("NAME")
+        SetPFirstName Data.Item("FNAME")
+        SetPNummer Data.Item("")
+        'SetVizData "0048",0
+        'SetVizData "0090","IMAGE*"&s__LogoPathDiv & "/" &"whistle"
+        'SetPHSOff
+
+        SetVizData "0501",""
+        SetVizData "0502",""
+        SetVizDataUpper "1111",Data.Item("REF2")
+        SetVizDataUpper "1112",Data.Item("REF3")
+        
+        SetVizDataUpper "1211",Data.Item("LIN1")
+        SetVizDataUpper "1212",Data.Item("LIN2")
+
+        GetPreview "Default 2.0 ", "L1 2.0 L2 2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+
+    public sub VB_MegaFacts(ByRef Data)
+        dim sCont, i
+
+        sScene = "SVB_Megafacts"
+        if Data.Item("HEADER_TYPE") =5 then
+            sScene = "SVB_Megafacts_NoLogo"
+
+        end if
+        sScene=sScene &"_"& Data.Item("ITEMCOUNT")
+
+        LoadScene elMainLayer, sScene
+        ' SetVizData "0004",2
+        SetShow
+        SetBGOnOff
+        SetTitelDefaultHeader
+        SetTitle Data.Item("TITLE")
+        SetTitleSubLine ""
+        SetSubLine Data.Item("SUBTITLE")
+
+        SetTeamLogo "0060", LCase(Data.Item("LOGO1"))
+        SetTeamLogo "0070", LCase(Data.Item("LOGO2"))
+        
+        SetVizData "0063","IMAGE*"&s__PlayerFotoPath & "/MF/" &LCase(Data.Item("FOTO"))
+        SetVizData "0073","IMAGE*"&s__PlayerFotoPath & "/MF/" &LCase(Data.Item("FOTO2"))
+
+        select case  Data.Item("HEADER_TYPE")
+            case 0
+                SetVizData "0010",0
+                SetVizData "0050",0
+            case 1
+                SetVizData "0010",0
+                SetVizData "0050",0
+            case 2
+                SetVizData "0010",1
+                SetVizData "0050",0
+            case 3
+                SetVizData "0010",0
+                SetVizData "0050",1
+            case 4
+                SetVizData "0010",1
+                SetVizData "0050",1
+            case 5
+                SetVizData "0010",1
+                SetVizData "0050",0
+        end select
+
+        dim ids :ids=1111
+        for i = 1 to 5
+            SetVizDataUpper ids,Data.Item("TEXT1" & i)
+            SetVizDataUpper ids+1,Data.Item("TEXT2" & i)
+            ids=ids+100
+        next
+        if not Data.Item("HEADER_TYPE") =5 then SetVizData "0004",Data.Item("ITEMCOUNT")
+
+
+        GetPreview "Default 3.5", "L1 3.5 L2 3.5 L3 3.5 L4 3.5 L5 3.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    
+    public sub IB_MegaFacts(ByRef Data)
+        dim sCont, i
+        dim typ: typ= Data.Item("HEADER_TYPE")
+        if  typ = 3 then
+            sScene = "IB_Megafacts_Spieler"
+        else
+            sScene = "IB_Megafacts"
+        end if
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetIBSide
+        if typ = 5 then
+            SetVizData "0085",0
+        elseif typ=0 then
+            SetVizData "0085",1
+                SetTeamLogo "0090",LCase(Data.Item("LOGO1"))
+        elseif typ=1 then
+            SetVizData "0085",1
+                SetTeamLogo "0090",LCase(Data.Item("LOGO2"))
+        elseif typ=3 then
+            SetTitelDefaultHeader
+        end if
+
+        SetTitle Data.Item("TITLE")
+        SetSubLine Data.Item("SUBTITLE")
+
+        if typ= 3  then
+            'if typ=4 then
+                SetTeamLogo "0610",LCase(Data.Item("LOGO1"))
+                SetPlayerHS "0600",LCase(Data.Item("LOGO1")),LCase(Data.Item("FOTO"))
+            'else
+            '    SetTeamLogo "0610",LCase(Data.Item("LOGO2"))
+            '    SetPlayerHS "0600",LCase(Data.Item("LOGO2")),LCase(Data.Item("FOTO"))
+            'end if
+
+        end if
+
+
+            dim ids :ids=1102
+            for i = 1 to 5
+               SetVizDataUpper ids,Data.Item("TEXT1" & i)
+               SetVizDataUpper ids+1,Data.Item("TEXT2" & i)
+                ids=ids+100
+            next
+            if typ= 3 or typ=4 then
+                if Data.Item("ITEMCOUNT")>4 then Data.Item("ITEMCOUNT")=4
+            end if
+            SetVizData "0004",Data.Item("ITEMCOUNT")
+
+
+
+        GetPreview "Default 3.0", "L1 3.0 L2 3.0 L3 3.0 L4 3.0 L5 3.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub IB_Spieler(ByRef Data)
+        dim sCont, i
+        sScene = "IB_SpielerPortrait"
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetIBSide
+        SetPLastName data.item("NAME")
+        SetPFirstName data.item("FNAME")
+        SetPlayerHS "0600", data.item("LOGO"),data.item("NR")
+        'SetPHS data.item("LOGO"),data.item("NR")
+        SetSubLine Data.Item("TITLE")
+        SetTitleLogo data.item("LOGO"),false
+        dim ids:ids=1102
+        for i = 1 to Data.Item("ITEMCOUNT")
+                SetVizDataUpper ids, data.Item("TEXT" & i)
+             ids=ids+100
+        next
+        if Data.Item("ITEMCOUNT")>3 then
+            SetVizData "0004",Data.Item("ITEMCOUNT")
+        else
+            SetVizData "0004",3
+        end if
+
+
+        GetPreview "Default 3.0", "L1 3.0 L2 3.0 L3 3.0 L4 3.0 L5 3.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub Torwand_Table(ByRef Data)
+        dim i,k, obj
+        sScene = "VB_Tut_Torwand"
+        LoadScene elMainLayer, sScene
+        SetText "$txt_Titel", UCase(Data.Item("TITLE"))
+
+        for i = 1 to 5          ' Zeilen
+            obj = "ZEILE_" & i
+            if i <= Data.Item("ITEMCOUNT") then
+                obj__TV.ShowObject obj
+                SetText obj & "$txt_Team", UCase(Data.Item("NAME" & i))
+                SetText obj & "$txt_Parameter", UCase(Data.Item("RESULT" & i))
+                for k = 1 to 4  ' Bälle
+                    obj__TV.HideObject obj & "$BALL_" & k & "$EINAUS_TREFFER"
+                    obj__TV.HideObject obj & "$BALL_" & k & "$EINAUS_DANEBEN"
+                    if Data.Item("BALL" & i & k) = 1 then obj__TV.ShowObject obj & "$BALL_" & k & "$EINAUS_TREFFER"
+                    if Data.Item("BALL" & i & k) = 2 then obj__TV.ShowObject obj & "$BALL_" & k & "$EINAUS_DANEBEN"
+                next
+            else
+                obj__TV.HideObject "$ZEILE_" & i
+            end if
+        next
+
+        GetPreview "Default", "1.8", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub Torwand_BB(ByRef Data)
+        dim k
+        if sScene <> "BB_TuT_Torwand" then      ' Ist die Szene schon geladen dann nur Ball Update machen
+            sScene = "BB_TuT_Torwand"
+            LoadScene elMainLayer, sScene
+            Redim ActionList(2, 1)
+            ActionList(1, 0) = "Default"
+            ActionList(1, 1) = "Default"
+            ActionList(2, 1) = efPlay
+        else
+            Redim ActionList(1, 0)
+            ActionList(1, 0) = "Default"
+        end if
+        SetText "$txt_Zeile_1", UCase(GetString("TUT", i__TVLanguage))
+        SetText "$txt_Zeile_2", UCase(Data.Item("NAME"))
+
+        for k = 1 to 4  ' Bälle
+            obj__TV.HideObject "$BALL_" & k & "$EINAUS_TREFFER"
+            obj__TV.HideObject "$BALL_" & k & "$EINAUS_DANEBEN"
+            if Data.Item("BALL" & k) = 1 then obj__TV.ShowObject "$BALL_" & k & "$EINAUS_TREFFER"
+            if Data.Item("BALL" & k) = 2 then obj__TV.ShowObject "$BALL_" & k & "$EINAUS_DANEBEN"
+        next
+
+        GetPreview "Default", "1.8", sScene
+    end sub
+
+      Public Sub FP_TactLineup(ByRef Data)
+        dim P_Nr,P_Name, x_Pos, y_Pos, ScenePosX, ScenePosY, Team, TeamId, i, LineupID
+        sScene = "VB_takt_Aufstellung_Fussball"
+        LoadScene elMainlayer, sScene
+        'SetBGOnOff
+        dim LineupWidth : LineupWidth  = 730   '100-830
+        dim LineupHeight: LineupHeight = 400    '125-525
+        dim SceneWidth   : SceneWidth  = 500    '-250-250
+        dim SceneHeight  : SceneHeight = 265    '-115-150
+        Team = Data.Item("CURR_TEAM")
+        If Team = "A" Then
+            TeamId = 1
+            LineupID = Lineup_A
+        else
+            TeamId = 2
+            LineupID = Lineup_B
+        end if
+        SetVizDataUpper "0100",1
+        SetTeamLogo "0101",LCase(Data.Item("T_LOGO_"& TeamId))
+        tw_lineupphoto.cb_logo.Text= LCase(Data.Item("T_LOGO_"& TeamId))
+        tw_lineupphoto_cb_logoChange 0
+        SetVizDataUpper "0111",Data.Item("T_LNAME_"& TeamId)
+        SetVizDataUpper "0112",""
+        SetVizDataUpper "0120",""
+        SetVizDataUpper "0120",GetString("Trainer", i__TVLanguage) & ": " & Data.Item("COACH" & TeamId)
+        
+        SetVizDataUpper "0200",1
+        SetTeamLogo "0201",LCase(Data.Item("T_LOGO_2"))
+        SetVizDataUpper "0211",Data.Item("T_LNAME_2")
+        SetVizDataUpper "0212",""
+        SetVizDataUpper "0220",""
+        SetVizDataUpper "0220",GetString("Trainer", i__TVLanguage) & ": " & Data.Item("COACHB")
+        tw_lineupphoto.cb_name.Items.Clear
+        dim ids:ids=1100
+        For i = 1 to 11
+            SetVizDataBufferOn
+            P_Nr   = Trim(Lineup.GetPlayer(Lineup_Nr, i, LineupID))
+            P_Name = (GetData(Team, P_Nr))
+            x_Pos  = MakeNumber(Lineup.GetPlayer(Lineup_Name_X, i, LineupID),1,0,"",-1) - MakeNumber(Lineup.GetPlayer(Lineup_Nr_W, i, LineupID),1,0,"",-1)
+            y_Pos  = MakeNumber(Lineup.GetPlayer(Lineup_Name_Y, i, LineupID),1,0,"",-1)  + 8 + MakeNumber(Lineup.GetPlayer(Lineup_Name_H, i, LineupID),1,0,"",-1)'Trim(Lineup.GetPlayer(Lineup_Name_Y, i))
+            tw_lineupphoto.cb_name.Items.Add P_Name
+
+            o0= Formatnumber(x_Pos,1)-100
+            p=(o0/LineupWidth)*SceneWidth
+            o0=p-250
+            ScenePosX    = Replace(o0, ",", ".")
+            o0= Formatnumber(y_Pos,1)-125
+            p=(o0/LineupHeight)*SceneHeight
+            o0=p-115
+
+            ScenePosY    = Replace(o0, ",", ".")
+            'ScenePosX  = Replace(Formatnumber((x_Pos - 480) / (LineupWidth / SceneWidth), 1), ",", ".")
+            'ScenePosY  = Replace(Formatnumber((y_Pos - 288) / (LineupHeight / SceneHeight), 1), ",", ".")
+
+            SetVizData ids,P_nr
+            SetVizDataUpper ids+2,P_Name
+            SetVizData (ids+10)&".x1",ScenePosX
+            SetVizData (ids+10)&".y1",ScenePosY
+            ids=ids+100
+            SetVizDataBufferOff
+            if isPlayerHL(P_Nr,Team) = true then
+                obj__TV.SendCommand "SCENE*" & s__VizPath & "/"&sScene&"*STAGE*DIRECTOR*$H"&i&" SHOW 0.7"
+            end if
+        Next
+
+        GetPreview "Default 3.5", "L1 3.0 L2 3.0 L3 3.0 L4 3.0 L5 3.0 L6 3.0 L7 3.0 L8 3.0 L9 3.0 L10 3.0 L11 3.0" ,sScene
+
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    End Sub
+    
+    Public Sub FP_TactLineup_Photo_Show(name,photo,team)
+        SetVizData "5102",name
+        SetPlayerBigHS "5101",team,photo
+        obj__TV.DoEffect elMainLayer, "SPIELERFOTO", efPlay
+        obj__TV.DoEffect elMainLayer, "POS_ALL", efPlay
+
+    end sub
+    Public Sub FP_TactLineup_Photo_Hide()
+        obj__TV.DoEffect elMainLayer, "POS_ALL", efContinue
+        obj__TV.DoEffect elMainLayer, "SPIELERFOTO", efContinue
+    end sub
+
+    Public Sub FP_TactLineupLiveUpdate(ByRef Data)
+        sScene = "VB_takt_Aufstellung_Fussball"
+        dim LineupWidth : LineupWidth  = 730   '100-830
+        dim LineupHeight: LineupHeight = 400    '125-525
+        dim SceneWidth   : SceneWidth  = 500    '-250-250
+        dim SceneHeight  : SceneHeight = 265    '-115-150
+
+        dim o0,p
+        o0= Formatnumber(Data.Item("myX"),1)-100
+        p=(o0/LineupWidth)*SceneWidth
+        o0=p-250
+        dim ScenePosX   : ScenePosX    = Replace(o0, ",", ".")
+
+
+        o0= Formatnumber(Data.Item("myY"),1)-125
+        p=(o0/LineupHeight)*SceneHeight
+        o0=p-115
+
+        dim ScenePosY   : ScenePosY    = Replace(o0, ",", ".")
+        Dim Team
+        Team = UCASE(split(Lineup.ActiveLineup)(1))
+
+        dim ids
+        'if Team = "A" then
+            ids=1000+(Data.Item("Curr")*100)
+            SetVizData (ids+10)&".x1",ScenePosX
+            SetVizData (ids+10)&".y1",ScenePosY
+            obj__TV.SendCommand "SCENE*" & s__VizPath & "/VB_takt_Aufstellung_Fussball*TREE*$SPIELER_HEIM$SPIELER_" & Data.Item("Curr") & "$POS*TRANSFORMATION*POSITION SET " & ScenePosX & " " & ScenePosY & " 0.0"
+
+        'else
+        '    ds=3000+(Data.Item("Curr")*100)
+         '   SetVizData (ids+10)&".x1",ScenePosX
+         '   SetVizData (ids+10)&".y1",ScenePosY
+         '   obj__TV.SendCommand "SCENE*" & s__VizPath & "/VB_Lframe3070_Aufstellung*TREE*$SPIELER_GAST$SPIELER_" & Data.Item("Curr") & "$POS*TRANSFORMATION*POSITION SET " & ScenePosX & " " & ScenePosY & " 0.0"
+        'end if
+    End Sub
+
+    public sub VB_IB_RestProgramm(ByRef Data)
+        dim i
+        if Data.Item("AS_INFOBOX") then
+            sScene = "IB_Restprogramm"
+        else
+            sScene="VB_Restprogramm"
+        end if
+
+        LoadScene elMainLayer, sScene
+        SetShow
+        if Data.Item("AS_INFOBOX") then
+            SetIBSide
+        else
+            SetBGOnOff
+        end if
+        SetTitle Data.Item("NAME")
+        SetSubLine GetString("RESTPROGRAMM", i__TVLanguage)
+        SetTitleLogo Data.Item("LOGO"),false
+        dim ids:ids=1100
+        for i = 1 to Data.Item("ITEMCOUNT")
+            SetVizDataUpper ids,Data.Item("NR" & i)
+            SetTeamLogo ids+1,LCase(Data.Item("LOGO" & i))
+            SetVizDataUpper ids+2, Data.Item("NAME" & i)
+            if Data.Item("HOME" & i) then
+                SetVizData ids+3,"(H)"
+            else
+                SetVizData ids+3,"(A)"
+            end if
+
+            ids=ids+100
+        next
+
+
+            SetVizData "0004", Data.Item("ITEMCOUNT")
+
+        GetPreview "Default 3.0", "L1 3.0 L2 3.0 L3 3.0 L4 3.0 L5 3.0 L6 3.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub DSS_RestProgramm_Show(ByRef Data)
+        dim i
+        SetVizDataUpperFL "3001",GetString("RESTPROGRAMM", i__TVLanguage)&" "&Data.Item("NAME")
+
+        dim ids : ids=3100
+        for i = 1 to Data.Item("ITEMCOUNT")
+            SetVizDataUpperFL ids,Data.Item("NR" & i)
+            SetVizDataUpperFL ids+2,Data.Item("NAME" & i)
+            if Data.Item("HOME" & i) then
+                SetVizDataFL ids+3,"(H)"
+            else
+                SetVizDataFL ids+3,"(A)"
+            end if
+            ids=ids+100
+        next
+        SetVizDataFL "3000",Data.Item("ITEMCOUNT")
+
+    end sub
+
+
+    public sub IB_BlitzErgebnisse(ByRef Data)
+        dim i
+        sScene = "IB_Blitzergebnisse"
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetIBSide
+        SetTitle  Data.Item("HEADER")
+        SetSubLine ""
+        SetTitelDefaultHeader
+        
+        dim ids : ids=1102
+        for i = 1 to Data.Item("ITEMCOUNT")
+            SetVizDataUpper ids , Data.Item("NAME_A" & i)
+            SetVizDataUpper ids+4 , Data.Item("NAME_B" & i)
+            SetVizDataUpper ids+2 , Data.Item("RESULT" & i)
+            ids=ids+100
+        next
+
+        SetVizData "0004",Data.Item("ITEMCOUNT")
+
+        GetPreview "Default 3.0", "L1 3.0 L2 3.0 L3 3.0 L4 3.0 L5 3.0 L6 3.0" ,sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub IB_BlitzTabelle(ByRef Data)
+        dim i,k
+        dim page2
+        sScene = "IB_Blitztabelle"
+        dim count,hcount
+        page2=false
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetIBSide
+            'SetText "$txt_Titel", UCase(GetString("BLITZTABELLE", i__TVLanguage))
+        SetTitle Data.Item("HEADER")
+        count=Data.Item("ITEMCOUNT")
+        hcount=count
+        if count>7 then
+            page2=true
+            hcount=Ceil(count/2.0)
+
+        end if
+        SetVizDataUpper "0502",GetString(Data.Item("HEADER1"), i__TVLanguage)
+        SetVizDataUpper "0504",GetString(Data.Item("HEADER2"), i__TVLanguage)
+        SetTitelDefaultHeader
+        dim ids:ids= 1100
+        k = 0
+        for i = 1 to hcount
+            SetVizData ids, Data.Item("PLACE" & i)
+            SetVizDataUpper ids+2, Data.Item("NAME" & i)
+            SetVizData ids+4, Data.Item("GOALS" & i)
+            SetVizData ids+6, Data.Item("POINTS" & i)
+
+            ids=ids+100
+        next
+        if page2=true then
+            ids=2100
+            for i=(hcount+1) to (hcount*2)
+                if i>count  then
+                    SetVizDataUpper ids+2, ""
+                else
+                    SetVizData ids, Data.Item("PLACE" & i)
+                    SetVizDataUpper ids+2, Data.Item("NAME" & i)
+                    SetVizData ids+4, Data.Item("GOALS" & i)
+                    SetVizData ids+6, Data.Item("POINTS" & i)
+                end if
+                ids=ids+100
+            next
+        end if
+        
+
+        SetVizData "0004",hcount
+
+        GetPreview "Default 3.0", "L1 3.0 L2 3.0 L3 3.0 L4 3.0 L5 3.0 L6 3.0", sScene
+        Redim ActionList(2, 1)
+            ActionList(1, 0) = "Default"
+            ActionList(1, 1) = "Default"
+            ActionList(2, 1) = efPlay
+    end sub
+
+    public sub DSS_BlitzTabelle_Show(ByRef Data)
+        dim k
+
+        SetVizDataUpperFL "1001",Data.Item("HEADER")
+        SetVizDataUpperFL "1002",Data.Item("HEADER1")
+        SetVizDataUpperFL "1003",Data.Item("HEADER2")
+        dim ids:ids=1100
+        for k = 1 to Data.Item("ITEMCOUNT")
+            SetVizDataUpperFL ids,Data.Item("PLACE" & k)
+            SetVizDataUpperFL ids+2,Data.Item("NAME" & k)
+            SetVizDataUpperFL ids+4,Data.Item("GOALS" & k)
+            SetVizDataUpperFL ids+6,Data.Item("POINTS" & k)
+            ids=ids+100
+        next
+        SetVizDataFL "1000", Data.Item("ITEMCOUNT")
+
+        for i=1 to Data.Item("ITEMCOUNT")
+        obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr*STAGE*DIRECTOR*H"&i&" SHOW 0.0"
+        next
+        GetPreview "Default", "3.5", sScene
+
+    end sub
+
+    public sub BB_PlayerStats(ByRef Data)
+        dim i
+        if Data.Item("NEBENEINANDER") then
+            'if Data.Item("MIT_TAUFE") then
+                sScene = "BB_Statistik"
+            'else
+            '    sScene = "BB_3er_Statistik"
+            'end if
+        else
+            sScene = "BB_Playerstat"
+        end if
+        LoadScene elMainLayer, sScene
+        SetShow
+
+        SetPLastName Data.Item("NAME")
+        SetPFirstName Data.Item("FNAME")
+        SetTLogo Data.Item("LOGO")
+        SetPNummer Data.Item("NR")
+        
+        if Data.item("SHOWHS") and Data.Item("NR")<>"" then
+            SetPHS LCase(Data.Item("LOGO")),Data.Item("NR")
+        else
+            SetPHSOff
+        end if
+        
+
+        SetVizDataUpper "0120", Data.Item("INFO")
+        dim count:count=0
+        dim ids
+        ids=1110
+        for i = 1 to 6
+            if Data.Item("TEXT" & i) <> "" then
+                SetVizDataUpper ids,Data.Item("TEXT" & i)
+                SetVizDataUpper ids+5,Data.Item("VALUE" & i)
+                SetVizDataUpper ids+1,Data.Item("VALUE" & i)
+                ids=ids+100
+                count=count+1
+            end if
+        next
+        
+        if Data.Item("NEBENEINANDER") then
+              SetVizData "0005", count
+        else
+            SetVizData "0004", count
+            SetVizData "0005", 1
+            SetVizData "0501", ""
+        end if
+
+        GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub HL(ByRef Data)
+        dim i
+        for i = 1 to 6
+            if Data.Item("HL" & i) then
+                obj__TV.DoEffect elMainLayer, "H" & i, efPlay
+                CC.SF.Wait 100
+            end if
+        next
+    end sub
+
+    public sub HL_FREE(ByRef Data,min, max,refhl,dir,offset)
+        dim i
+        for i = min to max
+            if Data.Item(refhl & i) then
+                obj__TV.DoEffect elMainLayer, dir & i +offset, efPlay
+                CC.SF.Wait 100
+            end if
+        next
+    end sub
+
+    public sub HL_FREE_FL(ByRef Data,min, max,refhl,dir)
+        dim i
+        for i = min to max
+            if Data.Item(refhl & i) then
+                obj__TV.DoEffect elFrontLayer, dir & i, efPlay
+                CC.SF.Wait 100
+            end if
+        next
+    end sub
+
+    public sub VB_IB_Programm(ByRef Data)
+        dim i, obj
+        dim ids
+        if Data.Item("AS_INFOBOX") = true then
+            sScene = "IB_Hinweise"
+            ids =1102
+        else
+            sScene = "VB_Hinweise"
+            ids=  1111
+        end if
+
+        LoadScene elMainLayer, sScene
+        SetShow
+        if Data.Item("AS_INFOBOX") = true then
+            SetIBSide
+        else
+            SetBGOnOff
+        end if
+        SetTitelDefaultHeader
+        SetTitle Data.Item("HEADER")
+        SetTitleSubLine ""
+        SetDropLine ""
+        SetSubLine ""
+        SetVizData "0085", 0
+        if Data.Item("AS_INFOBOX") = true then SetSubLine ""
+        for i = 1 to 5
+            SetVizDataUpper ids,Data.Item("NAME_A" & i) & " - " & Data.Item("NAME_B" & i)
+            SetVizDataUpper ids+1 ,Data.Item("TIME" & i)
+            SetTeamLogo ids+2,LCase(Data.Item("LOGO_A" & i))
+            SetTeamLogo ids+3,LCase(Data.Item("LOGO_B" & i))
+
+            'if i<6 then
+            '    obj = "QUOTE_" & i
+            '    SetText obj & "$txt_Spiel_Quote",      UCase(Data.Item("NAME_A" & i)) & " - " & UCase(Data.Item("NAME_B" & i))
+            '    SetText obj & "$txt_Quote_Sieg"&i,      Data.Item("QH" & i)
+            '    SetText obj & "$txt_Quote_Remi"&i,      Data.Item("QD" & i)
+            '    SetText obj & "$txt_Quote_Niederlage"&i,      Data.Item("QG" & i)
+            'end if
+            ids=ids+100
+        next
+
+        SetVizData "0004", Data.Item("ITEMCOUNT")
+
+
+        GetPreview "Default 3.0", "L1 3.0 L2 3.0 L3 3.0 L4 3.0 L5 3.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub Programm_continue()
+        GetPreview "Default 1.8 TAFEL_1 0.0", "TAFEL_2 1.3", sScene
+        Redim ActionList(2, 2)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "TAFEL_1"
+        ActionList(2, 1) = efContinue
+        ActionList(1, 2) = "TAFEL_2"
+        ActionList(2, 2) = efPlay
+    end sub
+
+    public sub QuotenStart
+        obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$STOP_ADMIRAL*VALUE SET PAUSER"
+        obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*ACTION*RESET*KEY*$PLAY_ADMIRAL*MODE SET COMMAND"
+        obj__TV.DoEffect elMainLayer, "Default", efContinue
+    end sub
+
+    public sub VB_IB_PlayerStatsTable(ByRef Data)
+        dim i
+        if Data.Item("AS_INFOBOX") = true then
+            sScene = "IB_Hitliste_Logos"
+
+        else
+            sScene = "VB_Hitliste"
+        end if
+
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetTitelDefaultHeader
+        SetVizData "0008", 0
+        SetTitle Data.Item("TITLE")
+        SetTitleSubLine ""
+        SetDropLine ""
+        SetVizDataUpper "0500",Data.Item("SUBTITLE")
+
+        if Data.Item("AS_INFOBOX") = true then
+            SetIBSide
+            SetVizData "0501",Data.Item("HEADER_A")
+        else
+            SetBGOnOff
+            SetVizData "0501",""
+            SetVizData "0008",1
+            if Data.Item("TWO_PARAMS") = true then
+                SetVizData "0005",2
+                SetVizDataUpper "0502",Data.Item("HEADER_A")
+                SetVizDataUpper "0503",Data.Item("HEADER_B")
+            else
+                SetVizData "0005",3
+                SetVizDataUpper "0502",""
+                SetVizDataUpper "0503",Data.Item("HEADER_A")
+            end if
+        end if
+
+
+        dim ids : ids = 1100
+        for i = 1 to 8  ' IB hat nur 6!
+            if Data.Item("AS_INFOBOX") = true then
+                SetVizData ids ,Data.Item("NR" & i)
+                SetVizDataUpper ids+2, Data.Item("NAME" & i)
+                SetVizData ids+3 ,Data.Item("PARAM_A" & i)
+                SetTeamLogo ids+1,LCase(Data.Item("LOGO"&i))
+            else
+                SetVizData ids ,Data.Item("NR" & i)
+                SetVizDataUpper ids+2, Data.Item("NAME" & i)
+                SetTeamLogo ids+1,LCase(Data.Item("LOGO"&i))
+                SetVizData ids+3 ,""
+                if Data.Item("TWO_PARAMS") = true then
+                    SetVizData ids+4,Data.Item("PARAM_A" & i)
+                    SetVizData ids+5,Data.Item("PARAM_B" & i)
+                else
+                    SetVizDataUpper ids+4,""
+                    SetVizDataUpper ids+5,Data.Item("PARAM_A" & i)
+                end if
+            end if
+            ids =ids + 100
+        next
+        SetVizData "0004" ,Data.Item("ITEMCOUNT")
+
+        GetPreview "Default", "3.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+
+    public sub VB_TeamStats(ByRef Data)
+        dim i
+        sScene = "SVB_Statistikvgl"
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetBGOnOff
+        SetTitleLogo "",false
+        SetTeamLogo "0060" ,LCase(Data.Item("LOGO1"))
+        SetTeamLogo "0070" ,LCase(Data.Item("LOGO2"))
+        SetVizData "0050",0
+        SetVizDataUpper "0100",Data.Item("NAME1")
+        SetVizDataUpper "0200",Data.Item("NAME2")
+        SetVizData "0110",""
+        SetVizData "0210",""
+
+        SetVizDataUpper "0500", GetString("TEAM_STATISTIK", i__TVLanguage)
+        if Data.Item("HL") <> "" then
+            SetVizDataUpper "0500", Data.Item("HL")
+        end if
+
+        if Data.Item("WITH_SCORE") = true then
+            SetVizData "0149",1
+            SetVizDataUpper "0150",Data.Item("SCORE")
+        else
+            SetVizData "0149",0
+            SetVizDataUpper "0150","vs"
+        end if
+
+        dim ids:ids= 1100
+        for i = 1 to 8
+            SetVizDataUpper ids,Data.Item("PARAM_A" & i)
+            SetVizDataUpper ids+1,Data.Item("TEXT" & i)
+            SetVizDataUpper ids+2,Data.Item("PARAM_B" & i)
+            ids=ids+100
+        next
+        SetVizData "0004", Data.Item("ITEMCOUNT")
+
+        GetPreview "Default 3.5", "L1 3.5 L2 3.5 L3 3.5 L4 3.5 L5 3.5 L6 3.5 L7 3.5 L8 3.5 L9 3.5 L10 3.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub VB_PlayerStatsCompare(ByRef Data)
+        dim i
+
+        sScene = "SVB_Statistikvgl"
+
+        LoadScene elMainLayer, sScene
+        
+        SetShow
+        SetBGOnOff
+        SetTitleLogo "",false
+        SetTeamLogo "0060" ,LCase(Data.Item("LOGO1") )
+        SetTeamLogo "0070" ,LCase(Data.Item("LOGO2"))
+
+        SetVizDataUpper "0100",Data.Item("NAME1")
+        SetVizDataUpper "0200",Data.Item("NAME2")
+        SetVizData "0110",""
+        SetVizData "0210",""
+        SetVizDataUpper "0500", Data.Item("TITLE")
+        
+        SetVizData "0149",-1
+        SetVizDataUpper "0150",""
+        
+
+        if not Data.item("ONLYPHOTO") then
+            SetVizData "0050",1
+            SetVizData "0063","IMAGE*"&s__PlayerFotoPath & "/" &LCase(Data.Item("FOTO1"))
+            SetVizData "0073","IMAGE*"&s__PlayerFotoPath & "/" &LCase(Data.Item("FOTO2"))
+        else
+            SetVizData "0050",0
+        end if
+
+
+        dim ids:ids= 1100
+        for i = 1 to 8
+            SetVizDataUpper ids,Data.Item("PARAM_A" & i)
+            SetVizDataUpper ids+1,Data.Item("TEXT" & i)
+            SetVizDataUpper ids+2,Data.Item("PARAM_B" & i)
+            ids=ids+100
+        next
+        SetVizData "0004", Data.Item("ITEMCOUNT")
+
+        GetPreview "Default 3.5", "L1 3.5 L2 3.5 L3 3.5 L4 3.5 L5 3.5 L6 3.5 L7 3.5 L8 3.5 L9 3.5 L10 3.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+
+    public sub Stat_BB(ByRef Data)
+        dim i
+        sScene = "BB_Statistik"
+        LoadScene elMainLayer, sScene
+        SetText "txt_TeamHeim", UCase(Data.Item("NAME1"))
+        SetText "txt_TeamGast", UCase(Data.Item("NAME2"))
+        SetText "txt_Erg"     , UCase(Data.Item("SCORE"))
+        SetImg  "img_LogoHeim", s__LogoPath & "\" & LCase(Data.Item("LOGO1"))
+        SetImg  "img_LogoGast", s__LogoPath & "\" & LCase(Data.Item("LOGO2"))
+
+        for i = 1 to 4
+            SetText "WECHSEL_" & i & "$txt_WertHeim" , UCase(Data.Item("PARAM_A" & i))
+            SetText "WECHSEL_" & i & "$txt_WertGast" , UCase(Data.Item("PARAM_B" & i))
+            SetText "WECHSEL_" & i & "$txt_Parameter", UCase(Data.Item("TEXT"    & i))
+        next
+        GetPreview "Default", "1.8", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub BB_TeamStat(ByRef Data)
+        dim i
+        sScene = "BB_Statistik_Vergleich"
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetTName Data.Item("NAME1")
+        SetTLogo  LCase(Data.Item("LOGO1"))
+        SetTName2 Data.Item("NAME2")
+        SetTLogo2  LCase(Data.Item("LOGO2"))
+        SetScore  Data.Item("SCORE")
+        SetSubLine Data.Item("HL")
+        dim id:ids=1109
+
+        SetVizData "0004",Data.Item("ITEMCOUNT")
+        for i = 1 to Data.Item("ITEMCOUNT")
+            SetVizDataUpper ids+1,Data.Item("TEXT"& i)
+            SetVizData ids,Data.Item("PARAM_A" & i)
+            SetVizData ids+3,Data.Item("PARAM_B" & i)
+            ids=ids+100
+        next
+
+        GetPreview "Default 1.0", "L1 1.0 L2 1.0 L3 1.3 L4 1.3 L5 1.3 L6 1.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+
+    Public Sub DSS_Show(ByRef Data)
+        dim sDirector
+        sScene = "DSS_Uhr"
+        obj__TV.RendererUpdate false
+        obj__TV.SetScene sScene
+        obj__TV.LoadScene elFrontLayer
+        obj__TV.DoEffect elFrontLayer, "ALL", efReset
+        obj__TV.RendererUpdate true
+        b__VisibleDSS     = True
+        b__VisibleADD     = False
+        b__VisibleText    = False
+        if Data.Item("WITH_CLOCK") then
+            SetVizDataFL "0001",1
+            b__VisibleClock = true
+        else
+            SetVizDataFL "0001",0
+            b__VisibleClock = False
+        end if
+        SetShow
+
+
+        dim iAddTime : iAddTime = Data.Item("INJURYTIME")
+        dim bAddTime : bAddTime = (iAddTime > -1)
+        SetVizDataUpperFL "0100",Data.Item("T_SNAME_1")
+        SetVizDataUpperFL "0200",Data.Item("T_SNAME_2")
+        SetVizDataFL "0090","IMAGE*"&s__LogoPath & "/" &Data.Item("T_LOGO_1")
+        SetVizDataFL "0190","IMAGE*"&s__LogoPath & "/" &Data.Item("T_LOGO_2")
+        if Data.Item("PERIOD") = 1 then
+            SetVizDataFL "0301","1/3"
+        elseif Data.Item("PERIOD") = 2 then
+            SetVizDataFL "0301","2/3"
+        elseif Data.Item("PERIOD") = 3 then
+            SetVizDataFL "0301","3/3"
+         elseif Data.Item("PERIOD") = 4 then
+            SetVizDataFL "0301","OT"
+        elseif Data.Item("PERIOD") = 5 then
+            SetVizDataFL "0301","2.OT"
+        elseif Data.Item("PERIOD") = 6 then
+            SetVizDataFL "0301","3.OT"
+        elseif Data.Item("PERIOD") = 7 then
+            SetVizDataFL "0301","4.OT"
+        elseif Data.Item("PERIOD") = 8 then
+            SetVizDataFL "0301","5.OT"
+        elseif Data.Item("PERIOD") = 9 then
+            SetVizDataFL "0301","6.OT"
+        elseif Data.Item("PERIOD") = 10 then
+            SetVizDataFL "0301","OT"
+        else
+            SetVizDataFL "0301",""
+        end if
+
+         SetVizDataFL "0150", Data.Item("T_SCORE_1") & ":" & Data.Item("T_SCORE_2") 'SetText "DSS_Uhr$txt_Erg", Data.Item("T_SCORE_1") & ":" & Data.Item("T_SCORE_2")
+
+        obj__TV.SetClock 0, clLimit, Data.Item("MAINTIME_LIMIT")
+        obj__TV.SendCommand "CLOCK0*DIRECTION SET DOWN"
+        if Data("TIME_ISRUNNING") then
+            obj__TV.SendCommand "CLOCK0 START"
+            'obj__TV.SendCommand "CLOCK1 START"  ' Ich glaube es ist egal wenn ich die jetzt schon Starte. Sie ist eh nicht eingeblendet
+        else
+            obj__TV.SendCommand "CLOCK0 STOP"
+            'obj__TV.SendCommand "CLOCK1 STOP"
+        end if
+        obj__TV.SendCommand "RENDERER*FRONT_LAYER*STAGE*DIRECTOR*POWERPLAY_HEIM SHOW 0.0"
+        obj__TV.SendCommand "RENDERER*FRONT_LAYER*STAGE*DIRECTOR*POWERPLAY_GAST SHOW 0.0"
+        ' NOTIZ: Problematisch. Die ADD Time ist mglw. veraltet die TSP Zeit aber nicht.
+        if (Data.Item("MAINTIME_LIMIT") <> "") and ((TSP.GetTime(TSP_Time, 0) / 1000) > Data.Item("MAXTIME")) then
+             obj__TV.SendCommand "CLOCK0*TIME SET " & Data.Item("MAXTIME")
+        else  ' Problem ist, das Uhren Objekt prüft Zeit-Limits NUR wenn sie TICKT
+             obj__TV.SendCommand "CLOCK0*TIME SET " & (TSP.GetTime(TSP_Time, 0) / 1000)
+        end if
+        'obj__TV.SendCommand "CLOCK1*TIME SET " & (iAddTime / 1000)
+
+        obj__TV.SetClock 1, clLimit, 0
+        obj__TV.SetClock 1, clDirection, 0
+        
+        obj__TV.SetClock 2, clLimit, 0
+        obj__TV.SetClock 2, clDirection, 0
+        
+        obj__TV.SetClock 3, clLimit, 0
+        obj__TV.SetClock 3, clDirection, 0
+        
+        obj__TV.SetClock 4, clLimit, 0
+        obj__TV.SetClock 4, clDirection, 0
+        
+        if  b__VisiblePenH1 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efPlay
+        if  b__VisiblePenH2 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efPlay
+        if  b__VisiblePenG1 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efPlay
+        if  b__VisiblePenG2 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efPlay
+
+        obj__TV.DoEffect elFrontLayer, "Default", efPlay
+
+
+
+        call SetIniOption("VISIBLE_DSS", b__VisibleDSS)
+        call SetIniOption("VISIBLE_CLOCK", b__VisibleClock)
+        call SetIniOption("VISIBLE_ADD",  b__VisibleADD)
+        call SetIniOption("VISIBLE_TEXT", b__VisibleText)
+
+    End Sub
+
+
+    Public Sub DSS_Hide()
+        dssishiding=true
+        dim w
+        w=false
+        'obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr*STAGE*DIRECTOR*STRAFZEIT_1_HEIM SHOW 0"
+        'obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr*STAGE*DIRECTOR*STRAFZEIT_2_HEIM SHOW 0"
+        'obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr*STAGE*DIRECTOR*STRAFZEIT_1_GAST SHOW 0"
+        'obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr*STAGE*DIRECTOR*STRAFZEIT_2_GAST SHOW 0"
+        IF b__VisibleADD THEN
+            obj__TV.DoEffect elFrontLayer, "OVERTIME", efContinue
+            cc.SF.Wait 350
+        END IF
+        if b__VisibleText then
+            obj__TV.DoEffect elFrontLayer, "ZUSATZINFO", efContinue
+            'cc.SF.Wait 350
+            w=true
+        end if
+        if b__VisibleTextL then
+            obj__TV.DoEffect elFrontLayer, "ZUSATZ_LINKS", efContinue
+            w=true
+           'cc.SF.Wait 350
+        end if
+        if w then cc.SF.Wait 350
+        if b__VisibleClock then
+            obj__TV.DoEffect elFrontLayer, "Default", efContinue
+            cc.SF.Wait 1000
+        elseif b__VisibleDSS then       ' DSS und ERGEBNIS schließen sich gegenseitig aus!
+            obj__TV.DoEffect elFrontLayer, "Default", efContinue
+            cc.SF.Wait 1000
+        end if
+        
+
+
+        b__VisibleDSS   = False
+        b__VisibleClock = False
+        b__VisibleADD   = False
+        b__VisibleText  = False
+        b__VisibleTextL  = False
+        b__VisibleRedCardH =false
+        b__VisibleRedCardG =false
+        call SetIniOption("VISIBLE_DSS", b__VisibleDSS)
+        call SetIniOption("VISIBLE_CLOCK", b__VisibleClock)
+        call SetIniOption("VISIBLE_ADD",  b__VisibleADD)
+        call SetIniOption("VISIBLE_TEXT", b__VisibleText)
+        dssishiding=false
+    End Sub
+
+    Public Sub Start_MainClock(ByRef Data)
+        if not b__VisibleClock then exit sub
+        'dim iAddTime : iAddTime = Data.Item("INJURYTIME")
+        'dim bAddTime : bAddTime = (iAddTime > -1)
+        obj__TV.SetClock 0, clLimit, Data.Item("MAINTIME_LIMIT")
+        'obj__TV.SendCommand "CLOCK1*TIME SET " & (iAddTime / 1000)
+        'obj__TV.SendCommand "CLOCK1 START"
+        obj__TV.SendCommand "CLOCK0*TIME SET " &  TSP.GetTime(TSP_Time, 0) / 1000
+        obj__TV.SetClock 0, clDirection, 0  ' Data.Item("MAINTIME_DIRECTION")
+        obj__TV.SendCommand "CLOCK0 START"
+    End Sub
+
+    Public Sub Stop_MainClock(ByRef Data)
+        if not b__VisibleClock then exit sub
+        'dim iAddTime : iAddTime = Data.Item("INJURYTIME")
+        'dim bAddTime : bAddTime = (iAddTime > -1)
+        obj__TV.SetClock 0, clLimit, Data.Item("MAINTIME_LIMIT")
+        'obj__TV.SendCommand "CLOCK1 STOP"
+        'obj__TV.SendCommand "CLOCK1*TIME SET " & (iAddTime / 1000)
+        obj__TV.SendCommand "CLOCK0 STOP "
+        obj__TV.SendCommand "CLOCK0*TIME SET " & (Data.Item("MAINTIME") / 1000)
+    End Sub
+    
+    Public Sub Start_PenClock(id,time)
+'        if not b__VisibleClock then exit sub
+        if time > -1 then
+        obj__TV.SetClock id, clLimit, 0
+        obj__TV.SendCommand "CLOCK"&id&"*TIME SET " &  time
+        obj__TV.SetClock id, clDirection, 0  ' Data.Item("MAINTIME_DIRECTION")
+        end if
+        'obj__TV.SendCommand "CLOCK"&id&" START"
+        
+        select case id
+            case 1:
+                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efPlay
+                b__VisiblePenH1 = true
+            case 2:
+                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efPlay
+                b__VisiblePenH2 = true
+            case 3:
+                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efPlay
+                b__VisiblePenG1 = true
+            case 4:
+                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efPlay
+                b__VisiblePenG2 = true
+        end select
+    End Sub
+    Public Sub Set_PenClock(id,time)
+        obj__TV.SendCommand "CLOCK"&id&"*TIME SET " &  time
+    end sub
+
+    Public Sub Stop_PenClock(id)
+ '       if not b__VisibleClock then exit sub
+
+        select case id
+            case 1:
+                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efContinue
+                b__VisiblePenH1 = false
+            case 2:
+                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efContinue
+                b__VisiblePenH2 = false
+            case 3:
+                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efContinue
+                b__VisiblePenG1 = false
+            case 4:
+                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efContinue
+                b__VisiblePenG2 = false
+        end select
+    End Sub
+
+
+    Public Sub OnAdditionalTime(atime)
+        if dssishiding=true then exit sub
+       if not b__VisibleClock then exit sub
+      ' obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr_ST*TREE*$DSS_Uhr$CLOCK1*TIME SET 0"
+      obj__TV.SendCommand "CLOCK1*TIME SET "&atime
+      ' obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr_ST*TREE*$DSS_Uhr$CLOCK1 START"
+      obj__TV.SendCommand "CLOCK1 START"
+       if not b__VisibleADD then
+           obj__TV.DoEffect elFrontLayer, "OVERTIME", efPlay
+           b__VisibleADD = true
+       end if
+    End Sub
+
+    Public Sub Update_MainScore(ByRef Data)
+        if (not b__VisibleDSS) and (not b__VisibleClock) then exit sub
+        SetVizDataFL "0150", Data.Item("T_AGGSCORE_1") & ":" & Data.Item("T_AGGSCORE_2")
+    end Sub
+
+    Public Sub DSS_Zusatz_Show(msg)
+        if not b__VisibleDSS then exit sub
+        SetVizDataUpperFL "0500", msg
+        if not b__VisibleText then
+            obj__TV.DoEffect elFrontLayer, "ZUSATZINFO", efPlay
+            cc.SF.Wait 350
+        end if
+        b__VisibleText = True
+    end Sub
+
+    Public Sub DSS_Zusatz_Hide()
+        IF b__VisibleText THEN
+            obj__TV.DoEffect elFrontLayer, "ZUSATZINFO", efContinue
+            cc.SF.Wait 350
+        END IF
+        b__VisibleText = False
+    end Sub
+    
+    Public Sub DSS_Zusatz_Links_Show(msg)
+        if not b__VisibleDSS then exit sub
+        SetVizDataUpperFL "0501", msg
+        if not b__VisibleTextL then
+            obj__TV.DoEffect elFrontLayer, "ZUSATZ_LINKS", efPlay
+            cc.SF.Wait 350
+        end if
+        b__VisibleTextL = True
+    end Sub
+
+    Public Sub DSS_Zusatz_Links_Hide()
+        IF b__VisibleTextL THEN
+            obj__TV.DoEffect elFrontLayer, "ZUSATZ_LINKS", efContinue
+            cc.SF.Wait 350
+        END IF
+        b__VisibleTextL = False
+    end Sub
+
+    Public Sub DSS_Card_Show(ch,cg)
+        if not b__VisibleDSS then exit sub
+        if ch >0 then
+            SetVizDataFL "0110",1
+            b__VisibleRedCardH=true
+        else
+            SetVizDataFL "0110",0
+            b__VisibleRedCardH=false
+        end if
+        if cg >0 then
+            SetVizDataFL "0210",1
+            b__VisibleRedCardG=true
+        else
+            SetVizDataFL "0210",0
+            b__VisibleRedCardG=false
+        end if
+    end Sub
+
+    Public Sub DSS_Card_Hide(dir)
+        if dir="H" then
+            IF b__VisibleRedCardH THEN
+                SetVizDataFL "0110",0
+                cc.SF.Wait 350
+            END IF
+            b__VisibleRedCardH = False
+        else
+            IF b__VisibleRedCardG THEN
+                SetVizDataFL "0210",0
+                cc.SF.Wait 350
+            END IF
+            b__VisibleRedCardG = False
+        end if
+    end Sub
+
+
+     public sub DSS_Sponsor_Hide()
+        obj__TV.DoEffect elFrontLayer, "FLASH_SPONSOR", efContinue
+        cc.sf.Wait 200
+        obj__TV.DoEffect elFrontLayer, "FLASH_SPONSOR", efReset
+    end sub
+
+    public sub DSS_Sponsor_Show(nr)
+        ' SIEMIC Dieser Sponsor geht nur wenn der DSS NICHT sichtbar ist!!!
+        SetVizDataFL "0011",""
+        if nr = "3" then    ' "Unterstützt durch Produkt Platzierung"
+            sScene = "DSS_Uhr"
+            obj__TV.RendererUpdate false
+            obj__TV.SetScene sScene
+            obj__TV.LoadScene elFrontLayer
+            obj__TV.DoEffect elFrontLayer, "ALL", efReset
+            obj__TV.RendererUpdate true
+            SetVizDataFL "0010","IMAGE*"&s__LogoPathDiv & "/" &"PRODUKTPLAZIERUNG"
+            obj__TV.DoEffect elFrontLayer, "FLASH_SPONSOR", efPlay
+            exit sub
+        end if
+
+        if not (b__VisibleClock or b__VisibleDSS) then exit sub
+
+        if nr = "1" then         '        => EINAUS_ADMIRAL / EINAUS_KURIER
+            SetVizDataFL "0010","IMAGE*"&s__LogoPathDiv & "/" &"Admiral"
+
+        else
+            SetVizDataFL "0010","IMAGE*"&s__LogoPathDiv & "/" &"Kurier"
+        end if
+        obj__TV.DoEffect elFrontLayer, "SPONSOR", efPlay
+    end sub
+
+    Public Sub ClearAll()
+        If obj__TV is Nothing Then Exit Sub
+
+        if s__LastAnim <> "" Then
+            obj__TV.DoEffect elMainLayer, s__LastAnim, efContinue
+            CC.SF.ShowSplashForm "Waiting for animation to finish...", clGreen
+            CC.SF.Wait 2000
+            CC.SF.HideSplashForm
+            ClearPreview
+        end if
+        s__LastAnim = ""
+        SetIniOption "LAST_SCENE", s__LastAnim
+
+        ReDim ActionList(1, 0)
+        ActionList(0, 0) = ""
+    End Sub
+
+
+    'Lädt Scene in Viz >> Synchron
+    Private Sub SetScene(ByVal sScene)
+        obj__TV.OpenProject s__VizPath
+        obj__TV.SetScene sScene
+    End Sub
+
+    Private Sub LoadScene(ByVal strLayer, ByVal sScene)
+        ClearAll                  ' Das passt mir nicht! Egal in welchen Layer ich was lade er blendet alle aus?
+
+        CC.SF.ShowSplashForm "VIZ is loading scene " & sScene & " ... ", clYellow
+
+        obj__TV.OpenProject s__VizPath
+        obj__TV.RendererUpdate false
+
+        obj__TV.SendCommandEx("POOLS CLEANUP")
+        obj__TV.SetScene sScene
+      '  cc.SF.TimerSet
+
+        ' SIEMIC:   TODO  If Kill_Bill switch is set, terminate this routine instantly
+        dim sLayer
+        If strLayer = 1 Then
+           sLayer = "FRONT_LAYER"
+        ElseIf strLayer = 2 Then
+           sLayer = "MAIN_LAYER"
+        ElseIf strLayer = 3 Then
+           sLayer = "BACK_LAYER"
+        End If
+        dim sResult
+        sResult = obj__TV.SendCommandEx("RENDERER*" & sLayer & " SET_OBJECT SCENE*" & s__VizPath & "/" & sScene)
+        sResult = obj__TV.SendCommandEx("RENDERER*" & sLayer & "*NAME GET")
+
+        Prepare_Layer strLayer
+
+        obj__TV.RendererUpdate true
+        CC.SF.HideSplashForm
+'        cc.SF.Wait 250
+ '
+    End Sub
+
+
+    Private Sub LoadScene2(ByVal strLayer, ByVal sScene)
+        'ClearAll                  ' Das passt mir nicht! Egal in welchen Layer ich was lade er blendet alle aus?
+
+        CC.SF.ShowSplashForm "VIZ is loading scene " & sScene & " ... ", clYellow
+
+        obj__TV.OpenProject s__VizPath
+        obj__TV.RendererUpdate false
+
+        obj__TV.SendCommandEx("POOLS CLEANUP")
+        obj__TV.SetScene sScene
+      '  cc.SF.TimerSet
+
+        ' SIEMIC:   TODO  If Kill_Bill switch is set, terminate this routine instantly
+        dim sLayer
+        If strLayer = 1 Then
+           sLayer = "FRONT_LAYER"
+        ElseIf strLayer = 2 Then
+           sLayer = "MAIN_LAYER"
+        ElseIf strLayer = 3 Then
+           sLayer = "BACK_LAYER"
+        End If
+        dim sResult
+        sResult = obj__TV.SendCommandEx("RENDERER*" & sLayer & " SET_OBJECT SCENE*" & s__VizPath & "/" & sScene)
+        sResult = obj__TV.SendCommandEx("RENDERER*" & sLayer & "*NAME GET")
+
+        Prepare_Layer strLayer
+
+        obj__TV.RendererUpdate true
+        CC.SF.HideSplashForm
+'        cc.SF.Wait 250
+
+    End Sub
+    Private Sub LoadSceneEx(ByVal strLayer, ByVal sScene, ByVal inPos, ByVal outPos)
+        ClearAll
+        obj__TV.OpenProject s__VizPath
+        obj__TV.RendererUpdate false
+
+        'obj__TV.SendCommandEx("SCENE*" & s__VizPath &"/" & sScene &" CLOSE")
+        obj__TV.SendCommandEx("POOLS CLEANUP")
+        obj__TV.SetScene sScene
+        cc.SF.TimerSet
+        If strLayer = 1 Then
+           sLayer = "FRONT_LAYER"
+        ElseIf strLayer = 2 Then
+           sLayer = "MAIN_LAYER"
+        ElseIf strLayer = 3 Then
+           sLayer = "BACK_LAYER"
+        End If
+        sResult = obj__TV.SendCommandEx("RENDERER*" & sLayer & " SET_OBJECT SCENE*" & s__VizPath & "/" & sScene)
+        sResult = obj__TV.SendCommandEx("RENDERER*" & sLayer & "*NAME GET")
+
+        obj__TV.SendCommandEx("RENDERER*" & sLayer & "*TREE*$clip_in*FUNCTION*imageClip*animPos SET 5" )'& CStr(inPos) )
+        obj__TV.SendCommandEx("RENDERER*" & sLayer & "*TREE*$clip_out*FUNCTION*imageClip*animPos SET 5" )' & CStr(outPos))
+
+        Prepare_Layer strLayer
+
+        obj__TV.RendererUpdate true
+
+
+        cc.SF.Wait 2500
+    End Sub
+
+
+
+    'Numeric to Layer in Viz
+    Private Function GetLayer(ByVal intLayer)
+        Select Case intLayer
+            Case 1 : GetLayer = elFrontLayer
+            Case 2 : GetLayer = elMainLayer
+            Case 3 : GetLayer = elBackLayer
+        End Select
+    End Function
+
+    Private Sub Prepare_Layer(ByVal strLayer)
+        obj__TV.DoEffect strLayer, "ALL", efReset
+    End Sub
+
+    'Set Text in VIZ
+    Private Sub SetText(ByVal sObject, ByVal sContent)
+        obj__TV.SetContent sObject, objText, sContent
+    End Sub
+
+    'Set Image in VIZ
+    Private Sub SetImg(ByVal sObject, ByVal sContent)
+        obj__TV.SetContent sObject, objImage, sContent
+    End Sub
+
+    'Set Object in VIZ
+    Private Sub SetObj(ByVal sObject, ByVal sContent)
+        obj__TV.SetContent sObject, objObject, sContent
+    End Sub
+
+    'Preview ziehen von entsprechender Animation und Frame
+    Public Sub GetPreview(ByVal PrevData, ByVal intFrame, ByVal sScene)
+        Dim sCmd
+        'If tw_preview.Visible Then
+            If IsArray(PrevData) Then
+               iCount = UBound(PrevData)
+               For i = 0 to iCount
+                   strPrevCmd = strPrevCmd & PrevData(i) & " "
+               Next
+               strPrevCmd = Trim(strPrevCmd)
+               obj__TV.SendCommand "RENDERER PREVIEW SCENE*" & s__VizPath & "/" & sScene & " VIDEO " & strPrevCmd
+            Else
+               obj__TV.SendCommand "RENDERER PREVIEW SCENE*" & s__VizPath & "/" & sScene & " VIDEO " & PrevData & " " & intFrame
+            End If
+
+           call obj__TV.GetPreview(PrevData, intFrame, 1, "d:\Preview.jpg")
+           tw_preview.img_preview.LoadFromFile "d:\Preview.jpg"
+        'end If
+
+    End Sub
+
+    ' Löscht den Preview
+    Public Sub ClearPreview()
+        IF trim(sScene) = "" THEN
+            obj__TV.SendCommand "RENDERER PREVIEW CURRENT VIDEO ALL 0.0"
+        ELSE
+            obj__TV.SendCommand "RENDERER PREVIEW SCENE*" & s__VizPath & "/" & sScene & " VIDEO Default 0.0"
+        END IF
+    End Sub
+
+     public sub Quoten( ByRef Data)
+        dim i
+        sScene = "BB_Admiral_Quoten"
+        LoadScene elMainLayer, sScene
+        dim con
+
+        obj__TV.HideObject "EINAUS_DREIERQUOTE"
+        obj__TV.HideObject "EINAUS_ZWEIERQUOTE"
+        if Data.Item("TYP") then
+            con="EINAUS_DREIERQUOTE"
+            SetText con&"$txt_Quote_1", UCase(Data.Item("Q1"))
+            SetText con&"$txt_Quote_2", UCase(Data.Item("Q2"))
+            SetText con&"$txt_Quote_3", UCase(Data.Item("Q3"))
+        else
+            con="EINAUS_ZWEIERQUOTE"
+            SetText con&"$txt_Quote_1", UCase(Data.Item("Q1"))
+            SetText con&"$txt_Quote_2", UCase(Data.Item("Q3"))
+        end if
+
+        obj__TV.showObject con
+        SetText con&"$txt_TeamHeim", UCase(Data.Item("NAME1"))
+        SetText con&"$txt_TeamGast", UCase(Data.Item("NAME2"))
+
+
+        GetPreview "Default", "1.1", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    'Propertys
+    Public Property Get TVLanguage()
+        TVLanguage = i__TVLanguage
+    End Property
+    Public Property Let TVLanguage(ByVal intNewData)
+        i__TVLanguage = intNewData
+    End Property
+    Public Property Get TVContent()
+        TVContent = i__TVContent
+    End Property
+    Public Property Let TVContent(ByVal intNewData)
+        i__TVContent = intNewData
+    End Property
+    Public Property Get TVObj()
+        Set TVObj = obj__TV
+    End Property
+    Public Property Set TVObj(ByRef Data)
+        Set obj__TV = Data
+        If Not obj__TV Is Nothing Then
+        End If
+    End Property
+    'L-Forms
+    public sub LF_Info( ByRef Data)
+        dim i
+        dim ids
+        dim dir
+        sScene = "VB_Lframe7030_Aut_Fussball"
+        LoadScene elMainLayer, sScene
+        SetShow
+        obj__TV.DoEffect elMainLayer,  "ALL", efReset
+        SetBGOnOff
+        SetTitelDefaultHeaderLF
+
+        if Data.item("BBTYP") = 0 then
+            SetVizData "970000",3
+            SetVizDataUpper "990100",Data.Item("BBHL")
+            SetVizDataUpper "990102",""
+            SetVizDataUpper "990200",Data.Item("BBSL")
+        elseif Data.item("BBTYP") = 1 then
+            SetVizData "970000",2
+            SetVizData "980149",0
+            SetVizDataUpper "980150","vs"
+            SetVizDataUpper "980100",Data.Item("NAME1")
+            SetVizDataUpper "980200",Data.Item("NAME2")
+            SetTeamLogo "980090", Data.Item("LOGO1")
+            SetTeamLogo "980190", Data.Item("LOGO2")
+            SetVizDataUpper "981100",Data.Item("BBSL")
+        elseif Data.item("BBTYP") = 2 then
+            SetVizData "970000",2
+            SetVizData "980149",1
+            SetVizDataUpper "980150",Data.Item("BBSCORE")
+            SetVizDataUpper "980100",Data.Item("NAME1")
+            SetVizDataUpper "980200",Data.Item("NAME2")
+            SetTeamLogo "980090", Data.Item("LOGO1")
+            SetTeamLogo "980190", Data.Item("LOGO2")
+            SetVizDataUpper "981100",Data.Item("BBSL")
+
+        else
+            SetVizData "970000",3
+            SetVizDataUpper "990100",Data.Item("BBHL")
+            SetVizDataUpper "990102",""
+            SetVizDataUpper "990200",Data.Item("BBSL")
+        end if
+
+        select case Data.item("STYP")
+        case "0"
+            obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*AUFSTELLUNG_HEIM START"& Chr(34)
+            dir= "AUFSTELLUNG_HEIM"
+            SetVizDataUpper "110500",Data.Item("TEAMNAMEA")
+            SetVizDataUpper "120500",Data.Item("TEAMNAMEB")
+            SetLFTitle "Aufstellung"
+            ids=111100
+            for i=1 to 11
+                SetVizDataBufferOn
+                SetVizData ids,Data.Item("TEAMNRA"&i)
+                SetVizData ids+2,Data.Item("TEAMNAMEA"&i)
+                SetVizData ids+10000,Data.Item("TEAMNRB"&i)
+                SetVizData ids+10002,Data.Item("TEAMNAMEB"&i)
+                SetVizDataBufferOff
+                ids=ids+100
+            next
+        case "1"
+            obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*TABELLE_1 START"& Chr(34)
+            dir= "TABELLE_1"
+            'SetText "TABELLE$txt_Titel", UCase(Data.Item("TABHL"))
+            SetLFTitle Data.Item("TABHL")
+            ids=91100
+            SetVizData "090501",""
+            for i = 1 to 10                   ' FULL STANDINGS TABLE
+                SetVizDataBufferOn
+                SetVizDataUpper "0"&ids,Data.Item("TABPLACE"&i)
+                SetVizDataUpper "0"&ids+2,Data.Item("TABNAME"&i)
+                SetVizDataUpper "0"&ids+3,""
+                SetVizDataUpper "0"&ids+6,Data.Item("TABPTS"&i)
+
+                
+
+                if false then
+                if     i = 2 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 2 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 160/255 & " " & 8 / 255 & " " & 16 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 3 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 3 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 160/255 & " " & 8 / 255 & " " & 16 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 4 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 3 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 9 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 9 = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    else                           ' 2. Liga = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 255/255 & " " & 10 / 255 & " " & 20 / 255 & vbNullChar
+                    end if
+                end if
+                end if
+                SetVizDataBufferOff
+                ids=ids+100
+            next
+
+            SetVizDataUpper "070500", Data.Item("REHL")
+            ids=71102
+            for i=1 to 5
+                SetVizDataBufferOn
+                SetVizDataUpper "0"&ids,Data.Item("RENAMEA"&i)
+                SetVizDataUpper "0"&ids+2,Data.Item("RERESULT"&i)
+                SetVizDataUpper "0"&ids+4,Data.Item("RENAMEB"&i)
+            SetVizDataBufferOff
+                ids=ids+100
+            next
+            SetVizData "070004",5
+            SetVizDataUpper "000100", Data.Item("REHL")
+
+
+        case "2"
+            obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*ERGEBNISSE START"& Chr(34)
+            dir= "ERGEBNISSE"
+            SetVizDataUpper "070500", Data.Item("REHL")
+            ids=71102
+            for i=1 to 5
+                SetVizDataBufferOn
+                SetVizDataUpper "0"&ids,Data.Item("RENAMEA"&i)
+                SetVizDataUpper "0"&ids+2,Data.Item("RERESULT"&i)
+                SetVizDataUpper "0"&ids+4,Data.Item("RENAMEB"&i)
+                SetVizDataBufferOff
+                ids=ids+100
+            next
+            SetVizData "070500",""
+            SetVizData "070004",5
+            SetLFTitle "Ergebnisse"
+            'SetText "TABELLE$txt_Titel", UCase(Data.Item("TABHL"))
+            ids=91100
+            SetVizData "090501",""
+            for i = 1 to 10                   ' FULL STANDINGS TABLE
+            SetVizDataBufferOn
+                SetVizDataUpper "0"&ids,Data.Item("TABPLACE"&i)
+                SetVizDataUpper "0"&ids+2,Data.Item("TABNAME"&i)
+                SetVizDataUpper "0"&ids+3,""
+                SetVizDataUpper "0"&ids+6,Data.Item("TABPTS"&i)
+
+
+                if false then
+                if     i = 2 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 2 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 160/255 & " " & 8 / 255 & " " & 16 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 3 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 3 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 160/255 & " " & 8 / 255 & " " & 16 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 4 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 3 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 9 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 9 = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    else                           ' 2. Liga = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 255/255 & " " & 10 / 255 & " " & 20 / 255 & vbNullChar
+                    end if
+                end if
+                end if
+                SetVizDataBufferOff
+                ids=ids+100
+            next
+
+
+        case "3"
+            obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*FAHRPLAN START"& Chr(34)
+            dir= "FAHRPLAN"
+            SetLFTitle Data.Item("GHL")
+            SetVizDataUpper "150500", Data.Item("GSL")
+            ids=151101
+            for i=1 to 5
+                SetVizDataUpper ids,Data.Item("GKOM"&i)
+                'SetImg  "SPIELE$SPIEL_"&i&"$img_LogoHeim_"&i, s__LogoPath & "\" & LCase(Data.Item("GLOGOA"&i))
+                'SetImg  "SPIELE$SPIEL_"&i&"$img_LogoGast_"&i, s__LogoPath & "\" & LCase(Data.Item("GLOGOB"&i))
+                ids=ids+1
+            next
+            SetVizData "150004",Data.Item("GITEMCOUNT")
+        end select
+
+        GetPreview "Default 3.0", dir&" 3.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub LF_Interview( ByRef Data)
+        dim i
+        dim ids
+        dim dir
+        if Data.item("STYP")=1 or Data.item("STYP")=2 then
+            sScene = "VB_Lframe_5050_Aut_Fussball"
+        else
+            sScene = "VB_Lframe_5050"
+        end if
+
+        LoadScene elMainLayer, sScene
+        SetShow
+        obj__TV.DoEffect elMainLayer,  "ALL", efReset
+
+        SetBGOnOff
+        SetTitelDefaultHeaderLF
+
+        if Data.item("BBTYP") = 0 then
+            if Data.Item("BBSTATTYP") = 0 then
+                SetVizData "970000",3
+                SetVizDataUpper "990100",Data.Item("BBHL")
+                SetVizDataUpper "990102",""
+                SetVizDataUpper "990200",Data.Item("BBSL")
+
+            else
+                SetVizData "970000",1
+                SetVizDataUpper "970100",Data.Item("BBHL")
+                SetVizDataUpper "970102",Data.Item("FNAME")
+                SetVizDataUpper "970120",Data.Item("BBSL")
+                SetVizDataUpper "970095",Data.Item("NR")
+                ids=971110
+                for i=1 to 3
+                    SetVizData ids,Data.Item("BBSTATTEXT"&i)
+                    SetVizData ids+5,Data.Item("BBSTATVALUE"&i)
+                    ids=ids+100
+                next
+                SetVizData 970005,3
+                SetTeamLogo 970090,LCase(Data.Item("LOGO1"))
+            end if
+        elseif Data.item("BBTYP") = 1 then
+            SetVizData "970000",2
+            SetVizData "980149",0
+            SetVizDataUpper "980150","vs"
+            SetVizDataUpper "980100",Data.Item("NAME1")
+            SetVizDataUpper "980200",Data.Item("NAME2")
+            SetTeamLogo "980090", Data.Item("LOGO1")
+            SetTeamLogo "980190", Data.Item("LOGO2")
+            SetVizDataUpper "981100",Data.Item("BBSL")
+        elseif Data.item("BBTYP") = 2 then
+            SetVizData "970000",2
+            SetVizData "980149",1
+            SetVizDataUpper "980150",Data.Item("BBSCORE")
+            SetVizDataUpper "980100",Data.Item("NAME1")
+            SetVizDataUpper "980200",Data.Item("NAME2")
+            SetTeamLogo "980090", Data.Item("LOGO1")
+            SetTeamLogo "980190", Data.Item("LOGO2")
+            SetVizDataUpper "981100",Data.Item("BBSL")
+
+        else
+            SetVizData "970000",3
+            SetVizDataUpper "990100",Data.Item("BBHL")
+            SetVizDataUpper "990102",""
+            SetVizDataUpper "990200",Data.Item("BBSL")
+        end if
+        SetLFTitle Data.Item("SHL")
+        select case Data.item("STYP")
+        case "0"   'MF
+
+            obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*MEGAFACTS START"& Chr(34)
+            dir="MEGAFACTS"
+            SetVizData "020500" ,""
+            ids=21102
+            for i=1 to 5
+                SetVizDataUpper "0"&ids,Data.Item("MF1"&i)
+                SetVizDataUpper "0"&ids+1,Data.Item("MF2"&i)
+                ids=ids+100
+
+            next
+            SetVizData "020004",Data.Item("MFITEMCOUNT")
+        case "1"
+            obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*TABELLE_1 START"& Chr(34)
+            dir="TABELLE_1"
+            'SetText "TABELLE$txt_Titel", UCase(Data.Item("TABHL"))
+
+            ids=91100
+
+            for i = 1 to 10                   ' FULL STANDINGS TABLE
+                SetVizDataBufferOn
+                SetVizDataUpper "0"&ids,Data.Item("TABPLACE"&i)
+                SetVizDataUpper "0"&ids+2,Data.Item("TABNAME"&i)
+                SetVizDataUpper "0"&ids+3,Data.Item("TABGAMES"&i)
+                SetVizDataUpper "0"&ids+6,Data.Item("TABPTS"&i)
+                SetVizDataUpper "0"&ids+4,Data.Item("TABGOALS"&i)
+                SetVizDataUpper "0"&ids+5,Data.Item("TABDIFF"&i)
+
+                if false then
+                if     i = 2 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 2 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 160/255 & " " & 8 / 255 & " " & 16 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 3 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 3 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 160/255 & " " & 8 / 255 & " " & 16 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 4 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 3 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 9 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 9 = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    else                           ' 2. Liga = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 255/255 & " " & 10 / 255 & " " & 20 / 255 & vbNullChar
+                    end if
+                end if
+                end if
+                SetVizDataBufferOff
+                ids=ids+100
+            next
+
+            SetVizDataUpper "070500", Data.Item("REHL")
+            ids=71102
+            for i=1 to 5
+            SetVizDataBufferOn
+                SetVizDataUpper "0"&ids,Data.Item("RENAMEA"&i)
+                SetVizDataUpper "0"&ids+2,Data.Item("RERESULT"&i)
+                SetVizDataUpper "0"&ids+4,Data.Item("RENAMEB"&i)
+                SetVizDataBufferOff
+                ids=ids+100
+            next
+            SetVizData "070004",5
+
+        case "2"
+            obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*ERGEBNISSE START"& Chr(34)
+            dir="ERGEBNISSE"
+            SetVizDataUpper "070500", Data.Item("REHL")
+            ids=71102
+            for i=1 to 5
+                SetVizDataBufferOn
+                SetVizDataUpper "0"&ids,Data.Item("RENAMEA"&i)
+                SetVizDataUpper "0"&ids+2,Data.Item("RERESULT"&i)
+                SetVizDataUpper "0"&ids+4,Data.Item("RENAMEB"&i)
+                SetVizDataBufferOff
+                ids=ids+100
+            next
+            SetVizData "070004",5
+
+            'SetText "TABELLE$txt_Titel", UCase(Data.Item("TABHL"))
+            ids=91100
+            for i = 1 to 10                   ' FULL STANDINGS TABLE
+                SetVizDataBufferOn
+                SetVizDataUpper "0"&ids,Data.Item("TABPLACE"&i)
+                SetVizDataUpper "0"&ids+2,Data.Item("TABNAME"&i)
+                SetVizDataUpper "0"&ids+3,Data.Item("TABGAMES"&i)
+                SetVizDataUpper "0"&ids+6,Data.Item("TABPTS"&i)
+                SetVizDataUpper "0"&ids+4,Data.Item("TABGOALS"&i)
+                SetVizDataUpper "0"&ids+5,Data.Item("TABDIFF"&i)
+
+                if false then
+                if     i = 2 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 2 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 160/255 & " " & 8 / 255 & " " & 16 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 3 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 3 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 160/255 & " " & 8 / 255 & " " & 16 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 4 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 3 = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    else                           ' 2. Liga = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    end if
+                elseif i = 9 then
+                    if CURRENT_LEAGUE = "119" then  ' 1. Liga PLatz 9 = Grau
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 72/255 & " " & 72 / 255 & " " & 72 / 255 & vbNullChar
+                    else                           ' 2. Liga = Dunkelrot
+                         buffer = buffer & "1  SCENE*" & s__VizPath & "/" & sScene & "*TREE*$" & sCont & "$obj_Rang*MATERIAL*COLOR SET " & 255/255 & " " & 10 / 255 & " " & 20 / 255 & vbNullChar
+                    end if
+                end if
+                end if
+                SetVizDataBufferOff
+                ids=ids+100
+            next
+        case "3"
+            obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*STATISTIK START"& Chr(34)
+            dir="STATISTIK"
+            SetVizDataUpper "010500",Data.Item("STNAME1")
+            SetVizDataUpper "010501",Data.Item("STNAME2")
+            ids= 11101
+            for i=1 to 8
+                SetVizDataBufferOn
+                SetVizData "0"&ids,Data.Item("STPARAM_A"&i)
+                SetVizDataUpper "0"&ids+1,Data.Item("STTEXT"&i)
+                SetVizData "0"&ids+2,Data.Item("STPARAM_B"&i)
+                SetVizDataBufferOff
+                ids=ids+100
+            next
+            SetVizData "010004",Data.Item("STITEMCOUNT")
+        end select
+
+        GetPreview "Default 3.0", "MEGAFACTS 3.5 L1 3.5 L2 3.5 L3 3.5 L4 3.5 L5 3.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub LF_PlayerStat( ByRef Data)
+        dim i
+        sScene = "VB_Lframe7030"
+        LoadScene elMainLayer, sScene
+        dim dir
+        obj__TV.DoEffect elMainLayer,  "ALL", efReset
+        SetShow
+        SetBGOnOff
+        SetTitelDefaultHeaderLF
+        if Data.item("BBTYP") = 0 then
+            if Data.Item("BBSTATTYP") = 0 then
+                SetVizData "970000",3
+                SetVizDataUpper "990100",Data.Item("BBHL")
+                SetVizDataUpper "990102",""
+                SetVizDataUpper "990200",Data.Item("BBSL")
+
+            else
+                SetVizData "970000",1
+                SetVizDataUpper "970100",Data.Item("BBHL")
+                SetVizDataUpper "970102",Data.Item("FNAME")
+                SetVizDataUpper "970120",Data.Item("BBSL")
+                SetVizDataUpper "970095",Data.Item("NR")
+                ids=971110
+                for i=1 to 3
+                    SetVizData ids,Data.Item("BBSTATTEXT"&i)
+                    SetVizData ids+5,Data.Item("BBSTATVALUE"&i)
+                    ids=ids+100
+                next
+                SetVizData 970005,3
+                SetTeamLogo 970090,LCase(Data.Item("LOGO1"))
+            end if
+        elseif Data.item("BBTYP") = 1 then
+            SetVizData "970000",2
+            SetVizData "980149",0
+            SetVizDataUpper "980150","vs"
+            SetVizDataUpper "980100",Data.Item("NAME1")
+            SetVizDataUpper "980200",Data.Item("NAME2")
+            SetTeamLogo "980090", Data.Item("LOGO1")
+            SetTeamLogo "980190", Data.Item("LOGO2")
+            SetVizDataUpper "981100",Data.Item("BBSL")
+        elseif Data.item("BBTYP") = 2 then
+            SetVizData "970000",2
+            SetVizData "980149",1
+            SetVizDataUpper "980150",Data.Item("BBSCORE")
+            SetVizDataUpper "980100",Data.Item("NAME1")
+            SetVizDataUpper "980200",Data.Item("NAME2")
+            SetTeamLogo "980090", Data.Item("LOGO1")
+            SetTeamLogo "980190", Data.Item("LOGO2")
+            SetVizDataUpper "981100",Data.Item("BBSL")
+
+        else
+            SetVizData "970000",3
+            SetVizDataUpper "990100",Data.Item("BBHL")
+            SetVizDataUpper "990102",""
+            SetVizDataUpper "990200",Data.Item("BBSL")
+        end if
+        SetLFTitle Data.Item("STHL")
+        SetVizDataUpper "060500",Data.Item("STSTAT")
+
+            'obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*VERGLEICH START"& Chr(34)
+         select case Data.Item("STTYP")
+            case "0"
+
+            case "1"
+                obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*Default*KEY*$ACTION*VALUE SET " & Chr(34) &"THIS_SCENE*STAGE*DIRECTOR*TOPSPIELER_2Z START"& Chr(34)
+                dir="TOPSPIELER_2Z"
+                ids= 61102
+                for i=1 to 5
+                    SetVizDataBufferOn
+                    SetVizDataUpper "0"&ids,Data.Item("STNAME"&i)
+                    SetVizDataUpper "0"&ids+1,Data.Item("STTEXT"&i)
+                    SetVizData "0"&ids+2,Data.Item("STVALUE"&i)
+                    SetVizDataBufferOff
+                    ids=ids+100
+                next
+                if Data.Item("STITEMCOUNT")>5 then  Data.Item("STITEMCOUNT")=5
+                SetVizData "060004",Data.Item("STITEMCOUNT")
+
+            case "2"
+
+        end select
+
+        GetPreview "Default 3.0", dir&" 3.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public sub LF_Lineup( ByRef Data)
+        dim i
+        sScene = "VB_Lframe3070_Aufstellung"
+        LoadScene elMainLayer, sScene
+        SetTitelDefaultHeaderLF
+        obj__TV.DoEffect elMainLayer,  "ALL", efReset
+        if Data.item("BBTYP") = 0 then
+            if Data.Item("BBSTATTYP") = 0 then
+                SetVizData "970000",3
+                SetVizDataUpper "990100",Data.Item("BBHL")
+                SetVizDataUpper "990102",""
+                SetVizDataUpper "990200",Data.Item("BBSL")
+
+            else
+                SetVizData "970000",1
+                SetVizDataUpper "970100",Data.Item("BBHL")
+                SetVizDataUpper "970102",Data.Item("FNAME")
+                SetVizDataUpper "970120",Data.Item("BBSL")
+                SetVizDataUpper "970095",Data.Item("NR")
+                ids=971110
+                for i=1 to 3
+                    SetVizData ids,Data.Item("BBSTATTEXT"&i)
+                    SetVizData ids+5,Data.Item("BBSTATVALUE"&i)
+                    ids=ids+100
+                next
+                SetVizData 970005,3
+                SetTeamLogo 970090,LCase(Data.Item("LOGO1"))
+            end if
+        elseif Data.item("BBTYP") = 1 then
+            SetVizData "970000",2
+            SetVizData "980149",0
+            SetVizDataUpper "980150","vs"
+            SetVizDataUpper "980100",Data.Item("NAME1")
+            SetVizDataUpper "980200",Data.Item("NAME2")
+            SetTeamLogo "980090", Data.Item("LOGO1")
+            SetTeamLogo "980190", Data.Item("LOGO2")
+            SetVizDataUpper "981100",Data.Item("BBSL")
+        elseif Data.item("BBTYP") = 2 then
+            SetVizData "970000",2
+            SetVizData "980149",1
+            SetVizDataUpper "980150",Data.Item("BBSCORE")
+            SetVizDataUpper "980100",Data.Item("NAME1")
+            SetVizDataUpper "980200",Data.Item("NAME2")
+            SetTeamLogo "980090", Data.Item("LOGO1")
+            SetTeamLogo "980190", Data.Item("LOGO2")
+            SetVizDataUpper "981100",Data.Item("BBSL")
+
+        elseif Data.item("BBTYP") = 3 then
+            SetVizData "970000",3
+            SetVizDataUpper "990100",Data.Item("BBHL")
+            SetVizDataUpper "990102",""
+            SetVizDataUpper "990200",Data.Item("BBSL")
+        else
+            SetVizData "970000",4
+            obj__TV.SetCrawl "BAUCHBINDEN$CRAWL$txt_CrawlHeim", crClear,  ""
+            obj__TV.SetCrawl "BAUCHBINDEN$CRAWL$txt_CrawlHeim", crScript, Data.Item("BBHL")
+            obj__TV.SetCrawl "BAUCHBINDEN$CRAWL$txt_CrawlHeim", crReset, ""
+            obj__TV.SetCrawl "BAUCHBINDEN$CRAWL$txt_CrawlGast", crClear,  ""
+            obj__TV.SetCrawl "BAUCHBINDEN$CRAWL$txt_CrawlGast", crScript, Data.Item("BBCRAWL2")
+            obj__TV.SetCrawl "BAUCHBINDEN$CRAWL$txt_CrawlGast", crReset, ""
+            SetVizDataUpper "981100",Data.Item("BBSL")
+
+            SetTeamLogo "980090", Data.Item("LOGO1")
+            SetTeamLogo "980190", Data.Item("LOGO2")
+
+            if Data.item("CRAWLLEFT") then
+                obj__TV.HideObject "BAUCHBINDEN$CRAWL$LOGO_2"
+            else
+                obj__TV.ShowObject "BAUCHBINDEN$CRAWL$LOGO_2"
+            end if
+        end if
+
+        dim P_Nr,P_Name, x_Pos, y_Pos, ScenePosX, ScenePosY, Team, TeamId,  LineupID
+
+        dim LineupWidth : LineupWidth  = 780    '80-850
+        dim LineupHeight: LineupHeight = 390    '80-470
+        dim SceneWidth   : SceneWidth  = 400    '-200-200
+        dim SceneHeight  : SceneHeight = 204    '-86-118
+        if Data.Item("BFIRST") ="B" then
+            Team = "B"
+            TeamId = 2
+            LineupID = Lineup_B
+            Lineup.ActiveLineup = "Team B"
+        else
+            Team = "A"
+            TeamId = 1
+            LineupID = Lineup_A
+            Lineup.ActiveLineup = "Team A"
+        end if
+        SetVizDataUpper "000100",Data.Item("LNAME1")
+        SetVizDataUpper "000102",""
+        SetVizDataUpper "000110",Data.Item("LNAME2")
+        SetVizDataUpper "000112",""
+        SetTeamLogo "000090",LCase(Data.Item("LLOGO1"))
+        'SetVizDataUpper "000100",Data.Item("LNAME1")
+        'SetVizDataUpper "000102",""
+        SetTeamLogo "000095",LCase(Data.Item("LLOGO2"))
+        dim ids: ids=191100
+        dim o0,p
+        For i = 1 to 11
+            SetVizDataBufferOn
+            P_Nr   = Trim(Lineup.GetPlayer(Lineup_Nr, i, LineupID))
+            P_Name = (GetData(Team, P_Nr))
+            x_Pos  = MakeNumber(Lineup.GetPlayer(Lineup_Name_X, i, LineupID),1,0,"",-1) - MakeNumber(Lineup.GetPlayer(Lineup_Nr_W, i, LineupID),1,0,"",-1)
+            y_Pos  = MakeNumber(Lineup.GetPlayer(Lineup_Name_Y, i, LineupID),1,0,"",-1)  + 8 + MakeNumber(Lineup.GetPlayer(Lineup_Name_H, i, LineupID),1,0,"",-1)'Trim(Lineup.GetPlayer(Lineup_Name_Y, i))
+
+
+            o0= Formatnumber(x_Pos,1)-80
+            p=(o0/LineupWidth)*SceneWidth
+            o0=p-200
+            ScenePosX    = Replace(o0, ",", ".")
+            o0= Formatnumber(y_Pos,1)-80
+            p=(o0/LineupHeight)*SceneHeight
+            o0=p-86
+
+            ScenePosY    = Replace(o0, ",", ".")
+            'ScenePosX  = Replace(Formatnumber((x_Pos - 480) / (LineupWidth / SceneWidth), 1), ",", ".") '- 21
+            'ScenePosY  = Replace(Formatnumber((y_Pos - 288) / (LineupHeight / SceneHeight), 1), ",", ".") +16'-41
+
+            SetVizData ids,P_nr
+            SetVizDataUpper ids+2,P_Name
+            SetVizData (ids+10)&".x1",ScenePosX
+            SetVizData (ids+10)&".y1",ScenePosY
+            ids=ids+100
+            SetVizDataBufferOff
+            if isPlayerHL(P_Nr,Team) =true then
+                obj__TV.SendCommand "SCENE*" & s__VizPath & "/"&sScene&"*STAGE*DIRECTOR*$H"&i&" SHOW 0.7"
+            end if
+        Next
+
+        if Data.Item("BFIRST")="B" then
+            Team = "A"
+            TeamId = 1
+            LineupID = Lineup_A
+            Lineup.ActiveLineup = "Team A"
+        else
+            Team = "B"
+            TeamId = 2
+            LineupID = Lineup_B
+            Lineup.ActiveLineup = "Team B"
+        end if
+        
+        ids=193100
+        For i = 1 to 11
+            SetVizDataBufferOn
+            P_Nr   = Trim(Lineup.GetPlayer(Lineup_Nr, i, LineupID))
+            P_Name = (GetData(Team, P_Nr))
+            'c.sf.DebugText P_Nr &" - "&P_Name
+            x_Pos  = MakeNumber(Lineup.GetPlayer(Lineup_Name_X, i, LineupID),1,0,"",-1) - MakeNumber(Lineup.GetPlayer(Lineup_Nr_W, i, LineupID),1,0,"",-1)
+            y_Pos  = MakeNumber(Lineup.GetPlayer(Lineup_Name_Y, i, LineupID),1,0,"",-1)  + 8 + MakeNumber(Lineup.GetPlayer(Lineup_Name_H, i, LineupID),1,0,"",-1)'Trim(Lineup.GetPlayer(Lineup_Name_Y, i))
+
+            o0= Formatnumber(x_Pos,1)-80
+            p=(o0/LineupWidth)*SceneWidth
+            o0=p-200
+            ScenePosX    = Replace(o0, ",", ".")
+            o0= Formatnumber(y_Pos,1)-80
+            p=(o0/LineupHeight)*SceneHeight
+            o0=p-86
+
+            ScenePosY    = Replace(o0, ",", ".")
+
+            SetVizData ids,P_nr
+            SetVizDataUpper ids+2,P_Name
+            SetVizData (ids+10)&".x1",ScenePosX
+            SetVizData (ids+10)&".y1",ScenePosY
+            ids=ids+100
+            SetVizDataBufferOff
+            if isPlayerHL(P_Nr,Team) =true then
+                obj__TV.SendCommand "SCENE*" & s__VizPath & "/"&sScene&"*STAGE*DIRECTOR*$BH"&i&" SHOW 0.7"
+            end if
+        Next
+
+        GetPreview "Default 3.0 ", " L1 3.0 L2 3.0 L3 3.0 L4 3.0 L5 3.0 L6 3.0 L7 3.0 L8 3.0 L9 3.0 L10 3.0 L11 3.0",sScene   'TAKT_AUFSTELLUNG 3.0
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    Public Sub FP_TactLineupLiveUpdateLF(ByRef Data)
+        sScene = "VB_Lframe3070_Aufstellung"
+        dim LineupWidth : LineupWidth  = 780    '80-850
+        dim LineupHeight: LineupHeight = 390    '80-470
+        dim SceneWidth   : SceneWidth  = 400    '-200-200
+        dim SceneHeight  : SceneHeight = 204    '-86-118
+
+        dim o0,p
+        o0= Formatnumber(Data.Item("myX"),1)-80
+        p=(o0/LineupWidth)*SceneWidth
+        o0=p-200
+        dim ScenePosX   : ScenePosX    = Replace(o0, ",", ".")
+
+
+        o0= Formatnumber(Data.Item("myY"),1)-80
+        p=(o0/LineupHeight)*SceneHeight
+        o0=p-86
+
+        dim ScenePosY   : ScenePosY    = Replace(o0, ",", ".")
+        Dim Team
+        Team = UCASE(split(Lineup.ActiveLineup)(1))
+
+        dim ids
+        if Team = "A" then
+            ids=191000+(Data.Item("Curr")*100)
+            SetVizData (ids+10)&".x1",ScenePosX
+            SetVizData (ids+10)&".y1",ScenePosY
+            obj__TV.SendCommand "SCENE*" & s__VizPath & "/VB_Lframe3070_Aufstellung*TREE*$SPIELER_HEIM$SPIELER_" & Data.Item("Curr") & "$POS*TRANSFORMATION*POSITION SET " & ScenePosX & " " & ScenePosY & " 0.0"
+
+        else
+            ds=193000+(Data.Item("Curr")*100)
+            SetVizData (ids+10)&".x1",ScenePosX
+            SetVizData (ids+10)&".y1",ScenePosY
+            obj__TV.SendCommand "SCENE*" & s__VizPath & "/VB_Lframe3070_Aufstellung*TREE*$SPIELER_GAST$SPIELER_" & Data.Item("Curr") & "$POS*TRANSFORMATION*POSITION SET " & ScenePosX & " " & ScenePosY & " 0.0"
+        end if
+
+    End Sub
+
+    Public sub VorlaufLogo_Show(byref Data)
+        sScene = "Cornerbug_Vorlauf"
+        LoadScene elFrontlayer, sScene
+        
+        dim i
+        SetVizDataFL "0000",3
+        SetVizDataFL "0090","IMAGE*"&s__LogoPath & "/" &LCase(Data.Item("LOGO1"))
+        SetVizDataFL "0190","IMAGE*"&s__LogoPath & "/" &LCase(Data.Item("LOGO2"))
+        SetVizDataFL "0003",Data.Item("TYP")
+        if  Data.Item("TYP") = 1 then
+            SetVizDataFL "0150",Data.Item("SCORE")
+        elseif  Data.Item("TYP") = 2 then
+            obj__TV.SendCommand "CLOCK5*TIME SET " & Data.Item("TIME")
+            if  Data.Item("TIME") <3600 then
+                obj__TV.SendCommand "SCENE*" & s__VizPath & "/"&sScene&"*TREE*$txt_Clock*GEOM*CLOCK*FORMAT SET mm:ss"
+            else
+                obj__TV.SendCommand "SCENE*" & s__VizPath & "/"&sScene&"*TREE*$txt_Clock*GEOM*CLOCK*FORMAT SET hh:mm:ss"
+            end if
+            obj__TV.SendCommand "CLOCK5*LIMIT SET 0"
+            obj__TV.SendCommand "CLOCK5*DIRECTION SET DOWN"
+            obj__TV.SendCommand "CLOCK5 START"
+        elseif Data.Item("TYP") = 3 then
+            SetVizDataUpperFL "0500",Data.Item("TEXT")
+        end if
+        if Data.Item("LEFT")=true then
+           SetVizDataFL "0002" ,0
+        else
+           SetVizDataFL "0002" ,1
+        end if
+        obj__TV.DoEffect elFrontlayer, "Default", efPlay
+    end sub
+    Public sub VorlaufLogo_Hide()
+        obj__TV.DoEffect elFrontlayer, "Default", efContinue
+        cc.sf.Wait 1000,"Wait"
+        obj__TV.SetScene "DSS_Uhr"
+        obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr*STAGE SHOW 0"
+           obj__TV.LoadScene elFrontLayer
+           obj__TV.DoEffect elFrontLayer, "ALL", efReset
+    end sub
+
+     Public sub BB_ColdOpen(byref Data)
+        sScene = "BB_Opener_Megafact"
+        LoadScene elMainlayer, sScene
+        SetShow
+        SetTeamLogo "0060",lCase(Data.Item("LOGO1"))
+        SetTeamLogo "0070",lCase(Data.Item("LOGO2"))
+        SetTitle Data.Item("PAGE1")
+        SetVizDataUpper "0501",Data.Item("PAGE2")
+        SetVizDataUpper "1110",Data.Item("PAGE3")
+        SetVizData "0004",1
+        GetPreview "Default", "3.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    Public sub Karusell_Show(byref Data)
+        sScene = "CB_Konf_Ergs"
+        LoadScene2 elBacklayer, sScene
+
+        SetVizDataUpperBL "0100",Data.Item("TEAMA")
+        SetVizDataUpperBL "0150",Data.Item("SCORE")
+        SetVizDataUpperBL "0200",Data.Item("TEAMB")
+
+        obj__TV.DoEffect elBacklayer, "Default", efPlay
+    end sub
+
+    Public sub Karusell_Hide()
+        obj__TV.DoEffect elBacklayer, "Default", efContinue
+    end sub
+
+    Public sub Karusell_Next(byref Data)
+        sScene = "CB_Konf_Ergebnisse"
+        if Data.Item("SIDE") = "A" then
+            SetVizDataUpperBL "0100",Data.Item("TEAMA")
+            SetVizDataUpperBL "0150",Data.Item("SCORE")
+            SetVizDataUpperBL "0200",Data.Item("TEAMB")
+            obj__TV.DoEffect elBacklayer, "WECHSEL", efContinue
+        else
+            SetVizDataUpperBL "0300",Data.Item("TEAMA")
+            SetVizDataUpperBL "0350",Data.Item("SCORE")
+            SetVizDataUpperBL "0400",Data.Item("TEAMB")
+            obj__TV.DoEffect elBacklayer, "WECHSEL", efPlay
+        end if
+    end sub
+
+     public sub Butterfly(byref Data)
+        select case Data.Item("TYP")
+            case 0  sScene = "VB_Butterfly_5050_1_1"
+            case 1  sScene = "VB_Butterfly_5050_1_2"
+        end select
+
+        LoadScene elMainLayer, sScene
+        obj__TV.DoEffect elMainLayer,  "ALL", efReset
+        SetShow
+        SetVizDataUpper "0100",""
+        SetVizDataUpper "0102",Data.Item("HLL")
+        SetVizDataUpper "2100",""
+        SetVizDataUpper "2102",Data.Item("HLR")
+        
+        SetVizDataUpper "0200",Data.Item("SLL")
+        SetVizDataUpper "2200",Data.Item("SLR")
+
+
+
+
+        GetPreview "Default", "2.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+
+    public Sub PlayFL(director)
+        obj__TV.DoEffect elFrontLayer, director,efPlay
+    end sub
+    public sub ContinueFL(director)
+        obj__TV.DoEffect elFrontLayer, director,efContinue
+    end sub
+
+    public sub IB_Penalty(byref Data)
+        sScene = "IB_Elfmeter"
+
+        dim i
+
+        LoadScene elMainLayer, sScene
+        SetIBSide
+        SetShow
+        SetTitleLogo Data.Item("LOGO"),false
+        SetTitle Data.Item("TITLE")
+        dim ids:ids=210
+        for i=1 to Data.Item("ITEMCOUNT")
+            SetVizData ids&".active",1
+            SetVizData ids+1,Data.Item("HIT"&i)
+            SetVizData ids&".position",Data.Item("X"&i) & " " & Data.Item("Y"&i) & " 0.0"
+            ids=ids+10
+        next
+        for i=Data.Item("ITEMCOUNT")+1 to 20
+            SetVizData ids&".active",0
+            ids=ids+10
+        next
+
+
+        GetPreview "Default", "3.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    
+    public sub IB_Twittervoting(byref Data)
+        sScene = "IB_Twittervoting"
+
+        dim i
+
+        LoadScene elMainLayer, sScene
+        SetIBSide
+        SetShow
+
+        SetVizDataUpper "0006",Data.Item("TYP")
+        SetTitle Data.Item("HL")
+        SetVizDataUpper "1202",Data.Item("SL1")
+        SetVizDataUpper "1203",Data.Item("SL2")
+        SetVizDataUpper "0200",Data.Item("QUESTION")
+        SetVizData "1100", Data.Item("VS1")
+        SetVizData "1101", Data.Item("VE1")
+        SetVizData "1200", Data.Item("VS2")
+        SetVizData "1201", Data.Item("VE2")
+        
+        SetTeamLogo "0610",Data.Item("LOGO1")
+        SetTeamLogo "0710",Data.Item("LOGO2")
+        SetPlayerHS "0600",Data.Item("LOGO1"),Data.Item("PHOTO1")
+        SetPlayerHS "0700",Data.Item("LOGO2"),Data.Item("PHOTO2")
+        
+        if Data.Item("PHOTO")= true then
+            SetVizData "0007",1
+        else
+            SetVizData "0007",0
+        end if
+        if Data.Item("TWITTER")= true then
+            SetVizData "0085",1
+        else
+            SetVizData "0085",0
+        end if
+        GetPreview "Default", "3.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    
+    public sub BB_Starting_Five_Image(ByRef Data)
+        dim i
+
+        sScene = "BB_Starting6"
+
+        LoadScene elMainLayer, sScene
+        SetTeamLogo "0060",  LCase(Data.Item("LOGO"))
+        SetVizDataUpper "0080",Data.Item("HL")
+
+        dim ids: ids=1101
+        for i = 1 to 5
+            SetPlayerHS ids,LCase(Data.Item("LOGO")), Data.Item("PHOTO" & i)
+            SetVizData ids+2, Data.Item("BIB"  & i)
+            SetVizData ids+3,Data.Item("FNAME" & i)
+            SetVizData ids+4,Data.Item("NAME" & i)
+            ids=ids+100
+        next
+        
+        SetPlayerHS "0101",LCase(Data.Item("LOGO")), Data.Item("PHOTO0")
+        SetVizData "0103", Data.Item("BIB0")
+        SetVizData "0104",Data.Item("FNAME0")
+        SetVizData "0105",Data.Item("NAME0")
+
+
+        GetPreview  "Default 3.5" , "TORWART 1.0" , sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    
+    public sub VB_Starting_Five(ByRef Data)
+        dim i,k
+
+        sScene = "SVB_Startin5"
+
+        LoadScene elMainLayer, sScene
+        SetBGOnOff
+        SetTitleLogo Data.Item("LOGO"),false
+        SetTitle Data.Item("HL")
+        SetTitleSubLine ""
+        dim ids : ids=1101
+        for i = 0 to 5
+            SetPlayerBigHS ids, LCase(Data.Item("LOGO")), Data.Item("PHOTO" & i)
+            SetVizDataUpper ids+2,Data.Item("NR" & i)
+            SetVizDataUpper ids+3,Data.Item("FNAME" & i)
+            SetVizDataUpper ids+4,Data.Item("NAME" & i)
+            SetVizDataUpper ids+10,Data.Item("INFO" & i & "1")
+            SetVizDataUpper ids+11,Data.Item("INFO" & i & "2")
+            SetVizDataUpper ids+12,Data.Item("INFO" & i & "3")
+            ids=ids+100
+        next
+        
+        SetVizData "0004" ,Data.Item("COUNT")
+        'SetPlayerBigHS "0101",LCase(Data.Item("LOGO")), Data.Item("PHOTO0")
+        'SetVizData "0103", Data.Item("BIB0")
+        'SetVizData "0104",Data.Item("FNAME0")
+        'SetVizData "0105",Data.Item("NAME0")
+        'SetVizDataUpper "0111",Data.Item("INFO0" & "1")
+        'SetVizDataUpper "0112",Data.Item("INFO0" & "2")
+        'SetVizDataUpper "0113",Data.Item("INFO0" & "3")
+
+        GetPreview "Default", "3.5", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    function GetPosABC(pos)
+        select case lcase(pos)
+        case "goalkeeper"
+             GetPosABC="TOR"
+       case "defender"
+             GetPosABC="DEF"
+       case "forward"
+             GetPosABC="OFF"
+        case default
+            GetPosABC=""
+        end select
+    end function
+
+    public sub VB_LineupTab(byRef Data)
+        dim i
+        sScene = "VB_Kader"
+
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetBGOnOff
+        SetVizData "0100",Data.Item("TNAME")
+        SetVizData "0102",""
+        SetVizData "0200",""
+
+
+        SetTeamLogo "0060",LCase(Data.Item("LOGO"))
+        SetVizData "0010",Data.Item("TRAINER")
+        SetVizData "0300", Data.Item("BIB1") & " "& Data.Item("NAME1")
+        if Data.Item("HL1") then obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*H2 SHOW 0.5"
+        SetVizData "0400", Data.Item("BIB2") & " "& Data.Item("NAME2")
+        if Data.Item("HL2") then obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*H3 SHOW 0.5"
+        dim ids: ids=1000
+        SetVizDataBufferOn
+        for i = 3 to 22
+            SetVizData ids, Data.Item("BIB"&i) & " "& Data.Item("NAME"&i)
+            'SetVizDataUpper ids+3, GetPosABC(Data.Item("TEXT" & i))
+            if Data.Item("HL"&i) then obj__TV.SendCommand "RENDERER*MAIN_LAYER*STAGE*DIRECTOR*H"&i+2&" SHOW 0.5"
+            ids=ids+1000
+        next
+        SetVizDataBufferOff
+        GetPreview "Default 2.72", "L1 2.72 L2 2.72 L3 2.72 L4 2.72 L5 2.72 L6 2.72 L7 2.72 L8 2.72 L9 2.72 L10 2.72 L11 2.72 L12 2.72 L13 2.72 L14 2.72 L15 2.72 L16 2.72 L17 2.72 L18 2.72 L19 2.72 L20 2.72 L21 2.72 L22 2.72 L23 2.72 L24 2.72" ,sScene
+        'GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    
+    public sub VB_LineupTab_old(byRef Data)
+        dim i
+        sScene = "VB_Lineups2Team"
+
+        LoadScene elMainLayer, sScene
+        SetShow
+        SetBGOnOff
+        SetVizData "0100",Data.Item("TNAME")
+        SetVizData "0200",Data.Item("TNAME2")
+        SetVizData "0110",""
+        SetVizData "0210",""
+        'SetTitleSubLine Data.Item("TRAINER")
+        SetTeamLogo "0090",LCase(Data.Item("LOGO"))
+        SetTeamLogo "0190",LCase(Data.Item("LOGO2"))
+        SetVizData "0500",""
+        SetVizData "0501",""
+        dim ids: ids=1100
+        SetVizDataBufferOn
+        for i = 1 to 11
+            SetVizDataUpper ids,Data.Item("BIB"  & i)
+            SetVizDataUpper ids+2,Data.Item("NAME" & i)
+            SetVizDataUpper ids+3, GetPosABC(Data.Item("TEXT" & i))
+            ids=ids+100
+        next
+        SetVizDataBufferOff
+        ids=3100
+        SetVizDataBufferOn
+        for i = 12 to 22
+            SetVizDataUpper ids,Data.Item("BIB"  & i)
+            SetVizDataUpper ids+2,Data.Item("NAME" & i)
+            SetVizDataUpper ids+3, GetPosABC(Data.Item("TEXT" & i))
+            ids=ids+100
+        next
+        SetVizDataBufferOff
+        ids=4200
+        SetVizDataBufferOn
+        for i = 1 to 11
+            SetVizDataUpper ids,Data.Item("BIB3"  & i)
+            SetVizDataUpper ids+2,Data.Item("NAME3" & i)
+            SetVizDataUpper ids+3, GetPosABC(Data.Item("TEXT3" & i))
+            ids=ids+100
+        next
+        SetVizDataBufferOff
+        ids=5300
+        SetVizDataBufferOn
+        for i = 12 to 22
+            SetVizDataUpper ids,Data.Item("BIB3"  & i)
+            SetVizDataUpper ids+2,Data.Item("NAME3" & i)
+            SetVizDataUpper ids+3, GetPosABC(Data.Item("TEXT3" & i))
+            ids=ids+100
+        next
+        SetVizDataBufferOff
+        'SetVizData "0005",Data.Item("ITEMCOUNT")
+
+        GetPreview "Default", "2.0", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    
+    sub Show_PP(side,status)
+        if side=status then
+            obj__TV.SendCommand "RENDERER*FRONT_LAYER*STAGE*DIRECTOR*POWERPLAY_"&side&" START"
+        elseif status= "CLEAR" then
+            obj__TV.SendCommand "RENDERER*FRONT_LAYER*STAGE*DIRECTOR*POWERPLAY_HEIM SHOW 0.0"
+            obj__TV.SendCommand "RENDERER*FRONT_LAYER*STAGE*DIRECTOR*POWERPLAY_GAST SHOW 0.0"
+        else
+             obj__TV.SendCommand "RENDERER*FRONT_LAYER*STAGE*DIRECTOR*POWERPLAY_"&side&" CONTINUE"
+        end if
+    end sub
+    
+    public sub VB_Tree(ByRef Data)
+        dim sCont, i
+
+        sScene = "VB_Tunierbaum"
+
+        LoadScene elMainLayer, sScene
+
+        SetShow
+        SetBGOnOff
+        SetTitelDefaultHeader
+        SetTitle Data.Item("TITLE")
+        SetTitleSubLine Data.Item("SUBTITLE")
+
+
+        dim ids :ids=1101
+        for i = 1 to 14
+            SetTeamLogo ids, LCase(Data.Item("LOGO"&i))
+            SetVizDataUpper ids+1,Data.Item("NAME" & i)
+            SetVizDataUpper ids+2,Data.Item("ERG" & i)
+            ids=ids+100
+        next
+
+
+
+       GetPreview "Default 3.3", "L1 3.3 L2 3.3 L3 3.3 L4 3.3 L5 3.3 L6 3.3 L7 3.3 L8 3.3 L9 3.3 L10 3.3 L11 3.3 L12 3.3 L13 3.3 L14 3.3", sScene
+        Redim ActionList(2, 1)
+        ActionList(1, 0) = "Default"
+        ActionList(1, 1) = "Default"
+        ActionList(2, 1) = efPlay
+    end sub
+    
+    public sub PP
+        sScene = "CB_Produktplazierung"
+        LoadScene elMainLayer, sScene
+        obj__TV.DoEffect elMainLayer, "Default",efPlay
+    end sub
+End Class
+
+</script_body>
+</script>

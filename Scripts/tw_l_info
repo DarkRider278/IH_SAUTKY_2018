@@ -1,0 +1,544 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_l_info_rb_bbClick (Sender)
+    if tw_l_info.rb_bb.ItemIndex=0 then
+        tw_l_info.cb_bb_name1.Visible=true
+        tw_l_info.cb_bb_name2.Visible=false
+        tw_l_info.lbl_bb_headline.Visible=true
+        tw_l_info.lbl_bb_vs.Visible=false
+        tw_l_info.lbl_bb_score.Visible=false
+        tw_l_info.ed_bb_headline.Visible=true
+        tw_l_info.ed_bb_score.Visible=false
+    elseif tw_l_info.rb_bb.ItemIndex=1 then
+        tw_l_info.cb_bb_name1.Visible=true
+        tw_l_info.cb_bb_name2.Visible=true
+        tw_l_info.lbl_bb_headline.Visible=false
+        tw_l_info.lbl_bb_vs.Visible=true
+        tw_l_info.lbl_bb_score.Visible=false
+        tw_l_info.ed_bb_headline.Visible=false
+        tw_l_info.ed_bb_score.Visible=false
+    elseif tw_l_info.rb_bb.ItemIndex=2 then
+        tw_l_info.cb_bb_name1.Visible=true
+        tw_l_info.cb_bb_name2.Visible=true
+        tw_l_info.lbl_bb_headline.Visible=false
+        tw_l_info.lbl_bb_vs.Visible=true
+        tw_l_info.lbl_bb_score.Visible=true
+        tw_l_info.ed_bb_headline.Visible=false
+        tw_l_info.ed_bb_score.Visible=true
+    else
+        tw_l_info.cb_bb_name1.Visible=false
+        tw_l_info.cb_bb_name2.Visible=false
+        tw_l_info.lbl_bb_headline.Visible=true
+        tw_l_info.lbl_bb_vs.Visible=false
+        tw_l_info.lbl_bb_score.Visible=false
+        tw_l_info.ed_bb_headline.Visible=true
+        tw_l_info.ed_bb_score.Visible=false
+    end if
+
+end sub
+
+sub tw_l_info_cb_bb_name1Change (Sender)
+  ' script tw_l_info_cb_bb_name1Change generated on 7/1/2014 at 1:54:09 PM
+  ' description of params:
+  ' Sender as IccComboBox
+
+end sub
+
+sub tw_l_info_cb_bb_name2Change (Sender)
+  ' script tw_l_info_cb_bb_name2Change generated on 7/1/2014 at 1:54:30 PM
+  ' description of params:
+  ' Sender as IccComboBox
+
+end sub
+
+sub tw_l_info_rb_s_typClick (Sender)
+    if tw_l_info.rb_s_typ.ItemIndex=0 then
+        tw_l_info.pa_tabelle.Visible=false
+        tw_l_info.pa_team.Visible=true
+        tw_l_info.pa_result.Visible=false
+        tw_l_info.pa_games.Visible=false
+        tw_l_info.bt_changeteam.Visible=true
+        tw_l_info.bt_changetotab.Visible=false
+        tw_l_info.bt_changetoerg.Visible=false
+    elseif  tw_l_info.rb_s_typ.ItemIndex=1 then
+        tw_l_info.pa_tabelle.Visible=true
+        tw_l_info.pa_team.Visible=false
+        tw_l_info.pa_result.Visible=false
+        tw_l_info.pa_games.Visible=false
+        tw_l_info.bt_changeteam.Visible=false
+        tw_l_info.bt_changetotab.Visible=false
+        tw_l_info.bt_changetoerg.Visible=true
+    elseif  tw_l_info.rb_s_typ.ItemIndex=2 then
+        tw_l_info.pa_tabelle.Visible=false
+        tw_l_info.pa_team.Visible=false
+        tw_l_info.pa_result.Visible=true
+        tw_l_info.pa_games.Visible=false
+        tw_l_info.bt_changeteam.Visible=false
+        tw_l_info.bt_changetotab.Visible=true
+        tw_l_info.bt_changetoerg.Visible=false
+    else
+        tw_l_info.pa_tabelle.Visible=false
+        tw_l_info.pa_team.Visible=false
+        tw_l_info.pa_result.Visible=false
+        tw_l_info.pa_games.Visible=true
+        tw_l_info.bt_changeteam.Visible=false
+        tw_l_info.bt_changetotab.Visible=false
+        tw_l_info.bt_changetoerg.Visible=false
+    end if
+end sub
+
+
+sub RefreshData_L_I
+    If TSP.LoadSQLData("SELECT * FROM TEAMS") Then
+            If TSP.SetSQLPos("First") Then
+                tw_l_info.cb_bb_name1.UserData = tw_l_info.cb_bb_name1.Text
+                tw_l_info.cb_bb_name2.UserData = tw_l_info.cb_bb_name2.Text
+
+                tw_l_info.cb_s_g_team_a_1.UserData = tw_l_info.cb_s_g_team_a_1.Text
+                tw_l_info.cb_s_g_team_b_1.UserData = tw_l_info.cb_s_g_team_b_1.Text
+                tw_l_info.cb_s_g_team_a_2.UserData = tw_l_info.cb_s_g_team_a_2.Text
+                tw_l_info.cb_s_g_team_b_2.UserData = tw_l_info.cb_s_g_team_b_2.Text
+                tw_l_info.cb_s_g_team_a_3.UserData = tw_l_info.cb_s_g_team_a_3.Text
+                tw_l_info.cb_s_g_team_b_3.UserData = tw_l_info.cb_s_g_team_b_3.Text
+                tw_l_info.cb_s_g_team_a_4.UserData = tw_l_info.cb_s_g_team_a_4.Text
+                tw_l_info.cb_s_g_team_b_4.UserData = tw_l_info.cb_s_g_team_b_4.Text
+                tw_l_info.cb_s_g_team_a_5.UserData = tw_l_info.cb_s_g_team_a_5.Text
+                tw_l_info.cb_s_g_team_b_5.UserData = tw_l_info.cb_s_g_team_b_5.Text
+
+                tw_l_info.cb_bb_name1.Items.Clear
+                tw_l_info.cb_bb_name2.Items.Clear
+
+                tw_l_info.cb_s_g_team_a_1.Items.Clear
+                tw_l_info.cb_s_g_team_b_1.Items.Clear
+                tw_l_info.cb_s_g_team_a_2.Items.Clear
+                tw_l_info.cb_s_g_team_b_2.Items.Clear
+                tw_l_info.cb_s_g_team_a_3.Items.Clear
+                tw_l_info.cb_s_g_team_b_3.Items.Clear
+                tw_l_info.cb_s_g_team_a_4.Items.Clear
+                tw_l_info.cb_s_g_team_b_4.Items.Clear
+                tw_l_info.cb_s_g_team_a_5.Items.Clear
+                tw_l_info.cb_s_g_team_b_5.Items.Clear
+                Do
+                    if tw_l_info.cb_bb_name1.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_bb_name1.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_bb_name2.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_bb_name2.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_a_1.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_a_1.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_b_1.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_b_1.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_a_2.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_a_2.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_b_2.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_b_2.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_a_3.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_a_3.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_b_3.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_b_3.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_a_4.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_a_4.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_b_4.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_b_4.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_a_5.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_a_5.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_info.cb_s_g_team_b_5.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_info.cb_s_g_team_b_5.Items.Add TSP.GetSQLData("long_name")
+                Loop While TSP.SetSQLPos("Next")
+                tw_l_info.cb_bb_name1.ItemIndex =  tw_l_info.cb_bb_name1.Items.IndexOf( tw_l_info.cb_bb_name1.UserData)
+                tw_l_info.cb_bb_name2.ItemIndex =  tw_l_info.cb_bb_name2.Items.IndexOf( tw_l_info.cb_bb_name2.UserData)
+                
+                tw_l_info.cb_s_g_team_a_1.ItemIndex =  tw_l_info.cb_s_g_team_a_1.Items.IndexOf( tw_l_info.cb_s_g_team_a_1.UserData)
+                tw_l_info.cb_s_g_team_b_1.ItemIndex =  tw_l_info.cb_s_g_team_b_1.Items.IndexOf( tw_l_info.cb_s_g_team_b_1.UserData)
+                tw_l_info.cb_s_g_team_a_2.ItemIndex =  tw_l_info.cb_s_g_team_a_2.Items.IndexOf( tw_l_info.cb_s_g_team_a_2.UserData)
+                tw_l_info.cb_s_g_team_b_2.ItemIndex =  tw_l_info.cb_s_g_team_b_2.Items.IndexOf( tw_l_info.cb_s_g_team_b_2.UserData)
+                tw_l_info.cb_s_g_team_a_3.ItemIndex =  tw_l_info.cb_s_g_team_a_3.Items.IndexOf( tw_l_info.cb_s_g_team_a_3.UserData)
+                tw_l_info.cb_s_g_team_b_3.ItemIndex =  tw_l_info.cb_s_g_team_b_3.Items.IndexOf( tw_l_info.cb_s_g_team_b_3.UserData)
+                tw_l_info.cb_s_g_team_a_4.ItemIndex =  tw_l_info.cb_s_g_team_a_4.Items.IndexOf( tw_l_info.cb_s_g_team_a_4.UserData)
+                tw_l_info.cb_s_g_team_b_4.ItemIndex =  tw_l_info.cb_s_g_team_b_4.Items.IndexOf( tw_l_info.cb_s_g_team_b_4.UserData)
+                tw_l_info.cb_s_g_team_a_5.ItemIndex =  tw_l_info.cb_s_g_team_a_5.Items.IndexOf( tw_l_info.cb_s_g_team_a_5.UserData)
+                tw_l_info.cb_s_g_team_b_5.ItemIndex =  tw_l_info.cb_s_g_team_b_5.Items.IndexOf( tw_l_info.cb_s_g_team_b_5.UserData)
+            end if
+    end if
+        
+    RefreshLineup1_L_I
+    RefreshLineup2_L_I
+    RefreshTabelle_L_I
+    RefreshResults_L_I
+    call tw_l_info.gr_s_tab.SortByCol(1,true)
+end sub
+
+sub RefreshLineup1_L_I
+    dim i, pos
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    dim tmp   : Set tmp = CreateObject("Scripting.Dictionary")
+
+    TSP.SaveSelection
+    TSP.SetTeamPos "A"
+    
+    dim positions(11)     ' Spieler positionen
+    dim mapped_pos
+'    dim sorted_pos : sorted_pos = Array(1,2,5,6,3,7,4,8,11,10,9)  ' Die Reihenfolge der "Formation" Nummern wie ich sie brauche
+    dim sorted_pos : sorted_pos = Array(9,10,11,8,4,7,3,6,5,2,1)   ' Die Reihenfolge der "Formation" Nummern wie ich sie brauche
+    tw_l_info.lb_s_team1.Items.Clear
+    Data.Item("NAME")    = GetNameTranslation("T",  TSP.GetSTeam(TSP_db_id), TSP_short_name) ' TSP.GetSTeam(TSP_long_name)
+    tw_l_info.ed_s_team1.Text=Data.Item("NAME")
+    Data.Item("LOGO")    = TSP.GetSTeam(TSP_logo)
+    Data.Item("TRAINER") = GetNameTranslation("C", TSP.GetSTeam("coach_1_id"), TSP_Player_name)
+    i = 0
+    TSP.SetPlayerPos TSP_First, TSP_ALL, TSP_Actual
+    Do
+        if (TSP.GetTPlayer(TSP_status) = "I") or (TSP.GetTPlayer(TSP_status) = "G") then
+            i = i + 1
+
+            tmp.Item("BIB"  & i) = TSP.GetTPlayer(TSP_DRESS_NR)
+            tmp.Item("NAME" & i) = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_PLAYER_NAME)
+            tmp.Item("TEXT" & i) = TSP.GetTPlayer(TSP_POS_IN_GAME)
+
+            pos = cint(EmptyToZero(TSP.GetTPlayer(TSP_DUMMY_2)))
+            if pos <=  11 then positions(pos) = i   '  Wir speichern mal den Index dieses Spielers an dessen positions nummer
+
+        end if
+    Loop Until (TSP.SetPlayerPos("NEXT", "ALL", TSP_Actual) = False)
+    TSP.RestoreSelection
+    if i <> 11 then
+        msgbox "Team 1: 11 nominated players expected! Use TeamSports OCX."
+        exit sub
+    end if
+    Data.Item("ITEMCOUNT") = i
+
+
+    i = 0
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos) )= "GOALKEEPER" then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos)) = "DEFENDER" then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos)) = "MIDFIELDER" then
+          i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if (UCase(tmp.Item("TEXT" & mapped_pos)) = "STRIKER") or (UCase(tmp.Item("TEXT" & mapped_pos)) = "FORWARD") then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+        end if
+    next
+
+
+    for i = 1 to Data.Item("ITEMCOUNT")
+        tw_l_info.lb_s_team1.Items.Add Data.Item("BIB" & i) & " | " & Data.Item("NAME" & i)
+    next
+
+    set Data = Nothing
+    set Tmp = Nothing
+end sub
+
+sub RefreshLineup2_L_I
+    dim i, pos
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    dim tmp   : Set tmp = CreateObject("Scripting.Dictionary")
+
+    TSP.SaveSelection
+    TSP.SetTeamPos "B"
+
+    dim positions(11)     ' Spieler positionen
+    dim mapped_pos
+'    dim sorted_pos : sorted_pos = Array(1,2,5,6,3,7,4,8,11,10,9)  ' Die Reihenfolge der "Formation" Nummern wie ich sie brauche
+    dim sorted_pos : sorted_pos = Array(9,10,11,8,4,7,3,6,5,2,1)   ' Die Reihenfolge der "Formation" Nummern wie ich sie brauche
+
+    Data.Item("NAME")    = GetNameTranslation("T",  TSP.GetSTeam(TSP_db_id), TSP_short_name) ' TSP.GetSTeam(TSP_long_name)
+    tw_l_info.ed_s_team2.Text=Data.Item("NAME")
+    Data.Item("LOGO")    = TSP.GetSTeam(TSP_logo)
+    Data.Item("TRAINER") = GetNameTranslation("C", TSP.GetSTeam("coach_1_id"), TSP_Player_name)
+    tw_l_info.lb_s_team2.Items.Clear
+    i = 0
+    TSP.SetPlayerPos TSP_First, TSP_ALL, TSP_Actual
+    Do
+        if (TSP.GetTPlayer(TSP_status) = "I") or (TSP.GetTPlayer(TSP_status) = "G") then
+            i = i + 1
+
+            tmp.Item("BIB"  & i) = TSP.GetTPlayer(TSP_dress_nr)
+            tmp.Item("NAME" & i) = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_second_name)
+            tmp.Item("TEXT" & i) = TSP.GetTPlayer(TSP_pos_in_game)
+
+            pos = cint(EmptyToZero(TSP.GetTPlayer(TSP_DUMMY_2)))
+            if pos <=  11 then positions(pos) = i   '  Wir speichern mal den Index dieses Spielers an dessen positions nummer
+        end if
+    Loop Until (TSP.SetPlayerPos("NEXT", "ALL", TSP_Actual) = False)
+    TSP.RestoreSelection
+    if i <> 11 then
+        msgbox "Team 2: 11 nominated players expected! Use TeamSports OCX."
+        exit sub
+    end if
+    Data.Item("ITEMCOUNT") = i
+
+    i = 0
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos) )= "GOALKEEPER" then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos)) = "DEFENDER" then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if ucase(tmp.Item("TEXT" & mapped_pos)) = "MIDFIELDER" then
+          i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+        end if
+    next
+    for each pos in sorted_pos
+        mapped_pos = positions(pos)
+        if (UCase(tmp.Item("TEXT" & mapped_pos)) = "STRIKER") or (UCase(tmp.Item("TEXT" & mapped_pos)) = "FORWARD") then
+            i = i + 1
+            Data.Item("BIB"  & i) = tmp.Item("BIB"  & mapped_pos)
+            Data.Item("NAME" & i) = tmp.Item("NAME" & mapped_pos)
+            Data.Item("TEXT" & i) = tmp.Item("TEXT" & mapped_pos)
+        end if
+    next
+
+    for i = 1 to Data.Item("ITEMCOUNT")
+        tw_l_info.lb_s_team2.Items.Add Data.Item("BIB" & i) & " | " & Data.Item("NAME" & i)
+    next
+
+    set Data = Nothing
+    set Tmp = Nothing
+end sub
+
+sub refreshTabelle_L_I
+    dim rank, games,i
+    games = TSP.GetRound(TSP_ROUND)
+    i = 0
+    If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'") then
+        If TSP.SetSQLPos("First") Then
+            Do
+                rank = cInt(EmptyToZero(TSP.GetSQLData("RANK")))
+                if (rank <= 10) and (rank > 0) then
+                    i = i + 1
+                    tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "#"))     = rank &"."
+                    tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Club"))  = TSP.GetSQLData("short_name") & TSP.GetSQLData("tv_name_2")
+                    tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Games")) = TSP.GetSQLData("ANZGAMES")
+                    if cInt(EmptyToZero(TSP.GetSQLData("ANZGAMES"))) > games then games = cInt(TSP.GetSQLData("ANZGAMES"))
+                    tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Goals")) = TSP.GetSQLData("GOALS") & ":" & TSP.GetSQLData("GOALS_AGAINST")
+                    tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Diff"))  = cInt(EmptyToZero(TSP.GetSQLData("GOALS"))) - cInt(EmptyToZero(TSP.GetSQLData("GOALS_AGAINST")))
+
+                    if cint(EmptyToZero(tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Diff")))) > 0 then
+                        tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Diff")) = "+" & tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Diff"))
+                    end if
+
+                    tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Pts"))   = TSP.GetSQLData("POINTS")
+                    tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "HL?"))   = "" ' Vielleicht sollte man die markieren die sich verändert/gespielt haben?!
+                    if cInt(EmptyToZero(TSP.GetSQLData("RANK"))) < cInt(EmptyToZero(TSP.GetSQLData("RANK_PREV"))) then
+                        tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Trend")) = "+"
+                    elseif cInt(EmptyToZero(TSP.GetSQLData("RANK"))) > cInt(EmptyToZero(TSP.GetSQLData("RANK_PREV"))) then
+                        tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Trend")) = "-"
+                    else
+                        tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Trend")) = ""
+                    end if
+                end if
+            Loop While TSP.SetSQLPos("Next")
+        end if
+    end if
+
+end sub
+
+sub refreshResults_L_I
+    dim rank, games,i
+    games = TSP.GetRound(TSP_ROUND)
+    i = 0
+    dim found
+        tw_l_info.ed_s_result_headline.Text=  games & ". Runde"
+        If TSP.LoadSQLData("SELECT * FROM ROUNDS_LIST WHERE (round='" & games & "') and (league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "')") then
+            i = 0
+            If TSP.SetSQLPos("First") Then
+                Do
+                    i = i + 1
+                    if i <= 5 then
+
+                        tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "Team 1")) = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "LONG_NAME", TSP.GetSQLData("team_a_name"))
+                        tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "Team 2")) = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "LONG_NAME", TSP.GetSQLData("team_b_name"))
+                        if pg_settings.cb_lformauto.Checked = true then
+                            found = false
+                            MatchID = mid(TSP.GetSQLData("text"),2)
+                            for k = 1 to 5          ' Aktuellen SpielStand aus den Konferenz Panels ziehen (falls mgl)
+                                if tw_konferenz.ComponentByName("pn_game" & k).UserData = MatchID then
+                                    tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "result")) = tw_konferenz.ComponentByName("score" & 2*k-1).Caption & ":" & tw_konferenz.ComponentByName("score" & 2*k).Caption
+                                    found=true
+                                    exit for
+                                end if
+                            next
+                            if not found then
+                                tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "result")) = TSP.GetSQLData("score_a") & ":" & TSP.GetSQLData("score_b")
+                            end if
+                        else
+                            tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "result")) = TSP.GetSQLData("score_a") & ":" & TSP.GetSQLData("score_b")
+                        end if
+                        tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "hl?"))   = ""
+                    end if
+                Loop While TSP.SetSQLPos("Next")
+            end if
+        end if
+end sub
+
+sub tw_l_info_bt_showClick (Sender)
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim i
+    'BB
+    Data.Item("BBTYP") = tw_l_info.rb_bb.ItemIndex
+    'Data.Item("LOGO1") = TSP.GetTeamByName(tw_l_info.cb_bb_name1.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("LOGO1") = TSP_get_info_from_db("TEAMS", "LOGO", "LONG_NAME", tw_l_info.cb_bb_name1.Text)
+    'Data.Item("LOGO2") = TSP.GetTeamByName(tw_l_info.cb_bb_name2.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("LOGO2") = TSP_get_info_from_db("TEAMS", "LOGO", "LONG_NAME", tw_l_info.cb_bb_name2.Text)
+    Data.Item("NAME1") = TSP.GetTeamByName(tw_l_info.cb_bb_name1.Text, TSP.GetGroup(), TSP_SHORT_NAME)
+    Data.Item("NAME2") = TSP.GetTeamByName(tw_l_info.cb_bb_name2.Text, TSP.GetGroup(), TSP_SHORT_NAME)
+
+    Data.Item("BBHL") = tw_l_info.ed_bb_headline.Text
+    Data.Item("BBSL") = tw_l_info.ed_bb_subline.Text
+    Data.Item("BBSCORE") = tw_l_info.ed_bb_score.Text
+    
+    Data.Item("STYP") = tw_l_info.rb_s_typ.ItemIndex
+    'Aufstellung
+    Data.Item("TEAMNAMEA")=tw_l_info.ed_s_team1.text
+    Data.Item("TEAMNAMEB")=tw_l_info.ed_s_team2.text
+    
+    for i = 0 to tw_l_info.lb_s_team1.Items.Count - 1
+        tmp = split(tw_l_info.lb_s_team1.Items.Strings(i), " | ")
+        Data.Item("TEAMNRA"  & i+1) = tmp(0)
+        Data.Item("TEAMNAMEA" & i+1) = tmp(1)
+    next
+    for i = 0 to tw_l_info.lb_s_team2.Items.Count - 1
+        tmp = split(tw_l_info.lb_s_team2.Items.Strings(i), " | ")
+        Data.Item("TEAMNRB"  & i+1) = tmp(0)
+        Data.Item("TEAMNAMEB" & i+1) = tmp(1)
+    next
+     'Tabelle
+
+      Data.Item("TABHL")=tw_l_info.ed_s_tab_headline.Text
+     for i = 1 to tw_l_info.gr_s_tab.RowCount - 1
+        Data.Item("TABNAME"  & i) = tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Club"))
+        Data.Item("TABPLACE" & i) = tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "#"))
+        Data.Item("TABPTS"   & i) = tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "Pts"))
+        Data.Item("TABHL"    & i) =(tw_l_info.gr_s_tab.Cells(i, GetColIdx(tw_l_info.gr_s_tab, "HL?")) = "X")
+    next
+    'Results
+    dim k : k = 0
+    Data.Item("REHL")=tw_l_info.ed_s_result_headline.Text
+    for i = 1 to tw_l_info.gr_s_res.RowCount - 1
+        if Trim(tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "Team 1"))) <> "" then
+            k = k + 1
+            Data.Item("RENAMEA" & k) = tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "Team 1"))
+            Data.Item("RENAMEB" & k) =tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "Team 2"))
+            Data.Item("RERESULT" & k) = tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "Result"))
+            Data.Item("REHL"     & k) =(tw_l_info.gr_s_res.Cells(i, GetColIdx(tw_l_info.gr_s_res, "HL?")) = "X")
+        end if
+    next
+    Data.Item("REITEMCOUNT")  = k
+
+    'Spiele
+    Data.Item("GHL") = tw_l_info.ed_s_g_headline.Text
+    Data.Item("GSL") = tw_l_info.ed_s_g_subline.Text
+    
+    dim g : g=0
+    dim kommentar
+    
+    if tw_l_info.cb_s_g_team_a_1.Text <> "" then
+        g=g+1
+        Data.Item("GLOGOA"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_a_1.Text, TSP.GetGroup(), TSP_LOGO)
+        Data.Item("GLOGOB"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_b_1.Text, TSP.GetGroup(), TSP_LOGO)
+        kommentar=tw_l_info.ed_s_g_game_1_1.Text
+        if tw_l_info.ed_s_g_game_2_1.Text <> "" then
+            kommentar=kommentar & VbCrLf & tw_l_info.ed_s_g_game_2_1.Text
+        end if
+        Data.Item("GKOM"&g)=tw_l_info.cb_s_g_team_a_1.Text& " - " & tw_l_info.cb_s_g_team_b_1.Text
+    end if
+    
+    if tw_l_info.cb_s_g_team_a_2.Text <> "" then
+        g=g+1
+        Data.Item("GLOGOA"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_a_2.Text, TSP.GetGroup(), TSP_LOGO)
+        Data.Item("GLOGOB"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_b_2.Text, TSP.GetGroup(), TSP_LOGO)
+        kommentar=tw_l_info.ed_s_g_game_1_2.Text
+        if tw_l_info.ed_s_g_game_2_2.Text <> "" then
+            kommentar=kommentar & VbCrLf & tw_l_info.ed_s_g_game_2_2.Text
+        end if
+        Data.Item("GKOM"&g)=tw_l_info.cb_s_g_team_a_2.Text& " - " & tw_l_info.cb_s_g_team_b_2.Text
+    end if
+    
+    if tw_l_info.cb_s_g_team_a_3.Text <> "" then
+        g=g+1
+        Data.Item("GLOGOA"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_a_3.Text, TSP.GetGroup(), TSP_LOGO)
+        Data.Item("GLOGOB"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_b_3.Text, TSP.GetGroup(), TSP_LOGO)
+        kommentar=tw_l_info.ed_s_g_game_1_3.Text
+        if tw_l_info.ed_s_g_game_2_3.Text <> "" then
+            kommentar=kommentar & VbCrLf & tw_l_info.ed_s_g_game_2_3.Text
+        end if
+        Data.Item("GKOM"&g)=tw_l_info.cb_s_g_team_a_3.Text& " - " & tw_l_info.cb_s_g_team_b_3.Text
+    end if
+    
+    if tw_l_info.cb_s_g_team_a_4.Text <> "" then
+        g=g+1
+        Data.Item("GLOGOA"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_a_4.Text, TSP.GetGroup(), TSP_LOGO)
+        Data.Item("GLOGOB"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_b_4.Text, TSP.GetGroup(), TSP_LOGO)
+        kommentar=tw_l_info.ed_s_g_game_1_4.Text
+        if tw_l_info.ed_s_g_game_2_4.Text <> "" then
+            kommentar=kommentar & VbCrLf & tw_l_info.ed_s_g_game_2_4.Text
+        end if
+        Data.Item("GKOM"&g)=tw_l_info.cb_s_g_team_a_4.Text& " - " & tw_l_info.cb_s_g_team_b_4.Text
+    end if
+    
+    if tw_l_info.cb_s_g_team_a_5.Text <> "" then
+        g=g+1
+        Data.Item("GLOGOA"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_a_5.Text, TSP.GetGroup(), TSP_LOGO)
+        Data.Item("GLOGOB"&g)= TSP.GetTeamByName(tw_l_info.cb_s_g_team_b_5.Text, TSP.GetGroup(), TSP_LOGO)
+        'kommentar=tw_l_info.ed_s_g_game_1_5.Text
+        'if tw_l_info.ed_s_g_game_2_5.Text <> "" then
+        '    kommentar=kommentar & VbCrLf & tw_l_info.ed_s_g_game_2_5.Text
+        'end if
+        Data.Item("GKOM"&g)=tw_l_info.cb_s_g_team_a_5.Text& " - " & tw_l_info.cb_s_g_team_b_5.Text
+    end if
+
+    Data.Item("GITEMCOUNT")  = g
+    HideVorlaufLogos
+    AllTV.TV__LF_Info Data
+    set Data = Nothing
+end sub
+
+sub tw_l_info_bt_changeteamClick (Sender)
+    AllTV.TV__PlayChange "AUFSTELLUNG_HEIM","AUFSTELLUNG_GAST"
+end sub
+
+sub tw_l_info_bt_changetotabClick (Sender)
+    AllTV.TV__PlayChange "ERGEBNISSE","TABELLE_1"
+end sub
+
+sub tw_l_info_bt_changetoergClick (Sender)
+
+    AllTV.TV__PlayChange "TABELLE_1","ERGEBNISSE"
+end sub
+
+</script_body>
+</script>

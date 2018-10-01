@@ -1,0 +1,60 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub show_commentatorBB_dialog()
+    dim fList, i
+    
+    For i = 0 to AllTV.int_TVCount
+       If not AllTV.obj_TVList(i) is Nothing Then
+          If not AllTV.obj_TVList(i).TVContent = 0 Then
+             fList = AllTV.obj_TVList(i).get_available_fotos()
+             exit for
+          End If
+       End If
+    Next
+    
+    tw_commentBB.ComboBox1.Items.Clear
+    tw_commentBB.ComboBox2.Items.Clear
+    if not IsArray(fList) then
+        cc.sf.debugtext "NOT CONNECTED TO VIZ!!!", clRed
+        exit sub
+    end if
+    for i = 0 to UBound(fList)
+        tw_commentBB.ComboBox1.Items.Add fList(i)
+        tw_commentBB.ComboBox2.Items.Add fList(i)
+    next
+    tw_commentBB.Visible = true
+    tw_commentBB.BringToFront
+end sub
+
+sub tw_commentBB_cb_fotoClick (Sender)
+    tw_commentBB.ComboBox1.Enabled = Sender.Checked
+    tw_commentBB.ComboBox2.Enabled = Sender.Checked
+end sub
+
+sub tw_commentBB_bt_show_commentClick (Sender)
+    dim foto,foto2
+    if tw_commentBB.cb_foto.Checked then
+        foto = tw_commentBB.ComboBox1.Text
+        foto2 = tw_commentBB.ComboBox2.Text
+    else
+        foto = ""
+        foto2 = ""
+    end if
+    dim n ,i,n2,k
+    n=tw_commentBB.ed_Name.Text
+    i=cc.Strings.StrPos(" ",n)
+    n2=tw_commentBB.ed_Name1.Text
+    k=cc.Strings.StrPos(" ",n2)
+
+    if tw_commentBB.cb_2comment.Checked then
+        AllTV.TV__BB_comment2 right(n,len(n)-i), foto , tw_commentBB.ed_subline.Text,right(n2,len(n2)-k), foto2 , tw_commentBB.ed_subline1.Text ,left(n,i),left(n2,k)
+    else
+        AllTV.TV__BB_comment right(n,len(n)-i), foto , tw_commentBB.ed_subline.Text ,left(n,i)
+    end if
+end sub
+
+</script_body>
+</script>

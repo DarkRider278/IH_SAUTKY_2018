@@ -1,0 +1,13 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_BB_SPEICHERN_bt_showClick (Sender)
+    if Trim(tw_BB_SPEICHERN.ed_text1.Text) = "" then exit sub
+    AllTV.TV__BB_SOCIAL tw_BB_SPEICHERN.ed_text1.Text, tw_BB_SPEICHERN.ed_text2.Text ,tw_BB_SPEICHERN.ed_text3.Text
+    'tw_BB_SPEICHERN.Visible = False
+end sub
+
+</script_body>
+</script>

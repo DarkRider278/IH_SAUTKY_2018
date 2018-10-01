@@ -1,0 +1,11 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_freeCrawl_bt_show_crawlClick (Sender)
+    AllTV.TV__BB_Crawl tw_freeCrawl.ed_title.Text, tw_freeCrawl.memo.Lines.text, TSP.GetTeamByName(tw_freeCrawl.cb_logo.Text, TSP.GetGroup(), TSP_LOGO), tw_freeCrawl.cb_loop.Checked, tw_freeCrawl.TrackBar.Position
+end sub
+
+</script_body>
+</script>

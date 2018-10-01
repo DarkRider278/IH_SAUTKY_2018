@@ -1,0 +1,390 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+
+sub tw_l_stat_rb_bbClick (Sender)
+    tw_l_stat.lbl_bb_fname.Visible=false
+    tw_l_stat.lbl_bb_nr.Visible=false
+    tw_l_stat.ed_bb_fname.Visible=false
+    tw_l_stat.ed_bb_nr.Visible=false
+    if tw_l_stat.rb_bb.ItemIndex=0 then
+        tw_l_stat_rb_bb_playerstatClick 0
+        tw_l_stat.cb_bb_name1.Visible=true
+        tw_l_stat.cb_bb_name2.Visible=false
+        tw_l_stat.lbl_bb_headline.Visible=true
+        tw_l_stat.lbl_bb_vs.Visible=false
+        tw_l_stat.lbl_bb_score.Visible=false
+        tw_l_stat.ed_bb_headline.Visible=true
+        tw_l_stat.ed_bb_score.Visible=false
+        tw_l_stat.pa_playerstat.Visible=true
+    elseif tw_l_stat.rb_bb.ItemIndex=1 then
+        tw_l_stat.cb_bb_name1.Visible=true
+        tw_l_stat.cb_bb_name2.Visible=true
+        tw_l_stat.lbl_bb_headline.Visible=false
+        tw_l_stat.lbl_bb_vs.Visible=true
+        tw_l_stat.lbl_bb_score.Visible=false
+        tw_l_stat.ed_bb_headline.Visible=false
+        tw_l_stat.ed_bb_score.Visible=false
+        tw_l_stat.pa_playerstat.Visible=false
+    elseif tw_l_stat.rb_bb.ItemIndex=2 then
+        tw_l_stat.cb_bb_name1.Visible=true
+        tw_l_stat.cb_bb_name2.Visible=true
+        tw_l_stat.lbl_bb_headline.Visible=false
+        tw_l_stat.lbl_bb_vs.Visible=true
+        tw_l_stat.lbl_bb_score.Visible=true
+        tw_l_stat.ed_bb_headline.Visible=false
+        tw_l_stat.ed_bb_score.Visible=true
+        tw_l_stat.pa_playerstat.Visible=false
+    else
+        tw_l_stat.cb_bb_name1.Visible=false
+        tw_l_stat.cb_bb_name2.Visible=false
+        tw_l_stat.lbl_bb_headline.Visible=true
+        tw_l_stat.lbl_bb_vs.Visible=false
+        tw_l_stat.lbl_bb_score.Visible=false
+        tw_l_stat.ed_bb_headline.Visible=true
+        tw_l_stat.ed_bb_score.Visible=false
+        tw_l_stat.pa_playerstat.Visible=false
+    end if
+end sub
+
+sub RefreshData_L_S
+    If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'") Then
+    'If TSP.LoadSQLData("SELECT * FROM TEAMS") Then
+            If TSP.SetSQLPos("First") Then
+                tw_l_stat.cb_bb_name1.UserData = tw_l_lineup.cb_bb_name1.Text
+                tw_l_stat.cb_bb_name2.UserData = tw_l_lineup.cb_bb_name2.Text
+
+                'tw_l_lineup.cb_name1.UserData = tw_l_lineup.cb_name1.Text
+                'tw_l_lineup.cb_name2.UserData = tw_l_lineup.cb_name2.Text
+
+                tw_l_stat.cb_bb_name1.Items.Clear
+                tw_l_stat.cb_bb_name2.Items.Clear
+
+                'tw_l_interview.cb_name1.Items.Clear
+                'tw_l_interview.cb_name2.Items.Clear
+
+                Do
+                    if tw_l_stat.cb_bb_name1.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_stat.cb_bb_name1.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_stat.cb_bb_name2.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_stat.cb_bb_name2.Items.Add TSP.GetSQLData("long_name")
+                    'if tw_l_lineup.cb_name1.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_lineup.cb_name1.Items.Add TSP.GetSQLData("long_name")
+                    'if tw_l_lineup.cb_name2.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_lineup.cb_name2.Items.Add TSP.GetSQLData("long_name")
+                Loop While TSP.SetSQLPos("Next")
+                tw_l_stat.cb_bb_name1.ItemIndex =  tw_l_stat.cb_bb_name1.Items.IndexOf( tw_l_stat.cb_bb_name1.UserData)
+                tw_l_stat.cb_bb_name2.ItemIndex =  tw_l_stat.cb_bb_name2.Items.IndexOf( tw_l_stat.cb_bb_name2.UserData)
+                'tw_l_lineup.cb_name1.ItemIndex =  tw_l_lineup.cb_name1.Items.IndexOf( tw_l_lineup.cb_name1.UserData)
+                'tw_l_lineup.cb_name2.ItemIndex =  tw_l_lineup.cb_name2.Items.IndexOf( tw_l_lineup.cb_name2.UserData)
+            end if
+    end if
+end sub
+
+sub tw_l_stat_cb_bb_param1Change (Sender)
+    dim db_param1, db_param2, db_param3, pID, match_param1, match_param2, match_param3
+
+    tw_l_stat.gr_bb_stats.Cells(0, 1) = ""
+    tw_l_stat.gr_bb_stats.Cells(1, 1) = ""
+    tw_l_stat.gr_bb_stats.Cells(2, 1) = ""
+    tw_l_stat.gr_bb_stats.Cells(0, 2) = ""
+    tw_l_stat.gr_bb_stats.Cells(1, 2) = ""
+    tw_l_stat.gr_bb_stats.Cells(2, 2) = ""
+
+    match_param1 = PLAYER_STATS_MATCH.item(tw_l_stat.cb_bb_param1.Text)
+    match_param2 = PLAYER_STATS_MATCH.item(tw_l_stat.cb_bb_param2.Text)
+    match_param3 = PLAYER_STATS_MATCH.item(tw_l_stat.cb_bb_param3.Text)
+    db_param1    = PLAYER_STATS_SEASON.item(tw_l_stat.cb_bb_param1.Text)
+    db_param2    = PLAYER_STATS_SEASON.item(tw_l_stat.cb_bb_param2.Text)
+    db_param3    = PLAYER_STATS_SEASON.item(tw_l_stat.cb_bb_param3.Text)
+
+    on error resume next    ' Wichtig falls Current_Match_Data gar nicht vorhanden
+    pID = TSP.GetTPlayer(TSP_OPTA_ID)
+    ' MATCH STATS
+    tw_l_stat.gr_bb_stats.Cells(0, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param1)
+    tw_l_stat.gr_bb_stats.Cells(1, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param2)
+    tw_l_stat.gr_bb_stats.Cells(2, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param3)
+
+    ' SEASON STATS
+    tw_l_stat.gr_bb_stats.Cells(0, 2) = TSP_get_info_from_db("PLAYERS_2", db_param1, "OPTA_ID", pID)
+    tw_l_stat.gr_bb_stats.Cells(1, 2) = TSP_get_info_from_db("PLAYERS_2", db_param2, "OPTA_ID", pID)
+    tw_l_stat.gr_bb_stats.Cells(2, 2) = TSP_get_info_from_db("PLAYERS_2", db_param3, "OPTA_ID", pID)
+    on error goto 0
+end sub
+
+sub tw_l_stat_rg_statsTypeClick (Sender)
+    dim param
+    tw_l_stat.cb_param1.Items.clear
+    if tw_l_stat.rg_statsType.ItemIndex = 0 then
+        ' Die Auswahlboxen mit Stat Parametern füllen
+        for each param in PLAYER_STATS_SEASON.keys()
+            tw_l_stat.cb_param1.Items.Add param
+
+        next
+    else
+        for each param in PLAYER_STATS_MATCH.keys()
+            tw_l_stat.cb_param1.Items.Add param
+
+        next
+    end if
+
+end sub
+
+sub tw_l_stat_cb_param1Change (Sender)
+    dim i,j,k, obj, param, db_param1, db_param2, sql, db_id, tmp, pID
+    dim val1, val2
+
+        ' Wenn CURRENT MATCH ausgewählt wurde, dann entferne ich alle Spieler aus der Auswahlliste die gar nicht im Spiel sind...
+    if Sender is tw_l_stat.rg_statsType then
+        for i = 1 to 7'8
+            set obj = tw_l_stat.ComponentByName("cb_name" & i)
+            obj.Items.clear()
+            if tw_l_stat.rg_statsType.ItemIndex = 0 then
+                obj.Items.CommaText = ALL_PLAYERS
+            else
+                obj.Items.CommaText = CURRENT_PLAYERS
+                obj.Text = obj.items.strings(obj.Items.IndexOf(obj.Text))
+            end if
+            obj.Items.Add " "
+        next
+    end if
+
+    ' TODO: LIEBER NUR EINEN (Geänderten) EINTRAG AKTUALISIEREN ANSTATT ALLE 8 SPIELER?
+    ' Brauchen wir Season oder Match Statistiken?
+    if tw_l_stat.rg_statsType.ItemIndex = 0 then    ' SEASON STATS -> aus TSP DB
+        db_param1 = PLAYER_STATS_SEASON.item(tw_l_stat.cb_param1.Text)
+         dim tid
+        for i = 1 to 7'8
+            if UBound(split(tw_l_stat.ComponentByName("cb_name" & i).Text, "(")) = 1 then  ' Die Datenbank ID aus der ComboBox schneiden
+                db_id = trim(split(tw_l_stat.ComponentByName("cb_name" & i).Text, "(")(1))
+                if db_param1 <> "" then
+
+                    tw_l_stat.gr_stat.Cells(i-1, 2) = EmptyToZero(TSP_get_info_from_db("PLAYERS_2", db_param1, "PLAYER_ID", db_id))
+                    tid=EmptyToZero(TSP_get_info_from_db("PLAYERS_2", "TEAM_ID", "PLAYER_ID", db_id))
+                    tw_l_stat.gr_stat.Cells(i-1, 3) =TSP_get_info_from_db("TEAMS", "SHORT_NAME", "DB_ID", tid)
+                else
+                    tw_l_stat.gr_stat.Cells(i-1, 2) = ""
+                    tw_l_stat.gr_stat.Cells(i-1, 3) = ""
+                end if
+            end if
+        next
+    else
+        db_param1 = PLAYER_STATS_MATCH.item(tw_l_stat.cb_param1.Text)
+
+        ' AUSWAHL MATCH STATISTIK
+        ' STATISTIKEN für die gewählten Spieler
+        for i = 1 to 7'8
+            ' erstmal die TSP_DB-ID rausbekommen, sofern vorhanden
+            tmp = split(tw_l_stat.ComponentByName("cb_name" & i).Text, "(")
+            if Ubound(tmp) = 1 then
+                pID = TSP_get_info_from_db("PLAYERS_2", "OPTA_ID", "PLAYER_ID", tmp(1))
+                if db_param1 <> "" then
+                    tw_l_stat.gr_stat.Cells(i-1,2) = EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & db_param1))
+                    tid=EmptyToZero(TSP_get_info_from_db("PLAYERS_2", "TEAM_ID", "PLAYER_ID", tmp(1)))
+                    tw_l_stat.gr_stat.Cells(i-1, 3) =TSP_get_info_from_db("TEAMS", "SHORT_NAME", "DB_ID", tid)
+                 end if
+            else
+                tw_l_stat.gr_stat.Cells(i-1, 2) = ""
+                tw_l_stat.gr_stat.Cells(i-1, 3) = ""
+            end if
+        next
+    end if
+
+    set obj = Nothing
+end sub
+
+sub tw_l_stat_cb_name1Change (Sender)
+    tw_l_stat_cb_param1Change Sender
+    if (Sender.UserData = True) then exit sub
+    dim i,k
+    if len(Sender.Text) < 1 then exit sub
+    for i = 0 to Sender.Items.Count - 1
+        if Sender.text = left(sender.Items.Strings(i), len(Sender.Text)) then
+            k = len(Sender.Text)
+            Sender.Text      = sender.Items.Strings(i)
+            Sender.SelStart  = k
+            Sender.SelLength = len(Sender.Text) - k
+            tw_l_stat_cb_param1Change Sender
+            exit for
+        end if
+    next
+end sub
+
+sub tw_l_stat_bt_getTopClick (Sender)
+    dim i,j,k, obj, param, db_param1, db_param2, sql, db_id, tmp, pID
+    dim val1, val2
+
+    if tw_l_stat.rg_statsType.ItemIndex = 0 then   ' SEASON
+        db_param1 = PLAYER_STATS_SEASON.item(tw_l_stat.cb_param1.Text)
+
+        if db_param1 <> "" then
+             sql = "SELECT * from PLAYERS_2 INNER JOIN PLAYERS_1 ON PLAYERS_2.PLAYER_ID=PLAYERS_1.DB_ID WHERE team_id IN (" & LEAGUE_TEAMS & ") ORDER BY " & db_param1
+             if db_param2 <> "" then    sql = sql & " DESC," & db_param2
+             sql = sql & " DESC"
+        end if
+        i = 0                   ' TODO: EInen weg finden nicht immer ALLE Spieler abzurufen. "LIMIT" und "TOP" funktionieren jedoch anscheinend nicht
+        if TSP.LoadSQLData(sql) then
+            If TSP.SetSQLPos("First") Then
+                Do
+                    i = i + 1
+                    if i <= 7 then    '8
+                        if (db_param1 <> "") then
+                            tw_l_stat.gr_stat.Cells(i-1, 2) = EmptyToZero(TSP.GetSQLData(db_param1))
+                            pID=TSP.GetSQLData("PLAYER_ID")
+                            tid=EmptyToZero(TSP_get_info_from_db("PLAYERS_2", "TEAM_ID", "PLAYER_ID", pID))
+                            tw_l_stat.gr_stat.Cells(i-1, 3) =TSP_get_info_from_db("TEAMS", "SHORT_NAME", "DB_ID", tid)
+                        end if
+                        tw_l_stat.ComponentByName("cb_name" & i).text = TSP.GetSQLData("second_name") & ", " & TSP.GetSQLData("first_name") & " (" & TSP.GetSQLData("PLAYER_ID")
+                    end if
+                Loop While TSP.SetSQLPos("Next")
+            end if
+        end if
+        do while i+1 <= 7'8       ' Die anderen Felder leeren
+            i = i + 1
+            tw_l_stat.ComponentByName("cb_name" & i).text = ""
+        loop
+    else
+        db_param1 = PLAYER_STATS_MATCH.item(tw_l_stat.cb_param1.Text)
+
+        dim sort_array(7)
+        for k = 0 to tw_l_stat.cb_name1.Items.Count - 1
+            tmp = split(tw_l_stat.cb_name1.Items.Strings(k), "(")
+            if Ubound(tmp) = 1 then     ' Ich brauche die playerid von allen aktuellen Spielern
+                pID = TSP_get_info_from_db("PLAYERS_2", "OPTA_ID", "PLAYER_ID", tmp(1))
+            else
+                pID = ""
+            end if
+
+            if CURRENT_MATCH_DATA.count = 0 then
+                CC.SF.DEBUGTEXT "MATCH DATA FOR THIS GAME IS (STILL?) MISSING!", clRed
+                exit sub
+            end if
+
+
+            if db_param1 <> "" then val1 = EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & db_param1))
+
+            ' Einfacher Sortieralgorithmus
+            if (val1 <> "") or (val2 <> "") then    ' Wenn wir gar keine Werte haben kommt er nicht in die Auswahl
+                for i = 0 to 6'7
+                    if sort_array(i) = "" then  ' Noch gar nicht befüllt
+                        sort_array(i) = pID
+                        exit for
+                    else
+                        if cint(EmptyToZero(val1)) > cint(EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & sort_array(i) & "|" & db_param1))) then ' besserer Wert
+                            for j = 7 to i+1 Step -1     ' Neuer bestwert. Alle nachfolgenden "rutschen" einen Platz tiefer
+                                sort_array(j) = sort_array(j-1)
+                            next
+                            sort_array(i) = pID
+                            exit for
+                        elseif cint(EmptyToZero(val1)) = cint(EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & sort_array(i) & "|" & db_param1))) then ' Beide Gleich
+                            if (val2 <> "") and (cint(EmptyToZero(val2)) > cint(EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & sort_array(i) & "|" & db_param2)))) then
+                                for j = 7 to i+1 Step -1  ' Beide gleich gut. Vergleiche den 2. Statistik Parameter
+                                    sort_array(j) = sort_array(j-1)
+                                next
+                                sort_array(i) = pID
+                                exit for
+                            end if
+                        end if
+                    end if
+                next
+            end if
+         next
+
+         ' Füllen der Tabelle mit den gefundenen Werten
+         for i = 0 to 6'7
+            tw_l_stat.gr_stat.Cells(i,2) = CURRENT_MATCH_DATA.item("PLAYER|" & sort_array(i) & "|" & db_param1)
+
+            ' Nun noch das ganze Spiel rückwärts. Ich brauche den SpielerNamen zur PID
+            db_id = TSP_get_info_from_db("PLAYERS_1", "DB_ID", "text1", sort_array(i))
+            if db_id <> "" then
+                tw_l_stat.ComponentByName("cb_name" & i+1).text = TSP.GetPlayerByID(TSP_HPlayer, db_id, "second_name") & ", " & TSP.GetPlayerByID(TSP_HPlayer, db_id, "first_name") & " (" & TSP.GetPlayerByID(TSP_HPlayer, db_id, "DB_ID")
+                tid=EmptyToZero(TSP_get_info_from_db("PLAYERS_2", "TEAM_ID", "PLAYER_ID", db_id))
+                tw_l_stat.gr_stat.Cells(i, 3) =TSP_get_info_from_db("TEAMS", "SHORT_NAME", "DB_ID", tid)
+            else
+                tw_l_stat.ComponentByName("cb_name" & i+1).text = ""
+            end if
+         next
+    end if
+end sub
+
+sub tw_l_stat_bt_showClick (Sender)
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim i
+    dim k
+    'BB
+    Data.Item("BBTYP") = tw_l_stat.rb_bb.ItemIndex
+    Data.Item("LOGO1") = TSP.GetTeamByName(tw_l_stat.cb_bb_name1.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("LOGO2") = TSP.GetTeamByName(tw_l_stat.cb_bb_name2.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("NAME1") = TSP.GetTeamByName(tw_l_stat.cb_bb_name1.Text, TSP.GetGroup(), TSP_SHORT_NAME)
+    Data.Item("NAME2") = TSP.GetTeamByName(tw_l_stat.cb_bb_name2.Text, TSP.GetGroup(), TSP_SHORT_NAME)
+
+    Data.Item("BBHL") = tw_l_stat.ed_bb_headline.Text
+    Data.Item("BBSL") = tw_l_stat.ed_bb_subline.Text
+    Data.Item("BBSCORE") = tw_l_stat.ed_bb_score.Text
+
+    Data.Item("BBSTATTYP") = tw_l_stat.rb_bb_playerstat.ItemIndex
+
+    Data.Item("BBSTATTEXT1")  = tw_l_stat.cb_bb_param1.Text
+    Data.Item("BBSTATTEXT2")  = tw_l_stat.cb_bb_param2.Text
+    Data.Item("BBSTATTEXT3")  = tw_l_stat.cb_bb_param3.Text
+
+    Data.Item("BBSTATHL1")    = (tw_l_stat.gr_bb_stats.Cells(0,3) = "X")
+    Data.Item("BBSTATHL2")    = (tw_l_stat.gr_bb_stats.Cells(1,3) = "X")
+    Data.Item("BBSTATHL3")    = (tw_l_stat.gr_bb_stats.Cells(2,3) = "X")
+
+    if  tw_l_stat.rb_bb_playerstat.ItemIndex = 1 then
+        Data.Item("BBSTATVALUE1") = tw_l_stat.gr_bb_stats.Cells(0,1)
+        Data.Item("BBSTATVALUE2") = tw_l_stat.gr_bb_stats.Cells(1,1)
+        Data.Item("BBSTATVALUE3") = tw_l_stat.gr_bb_stats.Cells(2,1)
+    else
+        Data.Item("BBSTATVALUE1") = tw_l_stat.gr_bb_stats.Cells(0,2)
+        Data.Item("BBSTATVALUE2") = tw_l_stat.gr_bb_stats.Cells(1,2)
+        Data.Item("BBSTATVALUE3") = tw_l_stat.gr_bb_stats.Cells(2,2)
+    end if
+
+
+    'Stats
+    Data.Item("STHL") = tw_l_stat.ed_title.Text
+    Data.Item("STSTAT") = tw_l_stat.ed_titlesl.Text
+    Data.Item("STTYP") = tw_l_stat.rb_s_typ.ItemIndex
+    k = 0
+    dim pID
+    for i = 1 to tw_l_stat.gr_stat.RowCount
+        if Trim(tw_l_stat.ComponentByName("cb_name" & i).Text) <> "" then
+        'if (Trim(tw_l_stat.gr_stat.Cells(i, 1) <> "")) then
+            k = k + 1
+
+            if instr(tw_l_stat.ComponentByName("cb_name" & i).Text,"(")>0 then
+                pID = split(tw_l_stat.ComponentByName("cb_name" & i).Text, "(")(1)
+                Data.Item("STNAME"    & k) = GetNameTranslation("P", pID, TSP_player_name )
+            else
+                Data.Item("STNAME"    & k) =tw_l_stat.ComponentByName("cb_name" & i).Text
+            end if
+            'Data.Item("STNAME" & k) = tw_l_stat.gr_stat.Cells(i,1)
+            Data.Item("STVALUE" & k) = tw_l_stat.gr_stat.Cells(i-1,2)
+            Data.Item("STTEXT" & k) = tw_l_stat.gr_stat.Cells(i-1,3)
+        end if
+    next
+    if k = 0 then exit sub
+    Data.Item("STITEMCOUNT") = k
+
+    HideVorlaufLogos
+    AllTV.TV__LF_PlayerStat Data
+    set Data = Nothing
+end sub
+
+sub tw_l_stat_rb_bb_playerstatClick (Sender)
+  if tw_l_interview.rb_bb_playerstat.ItemIndex=0 then
+    tw_l_interview.lbl_bb_fname.Visible=false
+    tw_l_interview.lbl_bb_nr.Visible=false
+    tw_l_interview.ed_bb_fname.Visible=false
+    tw_l_interview.ed_bb_nr.Visible=false
+  else
+    tw_l_interview.lbl_bb_fname.Visible=true
+    tw_l_interview.lbl_bb_nr.Visible=true
+    tw_l_interview.ed_bb_fname.Visible=true
+    tw_l_interview.ed_bb_nr.Visible=true
+  end if
+
+end sub
+
+</script_body>
+</script>

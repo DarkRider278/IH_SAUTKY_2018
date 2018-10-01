@@ -1,0 +1,107 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_advertise_bt_admiral1Click (Sender)
+    'Hide_DSS
+    AllTV.TV__AdmiralInsert
+end sub
+
+sub tw_advertise_bt_advertise1Click (Sender)
+    AllTV.TV__SkyButton
+end sub
+
+sub tw_advertise_bt_advertiseClick (Sender)
+    AllTV.TV__SkyMediathek
+end sub
+
+sub tw_advertise_bt_advertise2Click (Sender)
+    tw_BB_SPEICHERN.DataBar1.DataGroupName = Sender.Caption
+    tw_BB_SPEICHERN.UserData = Sender.Caption
+    tw_BB_SPEICHERN.Visible = True
+    tw_BB_SPEICHERN.BringToFront
+end sub
+
+sub tw_advertise_bt_advertise3Click (Sender)
+    AllTV.TV__Show_FB_Link
+end sub
+
+sub tw_advertise_bt_advertise7Click (Sender)
+    tw_BB_SPEICHERN.DataBar1.DataGroupName = Sender.Caption
+    tw_BB_SPEICHERN.UserData = Sender.Caption
+    tw_BB_SPEICHERN.Visible = True
+    tw_BB_SPEICHERN.BringToFront
+end sub
+
+
+
+sub tw_advertise_bt_advertise5Click (Sender)
+
+    tw_facebook.Visible = True
+    tw_freetext.Visible = true
+    tw_facebook.BringToFront
+    tw_freetext.BringToFront
+end sub
+
+sub tw_advertise_bt_quizClick (Sender)
+    tw_quiz.Visible = True
+    tw_quiz.BringToFront
+end sub
+
+sub tw_advertise_bt_admiral2Click (Sender)
+    tsp.SaveSelection
+    TSP.SetTeamPos "A"
+    tw_quoten.ed_name1.Text = GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_short_name)
+    TSP.SetTeamPos "B"
+    tw_quoten.ed_name2.Text = GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_short_name)
+    tsp.RestoreSelection
+    tw_quoten.UserData = Sender.Caption
+    tw_quoten.Visible = True
+    tw_quoten.BringToFront
+end sub
+
+sub tw_advertise_bt_advertise6Click (Sender)
+    'CRAWL_SENDER = Sender.Caption
+    'Select case Sender.Caption
+        'case "Twitter Crawl"
+            tw_crawl_speichern.Label2.Visible   = True
+            tw_crawl_speichern.Label2.Caption   = "Hashtag/Titel"
+            tw_crawl_speichern.ed_text2.Visible = True
+        'case "FB Crawl"
+           ' tw_crawl_speichern.Label2.Visible   = True
+            'tw_crawl_speichern.Label2.Caption   = "After Crawl Text"
+            'tw_crawl_speichern.ed_text2.Visible = True
+        'case else
+            'tw_crawl_speichern.Label2.Visible   = False
+            'tw_crawl_speichern.ed_text2.Visible = False
+    'end select
+    'tw_crawl_speichern.DataBar1.DataGroupName = Sender.Caption
+    tw_crawl_speichern.Visible = True
+    tw_crawl_speichern.BringToFront
+end sub
+
+sub tw_advertise_bt_kurierClick (Sender)
+    Hide_DSS
+    AllTV.TV__Kurier_SkyScraper Right(Sender.Name, 1)
+end sub
+
+' Admiral Insert EURO LEAGUA
+sub tw_advertise_bt_admiral5Click (Sender)
+   AllTV.TV__Admiral_EL_Insert Right(Sender.Name, 1)
+end sub
+
+sub tw_advertise_bt_hash_tutMouseUp (Sender, Button, Shift, X, Y)
+   dim typ
+   if Sender is tw_konferenz.bt_hash_tut then
+    typ=0
+   elseif Sender is tw_konferenz.bt_hash_buli then
+    typ=1
+   else
+    typ=2
+   end if
+   AllTV.TV__Hashtag typ, (Button = 0)
+end sub
+
+</script_body>
+</script>

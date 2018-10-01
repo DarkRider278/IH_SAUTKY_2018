@@ -1,0 +1,172 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+' BLITZTABELLE VON OPTA
+sub pgMain_bt_BlitzTabClick (Sender)
+    dim rank, games,i, diff, id
+    dim teams()     ' Ich muss wissen welche Teams in MEINER AKTUELLEN GRUPPE spielen
+
+        games = 0
+        i = 0
+        If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE league_id = '"  & TSP.GetRound(TSP_LEAGUE_ID) &  "'") then
+            If TSP.SetSQLPos("First") Then
+                Do
+                    rank = cInt(EmptyToZero(TSP.GetSQLData("RANK")))
+                    if (rank <= 12) and (rank > 0) then
+                        i = i + 1
+                        tw_blitztab.Grid1.Cells(i, GetColIdx(tw_blitztab.Grid1, "Place")) = rank & "."
+                        tw_blitztab.Grid1.Cells(i, GetColIdx(tw_blitztab.Grid1, "Name"))  = TSP.GetSQLData("long_name")
+                        tw_blitztab.Grid1.Cells(i, GetColIdx(tw_blitztab.Grid1, "Goals")) = TSP.GetSQLData("GOALS") & ":" & TSP.GetSQLData("GOALS_AGAINST")
+                        diff = cint(EmptyToZero(TSP.GetSQLData("GOALS"))) - cint(EmptyToZero(TSP.GetSQLData("GOALS_AGAINST")))
+                        if diff > 0 then diff = "+" & diff
+                        tw_blitztab.Grid1.Cells(i, GetColIdx(tw_blitztab.Grid1, "Diff"))   = diff
+                        tw_blitztab.Grid1.Cells(i, GetColIdx(tw_blitztab.Grid1, "Pts"))   = TSP.GetSQLData("POINTS")
+                    end if
+                Loop While TSP.SetSQLPos("Next")
+            end if
+        end if
+        call tw_blitztab.Grid1.SortByCol(2,true)
+
+        tw_blitztab.Visible = True
+        tw_blitztab.BringToFront
+end sub
+
+' BLITZ TABELLE AUTOMATISCH VOM SPIELSTAND
+sub tw_stats_bt_BlitzTab1Click (Sender, Button, Shift, X, Y)
+    dim rank, games,i, diff
+   ' tw_blitzTab_MANUELL.cb_day.Items.Clear
+'    for i = 1 to TSP.GetRound(TSP_ROUND) - 1
+'        tw_blitzTab_MANUELL.cb_day.Items.Add i
+'    next
+'    tw_blitzTab_MANUELL.cb_day.ItemIndex = tw_blitzTab_MANUELL.cb_day.Items.Count - 1   ' automatisch vorherhigen Spieltag anwählen
+  '  get_standings_of_day(tw_blitzTab_MANUELL.cb_day.text)
+
+    i = 1
+    dim k, MatchID
+
+    ' Für den FALL Das wir KEINE Opta Daten finden, fülle ich zumindest schon mal die Team Namen in die Tabelle
+
+     If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE league_id='"  & TSP.GetRound(TSP_LEAGUE_ID) &  "'")     then
+        If TSP.SetSQLPos("First") Then
+            Do
+               tw_blitzTab_MANUELL.Grid1.Cells(i,0) = tsp.GetSQLData("SHORT_NAME")
+               'tw_blitzTab_MANUELL.Grid2.Cells(i,0) = tsp.GetSQLData("SHORT_NAME")
+               'tw_blitzTab_MANUELL.Grid2.Cells(0,i) = tsp.GetSQLData("SHORT_NAME")
+               i = i + 1
+            Loop While TSP.SetSQLPos("Next")
+        end if
+    end if
+
+
+    i = 1
+    TSP.SetRoundPos "First"        ' Teams der aktuellen Runde auslesen + Scores wenn vorhanden
+    Do
+        if i <= 6 then
+            tw_blitzTab_MANUELL.ComponentByName("teamA"  & i).Text = TSP.GetRound("TEAM_A_NAME")
+            tw_blitzTab_MANUELL.ComponentByName("teamB"  & i).Text = TSP.GetRound("TEAM_B_NAME")
+            tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text = ""
+            tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text = ""
+            tw_blitzTab_MANUELL.ComponentByName("teamA"  & i).Visible = True
+            tw_blitzTab_MANUELL.ComponentByName("teamB"  & i).Visible = True
+            tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Visible = True
+            tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Visible = True
+            MatchID = mid(TSP.GetRound("text"),2)
+            'for k = 1 to 6          ' Aktuellen SpielStand aus den Konferenz Panels ziehen (falls mgl)
+'                if tw_konferenz.ComponentByName("pn_game" & k).UserData = MatchID then
+'                    tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text = tw_konferenz.ComponentByName("score" & 2*k-1).Caption
+'                    tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text = tw_konferenz.ComponentByName("score" & 2*k).Caption
+'                    exit for
+'                end if
+'            next
+        end if
+        i = i + 1
+    Loop While TSP.SetRoundPos("Next")
+    do while (i <= 6)
+        tw_blitzTab_MANUELL.ComponentByName("teamA"  & i).Visible = False
+        tw_blitzTab_MANUELL.ComponentByName("teamB"  & i).Visible = False
+        tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Visible = False
+        tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Visible = False
+        i = i + 1
+    loop
+    tw_blitzTab_MANUELL_cb_dayChange Sender
+
+    'if Button = 1 then  ' Manuell
+        tw_blitzTab_MANUELL.Visible = true
+        tw_blitzTab_MANUELL.BringToFront
+    'else    ' Alles automatisch berechnen
+    '    tw_blitzTab_MANUELL_bt_updateClick (tw_blitzTab_MANUELL.bt_update)      ' Aktuelle Spielstände einpflegen in die Ergebnisse vom vorherigen SpielTag
+    '    tw_blitzTab_MANUELL_bt_calc_tableClick (Sender)  ' Blitz  Tabelle berechnen
+    'end if
+end sub
+
+' Blitz Tabelle MANUELL/AUTOMATISCH vom SpielStand
+sub tw_stats_bt_standings1MouseUp (Sender, Button, Shift, X, Y)
+    dim rank, games,i, diff
+    'tw_blitzTab_MANUELL.cb_day.Items.Clear
+'    for i = 1 to TSP.GetRound(TSP_ROUND) - 1
+'        tw_blitzTab_MANUELL.cb_day.Items.Add i
+'    next
+'    tw_blitzTab_MANUELL.cb_day.ItemIndex = tw_blitzTab_MANUELL.cb_day.Items.Count - 1   ' automatisch vorherhigen Spieltag anwählen
+  '  get_standings_of_day(tw_blitzTab_MANUELL.cb_day.text)
+
+    i = 1
+    dim k, MatchID
+
+    ' Für den FALL Das wir KEINE Opta Daten finden, fülle ich zumindest schon mal die Team Namen in die Tabelle
+     If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE league_id='"  & TSP.GetRound(TSP_LEAGUE_ID) &  "'")     then
+        If TSP.SetSQLPos("First") Then
+            Do
+
+               tw_blitzTab_MANUELL.Grid1.Cells(i,0) = tsp.GetSQLData("SHORT_NAME")
+               'tw_blitzTab_MANUELL.Grid2.Cells(i,0) = tsp.GetSQLData("SHORT_NAME")
+               'tw_blitzTab_MANUELL.Grid2.Cells(0,i) = tsp.GetSQLData("SHORT_NAME")
+               i = i + 1
+            Loop While TSP.SetSQLPos("Next")
+        end if
+    end if
+
+    i = 1
+    TSP.SetRoundPos "First"        ' Teams der aktuellen Runde auslesen + Scores wenn vorhanden
+    Do
+        if i <= 5 then
+            tw_blitzTab_MANUELL.ComponentByName("teamA"  & i).Text = TSP.GetRound("TEAM_A_NAME")
+            tw_blitzTab_MANUELL.ComponentByName("teamB"  & i).Text = TSP.GetRound("TEAM_B_NAME")
+            tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text = ""
+            tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text = ""
+            tw_blitzTab_MANUELL.ComponentByName("teamA"  & i).Visible = True
+            tw_blitzTab_MANUELL.ComponentByName("teamB"  & i).Visible = True
+            tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Visible = True
+            tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Visible = True
+            MatchID = mid(TSP.GetRound("text"),2)
+            for k = 1 to 5          ' Aktuellen SpielStand aus den Konferenz Panels ziehen (falls mgl)
+                if tw_konferenz.ComponentByName("pn_game" & k).UserData = MatchID then
+                    tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text = tw_konferenz.ComponentByName("score" & 2*k-1).Caption
+                    tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text = tw_konferenz.ComponentByName("score" & 2*k).Caption
+                    exit for
+                end if
+            next
+        end if
+        i = i + 1
+    Loop While TSP.SetRoundPos("Next")
+    do while (i <= 5)
+        tw_blitzTab_MANUELL.ComponentByName("teamA"  & i).Visible = False
+        tw_blitzTab_MANUELL.ComponentByName("teamB"  & i).Visible = False
+        tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Visible = False
+        tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Visible = False
+        i = i + 1
+    loop
+    tw_blitzTab_MANUELL_cb_dayChange Sender
+
+    if Button = 1 then  ' Manuell
+        tw_blitzTab_MANUELL.Visible = true
+        tw_blitzTab_MANUELL.BringToFront
+    else    ' Alles automatisch berechnen
+        tw_blitzTab_MANUELL_bt_updateClick (tw_blitzTab_MANUELL.bt_update)      ' Aktuelle Spielstände einpflegen in die Ergebnisse vom vorherigen SpielTag
+        tw_blitzTab_MANUELL_bt_calc_table1Click (Sender)  ' Blitz  Tabelle berechnen
+    end if
+end sub
+
+</script_body>
+</script>

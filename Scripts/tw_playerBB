@@ -1,0 +1,113 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub get_player_stats()
+    dim db_param1, db_param2, db_param3, pID, match_param1, match_param2, match_param3
+    pgMain.stats.Cells(0, 1) = ""
+    pgMain.stats.Cells(1, 1) = ""
+    pgMain.stats.Cells(2, 1) = ""
+    pgMain.stats.Cells(3, 1) = ""
+    pgMain.stats.Cells(4, 1) = ""
+    pgMain.stats.Cells(5, 1) = ""
+    pgMain.stats.Cells(0, 2) = ""
+    pgMain.stats.Cells(1, 2) = ""
+    pgMain.stats.Cells(2, 2) = ""
+    pgMain.stats.Cells(3, 2) = ""
+    pgMain.stats.Cells(4, 2) = ""
+    pgMain.stats.Cells(5, 2) = ""
+
+    match_param1 = PLAYER_STATS_MATCH.item(pgMain.cb_param1.Text)
+    match_param2 = PLAYER_STATS_MATCH.item(pgMain.cb_param2.Text)
+    match_param3 = PLAYER_STATS_MATCH.item(pgMain.cb_param3.Text)
+    match_param4 = PLAYER_STATS_MATCH.item(pgMain.cb_param4.Text)
+    match_param5 = PLAYER_STATS_MATCH.item(pgMain.cb_param5.Text)
+    match_param6 = PLAYER_STATS_MATCH.item(pgMain.cb_param6.Text)
+    db_param1    = PLAYER_STATS_SEASON.item(pgMain.cb_param1.Text)
+    db_param2    = PLAYER_STATS_SEASON.item(pgMain.cb_param2.Text)
+    db_param3    = PLAYER_STATS_SEASON.item(pgMain.cb_param3.Text)
+    db_param4    = PLAYER_STATS_SEASON.item(pgMain.cb_param4.Text)
+    db_param5    = PLAYER_STATS_SEASON.item(pgMain.cb_param5.Text)
+    db_param6    = PLAYER_STATS_SEASON.item(pgMain.cb_param6.Text)
+
+    on error resume next    ' Wichtig falls Current_Match_Data gar nicht vorhanden
+    pID = TSP.GetTPlayer(TSP_OPTA_ID)
+    ' MATCH STATS
+    pgMain.stats.Cells(0, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param1)
+    pgMain.stats.Cells(1, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param2)
+    pgMain.stats.Cells(2, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param3)
+    pgMain.stats.Cells(3, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param4)
+    pgMain.stats.Cells(4, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param5)
+    pgMain.stats.Cells(5, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param6)
+    ' SEASON STATS
+    pgMain.stats.Cells(0, 2) = TSP_get_info_from_db("PLAYERS_2", db_param1, "OPTA_ID", pID)
+    pgMain.stats.Cells(1, 2) = TSP_get_info_from_db("PLAYERS_2", db_param2, "OPTA_ID", pID)
+    pgMain.stats.Cells(2, 2) = TSP_get_info_from_db("PLAYERS_2", db_param3, "OPTA_ID", pID)
+    pgMain.stats.Cells(3, 2) = TSP_get_info_from_db("PLAYERS_2", db_param4, "OPTA_ID", pID)
+    pgMain.stats.Cells(4, 2) = TSP_get_info_from_db("PLAYERS_2", db_param5, "OPTA_ID", pID)
+    pgMain.stats.Cells(5, 2) = TSP_get_info_from_db("PLAYERS_2", db_param6, "OPTA_ID", pID)
+    on error goto 0
+end sub
+
+sub tw_playerBB_bt_show_crawlClick (Sender)
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim i
+    for i = 0 to pgMain.Memo1.Lines.Count - 1
+        Data.Item("LINE" & i + 1) = pgMain.Memo1.Lines.Strings(i)
+    next
+    Data.Item("NAME") = pgMain.ed_Name.Text
+    Data.Item("FNAME") = pgMain.ed_FName.Text
+    Data.Item("LOGO") = pgMain.ed_logo.Text
+    Data.Item("NR") = pgMain.ed_NR.Text
+    Data.Item("SHOWHS") = pgMain.cb_showHS.Checked
+    Data.Item("ITEMCOUNT") = pgMain.Memo1.Lines.Count
+    Data.item("BBTYP")=pgMain.cb_bb_typ.ItemIndex
+    AllTV.TV__BB_Player Data, pgMain.cb_two_lines.Checked
+    set Data = Nothing
+end sub
+
+sub tw_playerBB_bt_show_statsClick (Sender)
+end sub
+
+sub tw_playerBB_listClick (Sender)
+    if Sender.ItemIndex <> -1 then
+        pgMain.DataBar1.LoadData pgMain.list.Items.Strings(Sender.itemindex)
+    end if
+end sub
+
+sub tw_player_BB_list_refresh()
+    dim i
+    pgMain.list.Items.Clear
+    for i = 0 to pgMain.DataBar1.DataItemCount
+
+        pgMain.list.Items.Add pgMain.DataBar1.DataItems(i)
+    next
+end sub
+
+sub tw_playerBB_bt_saveClick (Sender)
+    pgMain.DataBar1.SaveData pgMain.ed_Name.Text
+    tw_player_BB_list_refresh
+end sub
+
+sub tw_playerBB_listDblClick (Sender)
+     call tw_playerBB_listClick (Sender)
+     call tw_playerBB_bt_show_crawlClick (Sender)
+end sub
+
+
+
+sub tw_playerBB_DataBar1BeforeDataSave (Sender, ComboText)
+    if pgMain.list.Items.IndexOf(ComboText) = -1 then
+        pgMain.list.Items.add ComboText
+    end if
+end sub
+
+sub tw_playerBB_DataBar1BeforeDataDelete (Sender, ComboText)
+    if pgMain.list.Items.IndexOf(ComboText) <> -1 then
+        pgMain.list.Items.Delete(pgMain.list.Items.IndexOf(ComboText))
+    end if
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,39 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+sub tw_startingv_image_btn_showClick (Sender)
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim i
+    for i=0 to 5
+        Data.Item("BIB"  & i) = tw_startingv_image.ComponentByName("tb_nr_"&i).Text
+        Data.Item("NAME" & i) = tw_startingv_image.ComponentByName("tb_name_"&i).Text
+        Data.Item("FNAME" & i) = tw_startingv_image.ComponentByName("tb_fname_"&i).Text
+        Data.Item("PHOTO" & i) = tw_startingv_image.ComponentByName("cb_photo_"&i).Text
+    next
+
+    Data.Item("LOGO")      = tw_startingv_image.cb_logo.Text
+    Data.Item("HL") =   tw_startingv_image.tb_hl.Text
+
+
+    AllTV.TV__BB_Starting_Five_Image Data
+    set Data = Nothing
+
+end sub
+
+sub tw_startingv_image_cb_logoChange (Sender)
+    dim subdir
+    subdir= tw_startingv_image.cb_logo.Text
+
+     AllTV.get_player_photos(subdir)
+end sub
+
+sub tw_startingv_image_btn_show_werbungClick (Sender)
+  ' script tw_startingv_image_btn_show_werbungClick generated on 9/17/2014 at 8:50:08 AM
+  ' description of params:
+  ' Sender as IccButton
+  AllTV.TV__ShowWerbung
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,274 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_NameTranslation_btnLoadMatchDataClick (Sender)
+    DIM intStart, intEnd, i, TC
+    
+    ' Teams laden
+    SELECT CASE Sender.Name
+        CASE "btnLoadMatchDataAB"   :   intStart = 1    :   intEnd = 2
+        CASE "btnLoadMatchDataA"    :   intStart = 1    :   intEnd = 1
+        CASE "btnLoadMatchDataB"    :   intStart = 2    :   intEnd = 2
+        CASE ELSE EXIT SUB
+    END SELECT
+    
+    TSP.SaveSelection
+    FOR i = intStart TO intEnd
+        IF i = 1 THEN TC = "A" ELSE TC = "B"
+        TSP.SetTeamPos TC
+        CALL AddTranslation("T_" & TSP.GetSTeam(TSP_db_id), TSP.GetSTeam(TSP_long_name), TSP.GetSTeam(TSP_short_name), TSP.GetSTeam(TSP_short_name), TSP.GetSTeam(TSP_long_name), TSP.GetSTeam(TSP_short_name), TSP.GetSTeam(TSP_short_name), false)
+        CALL AddTranslation("C_" & TSP.GetSTeam("coach_1_id"), TSP.GetOfficialById(TSP.GetSTeam("coach_1_id"),"First_name"), TSP.GetOfficialById(TSP.GetSTeam("coach_1_id"),"Last_name"), TSP.GetSTeam(TSP_short_name),  TSP.GetOfficialById(TSP.GetSTeam("coach_1_id"),"First_name"), TSP.GetOfficialById(TSP.GetSTeam("coach_1_id"),"Last_name"), TSP.GetSTeam(TSP_short_name), false)
+        TSP.SetPlayerPos TSP_First, TSP_ALL, TC
+        DO
+          if AddTranslation("P_" & TSP.GetHPlayer(TSP_db_id), TSP.GetHPlayer(TSP_first_name), TSP.GetHPlayer(TSP_second_name), TSP.GetSTeam(TSP_short_name), TSP.GetHPlayer(TSP_first_name), TSP.GetHPlayer(TSP_second_name), TSP.GetSTeam(TSP_short_name), false) = vbCancel Then Exit for
+        LOOP UNTIL TSP.SetPlayerPos(TSP_Next, TSP_ALL, TC) = False
+    NEXT
+    TSP.RestoreSelection
+    LoadTranslation2Grid
+    
+END SUB
+
+FUNCTION GetNameTranslation(ByVal strType, ByVal strID, ByVal strValue)
+    DIM myID : myID = strType & "_" & strID
+    dim nick_name
+    pg_settings.btnPlayerNames.Enabled = pgextra.cb_nameTranslation.Checked
+    
+
+    if not pgextra.cb_nameTranslation.Checked then
+        if strValue = TSP_player_name then
+            nick_name = tsp.GetPlayerByID(TSP_HPlayer, strID, "NICK_NAME")
+            if trim(nick_name) <> "" then
+                GetNameTranslation = nick_name
+            else
+                if strType = "C" then
+                    GetNameTranslation = GetNameTranslation(strType, strID, TSP_first_name) & " " & GetNameTranslation(strType, strID, TSP_last_name)
+                else
+                    GetNameTranslation = GetNameTranslation(strType, strID, TSP_first_name) & " " & GetNameTranslation(strType, strID, TSP_second_name)
+                end if
+            end if
+        else
+            if     strType = "P" then
+                nick_name = tsp.GetPlayerByID(TSP_HPlayer, strID, "NICK_NAME")
+                if trim(nick_name) <> "" then
+                    GetNameTranslation = nick_name
+                else
+                    GetNameTranslation =  tsp.GetPlayerByID(TSP_HPlayer, strID, strValue)
+                end if
+             elseif strType= "TV" then
+                nick_name = tsp.GetPlayerByID(TSP_HPlayer, strID, "TV_NAME")
+                if trim(nick_name) <> "" then
+                    GetNameTranslation = nick_name
+                else
+                    GetNameTranslation =  tsp.GetPlayerByID(TSP_HPlayer, strID, strValue)
+                end if
+            elseif strType = "T" then
+                GetNameTranslation =  tsp.GetTeamByID(TSP_STeam, strID, strValue)
+            elseif strType = "C" then
+                GetNameTranslation =  tsp.GetOfficialById(strID, strValue)
+            else
+                cc.sf.debugtext "FAILED!"
+            end if
+        end if
+    else
+        IF objNameTrans.Exists(myID) THEN
+
+            SELECT CASE strValue
+                CASE TSP_first_name, TSP_long_name
+                    GetNameTranslation = objNameTrans.Item(myID).Item("FNAME")
+                CASE TSP_second_name, TSP_short_name
+                    GetNameTranslation = objNameTrans.Item(myID).Item("LNAME")
+                CASE TSP_player_name
+                     GetNameTranslation = trim(objNameTrans.Item(myID).Item("FNAME") & " "  & objNameTrans.Item(myID).Item("LNAME"))
+            END SELECT
+         else
+            CC.sf.DebugText "CANNOT FIND " & strID & " IN PLAYER TRANSLATIONS TABLE"
+         END IF
+    end if
+
+END FUNCTION
+
+FUNCTION AddTranslation(ByVal myID, ByVal strOCX_FName, ByVal strOCX_LName, ByVal strOCX_TEAM, ByVal strFName, ByVal strLName, ByVal strTEAM, ByVal bAutoMode)
+    IF NOT objNameTrans.Exists(myID) THEN ' existiert noch nicht, dann anlegen
+         SET objNameTrans.Item(myID) = CreateObject("Scripting.Dictionary")
+    ELSE
+    
+        EXIT FUNCTION
+    
+    
+        ' Überschreiben?
+        IF NOT bAutoMode THEN
+            AddTranslation = MsgBox(strOCX_LName & " existiert bereits! Überschreiben?", vbYesNoCancel)
+            IF NOT AddTranslation = vbYes THEN EXIT FUNCTION
+        END IF
+    END IF
+    objNameTrans.Item(myID).Item("OCX_FNAME") = strOCX_FName
+    objNameTrans.Item(myID).Item("OCX_LNAME") = strOCX_LName
+    objNameTrans.Item(myID).Item("OCX_TEAM") = strOCX_TEAM
+    objNameTrans.Item(myID).Item("FNAME") = strFName
+    objNameTrans.Item(myID).Item("LNAME") = strLName
+    objNameTrans.Item(myID).Item("TEAM") = strTEAM
+END FUNCTION
+
+
+FUNCTION LoadTranslation2Grid
+    DIM myGrid : SET myGrid = tw_NameTranslation.grdTrans
+    DIM myKeys, i
+    myKeys = objNameTrans.Keys
+    myGrid.Clear false
+    
+    IF objNameTrans.Count > 0 THEN
+        myGrid.RowCount = objNameTrans.Count + 1
+    ELSE
+        myGrid.RowCount = 2
+    END IF
+    
+    FOR i = 0 TO objNameTrans.Count - 1
+        myGrid.Cells(i+1,0) = myKeys(i)
+        myGrid.Cells(i+1,1) = objNameTrans.Item(myKeys(i)).Item("OCX_FNAME")
+        myGrid.Cells(i+1,2) = objNameTrans.Item(myKeys(i)).Item("OCX_LNAME")
+        myGrid.Cells(i+1,3) = objNameTrans.Item(myKeys(i)).Item("OCX_TEAM")
+    NEXT
+END FUNCTION
+
+sub tw_NameTranslation_btnLoadMatchData1Click (Sender)
+    'SaveTranslationToDict
+    tw_NameTranslation.edtFileName.Text = SaveTranslationAsCSV  (tw_NameTranslation.edtFileName.Text)
+end sub
+
+
+
+
+FUNCTION SaveTranslationAsCSV (ByVal strFileName)
+    DIM myCSVData, myFile
+    myCSVData = GetTranslationCSVData
+
+    IF cc.Files.FileExists (strFileName) THEN
+        myFile = strFileName
+    ELSE
+        myFile = cc.Dialogs.SaveDialog("", "*.csv")
+    END IF
+    IF NOT myFile = "" THEN
+        SaveCSVData myFile, myCSVData
+    END IF
+    SaveTranslationAsCSV = myFile
+END FUNCTION
+
+FUNCTION GetTranslationCSVData
+    DIM i, myText : myText = ""
+    
+    DIM myKeys : myKeys = objNameTrans.Keys
+    myText = "ID;OCX_FNAME;OCX_LNAME;OCX_TEAM;FNAME;LNAME;TEAM" & vbCrLf
+    FOR i = 0 TO objNameTrans.Count - 1
+        myText = myText & myKeys(i) & ";"
+        myText = myText & objNameTrans.Item(myKeys(i)).Item("OCX_FNAME") & ";"
+        myText = myText & objNameTrans.Item(myKeys(i)).Item("OCX_LNAME") & ";"
+        myText = myText & objNameTrans.Item(myKeys(i)).Item("OCX_TEAM")  & ";"
+        myText = myText & objNameTrans.Item(myKeys(i)).Item("FNAME")     & ";"
+        myText = myText & objNameTrans.Item(myKeys(i)).Item("LNAME")     & ";"
+        myText = myText & objNameTrans.Item(myKeys(i)).Item("TEAM")      & vbCrLf
+    NEXT
+    GetTranslationCSVData = myText
+END FUNCTION
+
+
+sub tw_NameTranslation_btnLoadMatchData2Click (Sender)
+    LoadNameTranslations
+end sub
+
+SUB LoadNameTranslations
+    DIM myFile : myFile =  CC.DEFS.AppPath & "\Data\" & cc.DEFS.ProjectName & "\Data\Database\" & "Names.csv"   ''tw_NameTranslation.edtFileName.Text
+    tw_NameTranslation.edtFileName.Text = myFile
+    IF not cc.Files.FileExists (myFile) THEN
+        dim old_dir  : old_dir  = CC.Files.GetFileDir(myFile)
+        dim new_file : new_file = CC.Dialogs.OpenDialog("*.csv", "old_dir")
+        if CC.Files.FileExists(new_file) Then
+            tw_NameTranslation.edtFileName.Text = new_file
+            myFile = new_File
+        else
+            msgbox("Cannot read or access Name Translation file """ & new_file & """")
+            exit sub
+        end if
+    END IF
+    LoadCSVDataToDict (LoadCSVData(myFile))
+    LoadTranslation2Grid
+END SUB
+
+
+FUNCTION LoadCSVDataToDict(ByVal myText)
+    DIM myLines, myLine, tmpLine, i, j
+    myLines = Split(myText, vbCrLf)
+
+    objNameTrans.RemoveAll
+    
+    FOR i = 1 TO UBound(myLines) ' erste Zeile (Zeile 0) auslassen
+        myLine = Split(myLines(i), ";")
+        IF UBOUND(myLine)= 6 THEN
+            CALL AddTranslation(myLine(0), myLine(1), myLine(2), myLine(3), myLine(4), myLine(5), myLine(6), true)
+        END IF
+    NEXT
+END FUNCTION
+
+sub tw_NameTranslation_grdTransClickCell (Sender, AColumn, ARow)
+    IF ARow > 0 THEN
+        LoadSelectedListItem(ARow)
+    END IF
+end sub
+
+SUB LoadSelectedListItem(ByVal myRow)
+    DIM myGrid : SET myGrid = tw_NameTranslation.grdTrans
+    DIM myID : myID = myGrid.Cells(myRow, 0)
+
+    IF objNameTrans.Exists(myID) THEN
+        CALL SetEditForm(myID, objNameTrans.Item(myID).Item("FNAME") , objNameTrans.Item(myID).Item("LNAME"), objNameTrans.Item(myID).Item("TEAM"), _
+                               objNameTrans.Item(myID).Item("OCX_FNAME") , objNameTrans.Item(myID).Item("OCX_LNAME"), objNameTrans.Item(myID).Item("OCX_TEAM"))
+    ELSE
+        CALL SetEditForm("", "", "", "", "", "", "")
+    END IF
+
+END SUB
+
+SUB SetEditForm(ByVal myID, ByVal myFNAME, ByVal myLNAME, ByVal myTEAM, ByVal myOCX_FNAME, ByVal myOCX_LNAME, ByVal myOCX_TEAM)
+    tw_NameTranslation.edt_ID.Text = myID
+    
+    tw_NameTranslation.edt_FNAME.Text     = myFNAME
+    tw_NameTranslation.edt_FNAME.UserData = myOCX_FNAME
+    CALL CheckChanges (tw_NameTranslation.edt_FNAME)
+     
+    tw_NameTranslation.edt_LNAME.Text     = myLNAME
+    tw_NameTranslation.edt_LNAME.UserData = myOCX_LNAME
+    CALL CheckChanges (tw_NameTranslation.edt_LNAME)
+
+    tw_NameTranslation.edt_TEAM.Text     = myTEAM
+    tw_NameTranslation.edt_TEAM.UserData = myOCX_TEAM
+    CALL CheckChanges (tw_NameTranslation.edt_TEAM)
+END SUB
+
+sub tw_NameTranslation_btnLoadMatchData3Click (Sender)
+    DIM myID : myID = tw_NameTranslation.edt_ID.Text
+    IF objNameTrans.Exists(myID) THEN
+        objNameTrans.Item(myID).Item("FNAME") = tw_NameTranslation.edt_FNAME.Text
+        objNameTrans.Item(myID).Item("LNAME") = tw_NameTranslation.edt_LNAME.Text
+        objNameTrans.Item(myID).Item("TEAM")  = tw_NameTranslation.edt_TEAM.Text
+    END IF
+end sub
+
+SUB CheckChanges (ByRef edtEdit)
+
+    IF edtEdit.Text = edtEdit.UserData THEN
+        edtEdit.Font.Bold = false
+        edtEdit.Color = clWindow
+    ELSE
+        edtEdit.Font.Bold = true
+        edtEdit.Color = clLime
+    END IF
+    
+END SUB
+
+sub tw_NameTranslation_edt_FNAMEKeyUp (Sender, Key, Shift)
+    CALL CheckChanges (Sender)
+end sub
+
+</script_body>
+</script>

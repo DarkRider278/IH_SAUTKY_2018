@@ -1,0 +1,62 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_twittervoting_bt_showClick (Sender)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    Data.item("HL") = tw_twittervoting.ed_title.Text
+    Data.item("QUESTION") = tw_twittervoting.ed_question.Text
+    Data.item("SL1") = tw_twittervoting.ed_sl_1.Text
+    Data.item("SL2") = tw_twittervoting.ed_sl_2.Text
+    Data.item("PHOTO1") = tw_twittervoting.ed_nr1.Text
+    Data.item("PHOTO2") = tw_twittervoting.ed_nr2.Text
+    Data.item("VS1") = tw_twittervoting.edt_start_1.Text
+    Data.item("VS2") = tw_twittervoting.edt_start_2.Text
+    Data.item("VE1") = tw_twittervoting.edt_end_1.Text
+    Data.item("VE2") = tw_twittervoting.edt_end_2.Text
+    Data.item("TYP") = tw_twittervoting.rb_typ.ItemIndex
+    Data.item("PHOTO") = tw_twittervoting.cb_photo.Checked
+    Data.item("TWITTER") = tw_twittervoting.cb_twitterbug.Checked
+    Data.item("LOGO1") = tw_twittervoting.cb_name1.Text
+    Data.item("LOGO2") = tw_twittervoting.cb_name2.Text
+
+    AllTV.TV__IB_Twittervoting Data
+    set Data = Nothing
+end sub
+
+sub tw_twittervoting_edt_start_1Change (Sender)
+  dim i
+  i=tw_twittervoting.edt_start_1.Text
+  if i <> "" then  tw_twittervoting.edt_start_2.Text = 100- i
+end sub
+
+sub tw_twittervoting_edt_start_2Change (Sender)
+   dim i
+  i=tw_twittervoting.edt_start_2.Text
+  if i <> "" then tw_twittervoting.edt_start_1.Text = 100- i
+end sub
+
+sub tw_twittervoting_edt_end_1Change (Sender)
+  dim i
+  i=tw_twittervoting.edt_end_1.Text
+  if i <> "" then  tw_twittervoting.edt_end_2.Text = 100- i
+
+end sub
+
+sub tw_twittervoting_edt_end_2Change (Sender)
+  dim i
+  i=tw_twittervoting.edt_end_2.Text
+  if i <> "" then  tw_twittervoting.edt_end_1.Text = 100- i
+
+end sub
+
+
+
+sub tw_twittervoting_bt_bbupdateClick (Sender)
+tw_twittervoting.edt_start_1.Text=tw_twittervoting.edt_end_1.Text
+tw_twittervoting.edt_start_2.Text=tw_twittervoting.edt_end_2.Text
+end sub
+
+</script_body>
+</script>

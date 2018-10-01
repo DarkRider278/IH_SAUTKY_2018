@@ -1,0 +1,265 @@
+object tw_lineupphoto: TccToolWindow
+  Tag = 5
+  FloatingBorderStyle = bsNone
+  Caption = 'Lineup Photo'
+  Color = 3289650
+  ClientAreaHeight = 322
+  ClientAreaWidth = 284
+  DockableTo = []
+  LastDock = frmMain.dckLeft
+  Resizable = False
+  TabOrder = 0
+  Visible = False
+  Floating = True
+  ParentColor = False
+  Float = True
+  SavedAtRunTime = True
+  object Label1: TptLabel
+    Left = 15
+    Top = 50
+    Width = 27
+    Height = 13
+    Caption = 'Team'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Locked = False
+  end
+  object Label2: TptLabel
+    Left = 15
+    Top = 105
+    Width = 28
+    Height = 13
+    Caption = 'Photo'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Locked = False
+  end
+  object Label3: TptLabel
+    Left = 15
+    Top = 170
+    Width = 28
+    Height = 13
+    Caption = 'Name'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Locked = False
+  end
+  object cb_logo: TptComboBox
+    Left = 15
+    Top = 70
+    Width = 226
+    Height = 21
+    TabOrder = 0
+    ItemIndex = -1
+    DroppedWidth = 226
+    DropDownAutoSize = False
+    FixedStyle = False
+    SaveStyle = cbssStandard
+    Locked = False
+    EventDataNames = 'OnChange=tw_lineupphoto_cb_logoChange'
+  end
+  object cb_photo: TptComboBox
+    Left = 15
+    Top = 130
+    Width = 226
+    Height = 21
+    TabOrder = 1
+    Items.WideStrings = (
+      '10'
+      '11'
+      '13'
+      '14'
+      '15'
+      '17'
+      '18'
+      '19'
+      '21'
+      '22'
+      '23'
+      '24'
+      '26'
+      '27'
+      '29'
+      '31'
+      '34'
+      '38'
+      '41'
+      '55'
+      '58'
+      '61'
+      '66'
+      '7'
+      '72'
+      '74'
+      '78'
+      '8'
+      '88'
+      '9')
+    ItemIndex = -1
+    DroppedWidth = 226
+    DropDownAutoSize = False
+    FixedStyle = False
+    SaveStyle = cbssStandard
+    Locked = False
+  end
+  object cb_name: TptComboBox
+    Left = 15
+    Top = 190
+    Width = 226
+    Height = 21
+    TabOrder = 2
+    Text = 'Duba'
+    Items.WideStrings = (
+      'Potulny'
+      'Kragl'
+      'Franz'
+      'McLean'
+      'P. Lukas'
+      'R. Lukas'
+      ''
+      ''
+      ''
+      ''
+      '')
+    ItemIndex = -1
+    DroppedWidth = 226
+    DropDownAutoSize = False
+    FixedStyle = False
+    SaveStyle = cbssStandard
+    Locked = False
+  end
+  object DataBar1: TptDataBar
+    Left = 0
+    Top = 0
+    Width = 284
+    Height = 35
+    Align = alTop
+    Color = 13816530
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 3
+    DataGroupName = 'ToolWindow2'
+    DataGroupStyle = dsLocal
+    DataComboBoxWidth = 180
+    ButtonStyle = bsImageOnly
+    BorderWidth = 4
+    VisibleDataCbx = True
+    VisibleSaveBtn = True
+    VisibleRefreshBtn = False
+    VisibleDeleteBtn = True
+    VisibleNextBtn = False
+    VisiblePreviousBtn = False
+    DataVisibility = kfNone
+    Locked = False
+  end
+  object btn_show: TptButton
+    Left = 18
+    Top = 245
+    Width = 116
+    Height = 41
+    Caption = 'Show'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -20
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ModalResult = mrNone
+    ParentFont = False
+    TabOrder = 4
+    ParentColor = False
+    Color = clBtnFace
+    ColorMouseOver = clBtnFace
+    ColorFocused = clBtnFace
+    DrawFocusRect = False
+    MultiLineCaption = False
+    Alignment = alMiddleCenter
+    FontFocused.Charset = DEFAULT_CHARSET
+    FontFocused.Color = clWindowText
+    FontFocused.Height = -11
+    FontFocused.Name = 'MS Sans Serif'
+    FontFocused.Style = []
+    FontMouseOver.Charset = DEFAULT_CHARSET
+    FontMouseOver.Color = clWindowText
+    FontMouseOver.Height = -11
+    FontMouseOver.Name = 'MS Sans Serif'
+    FontMouseOver.Style = []
+    PreferFocused = False
+    FrameSize = 2
+    BackgroundTransparent = False
+    BackgroundStretch = True
+    BackgroundTransparentColor = clBlack
+    Down = False
+    DrawFocusBorder = True
+    Checkable = False
+    RightPressDown = False
+    StoreBackground = True
+    Hotkey.Shift = []
+    Hotkey.IsLong = False
+    Hotkey.Enabled = True
+    Locked = False
+    EventDataNames = 'OnClick=tw_lineupphoto_btn_showClick'
+  end
+  object btn_hide: TptButton
+    Left = 153
+    Top = 245
+    Width = 116
+    Height = 41
+    Caption = 'Hide'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -20
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ModalResult = mrNone
+    ParentFont = False
+    TabOrder = 5
+    ParentColor = False
+    Color = clBtnFace
+    ColorMouseOver = clBtnFace
+    ColorFocused = clBtnFace
+    DrawFocusRect = False
+    MultiLineCaption = False
+    Alignment = alMiddleCenter
+    FontFocused.Charset = DEFAULT_CHARSET
+    FontFocused.Color = clWindowText
+    FontFocused.Height = -11
+    FontFocused.Name = 'MS Sans Serif'
+    FontFocused.Style = []
+    FontMouseOver.Charset = DEFAULT_CHARSET
+    FontMouseOver.Color = clWindowText
+    FontMouseOver.Height = -11
+    FontMouseOver.Name = 'MS Sans Serif'
+    FontMouseOver.Style = []
+    PreferFocused = False
+    FrameSize = 2
+    BackgroundTransparent = False
+    BackgroundStretch = True
+    BackgroundTransparentColor = clBlack
+    Down = False
+    DrawFocusBorder = True
+    Checkable = False
+    RightPressDown = False
+    StoreBackground = True
+    Hotkey.Shift = []
+    Hotkey.IsLong = False
+    Hotkey.Enabled = True
+    Locked = False
+    EventDataNames = 'OnClick=tw_lineupphoto_btn_hideClick'
+  end
+end

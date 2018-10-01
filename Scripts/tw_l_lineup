@@ -1,0 +1,275 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_l_lineup_rb_bbClick (Sender)
+    if tw_l_lineup.rb_bb.ItemIndex=0 then
+        tw_l_lineup.cb_bb_name1.Visible=true
+        tw_l_lineup.cb_bb_name2.Visible=false
+        tw_l_lineup.lbl_bb_headline.Visible=true
+        tw_l_lineup.lbl_bb_headline.Caption="Headline"
+        tw_l_lineup.lbl_bb_vs.Visible=false
+        tw_l_lineup.lbl_bb_score.Visible=false
+        tw_l_lineup.ed_bb_headline.Visible=true
+        tw_l_lineup.ed_bb_score.Visible=false
+        tw_l_lineup.pa_playerstat.Visible=true
+        tw_l_lineup.cb_crawlleft.Visible=false
+        tw_l_lineup.bt_addr.Visible=false
+        tw_l_lineup.ed_bb_crawl2.Visible=false
+    elseif tw_l_lineup.rb_bb.ItemIndex=1 then
+        tw_l_lineup.cb_bb_name1.Visible=true
+        tw_l_lineup.cb_bb_name2.Visible=true
+        tw_l_lineup.lbl_bb_headline.Visible=false
+        tw_l_lineup.lbl_bb_vs.Visible=true
+        tw_l_lineup.lbl_bb_score.Visible=false
+        tw_l_lineup.ed_bb_headline.Visible=false
+        tw_l_lineup.ed_bb_score.Visible=false
+        tw_l_lineup.pa_playerstat.Visible=false
+        tw_l_lineup.cb_crawlleft.Visible=false
+        tw_l_lineup.bt_addr.Visible=false
+        tw_l_lineup.ed_bb_crawl2.Visible=false
+    elseif tw_l_lineup.rb_bb.ItemIndex=2 then
+        tw_l_lineup.cb_bb_name1.Visible=true
+        tw_l_lineup.cb_bb_name2.Visible=true
+        tw_l_lineup.lbl_bb_headline.Visible=false
+        tw_l_lineup.lbl_bb_vs.Visible=true
+        tw_l_lineup.lbl_bb_score.Visible=true
+        tw_l_lineup.ed_bb_headline.Visible=false
+        tw_l_lineup.ed_bb_score.Visible=true
+        tw_l_lineup.pa_playerstat.Visible=false
+        tw_l_lineup.cb_crawlleft.Visible=false
+        tw_l_lineup.bt_addr.Visible=false
+        tw_l_lineup.ed_bb_crawl2.Visible=false
+    elseif tw_l_lineup.rb_bb.ItemIndex=3 then
+        tw_l_lineup.cb_bb_name1.Visible=false
+        tw_l_lineup.cb_bb_name2.Visible=false
+        tw_l_lineup.lbl_bb_headline.Visible=true
+        tw_l_lineup.lbl_bb_headline.Caption="Headline"
+        tw_l_lineup.lbl_bb_vs.Visible=false
+        tw_l_lineup.lbl_bb_score.Visible=false
+        tw_l_lineup.ed_bb_headline.Visible=true
+        tw_l_lineup.ed_bb_score.Visible=false
+        tw_l_lineup.pa_playerstat.Visible=false
+        tw_l_lineup.cb_crawlleft.Visible=false
+        tw_l_lineup.bt_addr.Visible=false
+        tw_l_lineup.ed_bb_crawl2.Visible=false
+    else
+        tw_l_lineup.cb_bb_name1.Visible=true
+        tw_l_lineup.cb_bb_name2.Visible=true
+        tw_l_lineup.lbl_bb_headline.Visible=true
+        tw_l_lineup.lbl_bb_headline.Caption="Crawl"
+        tw_l_lineup.lbl_bb_vs.Visible=true
+        tw_l_lineup.lbl_bb_score.Visible=false
+        tw_l_lineup.ed_bb_headline.Visible=true
+        tw_l_lineup.ed_bb_score.Visible=false
+        tw_l_lineup.pa_playerstat.Visible=false
+        tw_l_lineup.cb_crawlleft.Visible=true
+        tw_l_lineup.bt_addr.Visible=true
+        tw_l_lineup.ed_bb_crawl2.Visible=true
+    end if
+end sub
+
+sub RefreshData_L_L
+    If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'") Then
+    'If TSP.LoadSQLData("SELECT * FROM TEAMS") Then
+            If TSP.SetSQLPos("First") Then
+                tw_l_lineup.cb_bb_name1.UserData = tw_l_lineup.cb_bb_name1.Text
+                tw_l_lineup.cb_bb_name2.UserData = tw_l_lineup.cb_bb_name2.Text
+
+                'tw_l_lineup.cb_name1.UserData = tw_l_lineup.cb_name1.Text
+                'tw_l_lineup.cb_name2.UserData = tw_l_lineup.cb_name2.Text
+
+                tw_l_lineup.cb_bb_name1.Items.Clear
+                tw_l_lineup.cb_bb_name2.Items.Clear
+
+                'tw_l_interview.cb_name1.Items.Clear
+                'tw_l_interview.cb_name2.Items.Clear
+
+                Do
+                    if tw_l_lineup.cb_bb_name1.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_lineup.cb_bb_name1.Items.Add TSP.GetSQLData("long_name")
+                    if tw_l_lineup.cb_bb_name2.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_lineup.cb_bb_name2.Items.Add TSP.GetSQLData("long_name")
+                    'if tw_l_lineup.cb_name1.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_lineup.cb_name1.Items.Add TSP.GetSQLData("long_name")
+                    'if tw_l_lineup.cb_name2.Items.IndexOf(TSP.GetSQLData("long_name")) = -1 then  tw_l_lineup.cb_name2.Items.Add TSP.GetSQLData("long_name")
+                Loop While TSP.SetSQLPos("Next")
+                tw_l_lineup.cb_bb_name1.ItemIndex =  tw_l_lineup.cb_bb_name1.Items.IndexOf( tw_l_lineup.cb_bb_name1.UserData)
+                tw_l_lineup.cb_bb_name2.ItemIndex =  tw_l_lineup.cb_bb_name2.Items.IndexOf( tw_l_lineup.cb_bb_name2.UserData)
+                'tw_l_lineup.cb_name1.ItemIndex =  tw_l_lineup.cb_name1.Items.IndexOf( tw_l_lineup.cb_name1.UserData)
+                'tw_l_lineup.cb_name2.ItemIndex =  tw_l_lineup.cb_name2.Items.IndexOf( tw_l_lineup.cb_name2.UserData)
+            end if
+    end if
+end sub
+
+sub tw_l_lineup_cb_bb_param1Change (Sender)
+    dim db_param1, db_param2, db_param3, pID, match_param1, match_param2, match_param3
+
+    tw_l_lineup.gr_bb_stats.Cells(0, 1) = ""
+    tw_l_lineup.gr_bb_stats.Cells(1, 1) = ""
+    tw_l_lineup.gr_bb_stats.Cells(2, 1) = ""
+    tw_l_lineup.gr_bb_stats.Cells(0, 2) = ""
+    tw_l_lineup.gr_bb_stats.Cells(1, 2) = ""
+    tw_l_lineup.gr_bb_stats.Cells(2, 2) = ""
+
+    match_param1 = PLAYER_STATS_MATCH.item(tw_l_lineup.cb_bb_param1.Text)
+    match_param2 = PLAYER_STATS_MATCH.item(tw_l_lineup.cb_bb_param2.Text)
+    match_param3 = PLAYER_STATS_MATCH.item(tw_l_lineup.cb_bb_param3.Text)
+    db_param1    = PLAYER_STATS_SEASON.item(tw_l_lineup.cb_bb_param1.Text)
+    db_param2    = PLAYER_STATS_SEASON.item(tw_l_lineup.cb_bb_param2.Text)
+    db_param3    = PLAYER_STATS_SEASON.item(tw_l_lineup.cb_bb_param3.Text)
+
+    on error resume next    ' Wichtig falls Current_Match_Data gar nicht vorhanden
+    pID = TSP.GetTPlayer(TSP_OPTA_ID)
+    ' MATCH STATS
+    tw_l_lineup.gr_bb_stats.Cells(0, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param1)
+    tw_l_lineup.gr_bb_stats.Cells(1, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param2)
+    tw_l_lineup.gr_bb_stats.Cells(2, 1) = CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & match_param3)
+
+    ' SEASON STATS
+    tw_l_lineup.gr_bb_stats.Cells(0, 2) = TSP_get_info_from_db("PLAYERS_2", db_param1, "OPTA_ID", pID)
+    tw_l_lineup.gr_bb_stats.Cells(1, 2) = TSP_get_info_from_db("PLAYERS_2", db_param2, "OPTA_ID", pID)
+    tw_l_lineup.gr_bb_stats.Cells(2, 2) = TSP_get_info_from_db("PLAYERS_2", db_param3, "OPTA_ID", pID)
+    on error goto 0
+end sub
+
+sub tw_l_lineup_bt_showClick (Sender)
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim i
+    dim k
+    'BB
+    Data.Item("BBTYP") = tw_l_lineup.rb_bb.ItemIndex
+    Data.Item("LOGO1") = TSP.GetTeamByName(tw_l_lineup.cb_bb_name1.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("LOGO2") = TSP.GetTeamByName(tw_l_lineup.cb_bb_name2.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("NAME1") = TSP.GetTeamByName(tw_l_lineup.cb_bb_name1.Text, TSP.GetGroup(), TSP_SHORT_NAME)
+    Data.Item("NAME2") = TSP.GetTeamByName(tw_l_lineup.cb_bb_name2.Text, TSP.GetGroup(), TSP_SHORT_NAME)
+
+    Data.Item("BBHL") = tw_l_lineup.ed_bb_headline.Text
+    Data.Item("BBSL") = tw_l_lineup.ed_bb_subline.Text
+    Data.Item("BBSCORE") = tw_l_lineup.ed_bb_score.Text
+    Data.Item("BBCRAWL2") = tw_l_lineup.ed_bb_crawl2.Text
+    Data.Item("BBSTATTYP") = tw_l_lineup.rb_bb_playerstat.ItemIndex
+
+    Data.Item("BBSTATTEXT1")  = tw_l_lineup.cb_bb_param1.Text
+    Data.Item("BBSTATTEXT2")  = tw_l_lineup.cb_bb_param2.Text
+    Data.Item("BBSTATTEXT3")  = tw_l_lineup.cb_bb_param3.Text
+
+    Data.Item("BBSTATHL1")    = (tw_l_lineup.gr_bb_stats.Cells(0,3) = "X")
+    Data.Item("BBSTATHL2")    = (tw_l_lineup.gr_bb_stats.Cells(1,3) = "X")
+    Data.Item("BBSTATHL3")    = (tw_l_lineup.gr_bb_stats.Cells(2,3) = "X")
+
+    if  tw_l_stat.rb_bb_playerstat.ItemIndex = 1 then
+        Data.Item("BBSTATVALUE1") = tw_l_lineup.gr_bb_stats.Cells(0,1)
+        Data.Item("BBSTATVALUE2") = tw_l_lineup.gr_bb_stats.Cells(1,1)
+        Data.Item("BBSTATVALUE3") = tw_l_lineup.gr_bb_stats.Cells(2,1)
+    else
+        Data.Item("BBSTATVALUE1") = tw_l_lineup.gr_bb_stats.Cells(0,2)
+        Data.Item("BBSTATVALUE2") = tw_l_lineup.gr_bb_stats.Cells(1,2)
+        Data.Item("BBSTATVALUE3") = tw_l_lineup.gr_bb_stats.Cells(2,2)
+    end if
+    
+    Data.item("CRAWLLEFT") = tw_l_lineup.cb_crawlleft.checked
+
+    'Lineup
+    if tw_l_lineup.cb_teambfirst.Checked = true then
+        Data.Item("BFIRST")="B"
+        TSP.SetTeamPos "A"
+        Data.Item("LNAME2") =TSP.GetSTeam(TSP_LONG_NAME)
+        Data.Item("LLOGO2")=TSP.GetSTeam(TSP_LOGO)
+        TSP.SetTeamPos "B"
+        Data.Item("LNAME1") =TSP.GetSTeam(TSP_LONG_NAME)
+        Data.Item("LLOGO1")=TSP.GetSTeam(TSP_LOGO)
+    else
+        Data.Item("BFIRST")="A"
+        TSP.SetTeamPos "A"
+        Data.Item("LNAME1") =TSP.GetSTeam(TSP_LONG_NAME)
+        Data.Item("LLOGO1")=TSP.GetSTeam(TSP_LOGO)
+        TSP.SetTeamPos "B"
+        Data.Item("LNAME2") =TSP.GetSTeam(TSP_LONG_NAME)
+        Data.Item("LLOGO2")=TSP.GetSTeam(TSP_LOGO)
+    end if
+    HideVorlaufLogos
+    AllTV.TV__LF_Lineup Data
+    set Data = Nothing
+end sub
+
+sub tw_l_lineup_bt_changeClick (Sender)
+    AllTV.TV__PlayDir("WECHSEL_TA")
+    'AllTV.TV__PlayDir("TEAMGAST")
+end sub
+
+sub tw_l_lineup_bt_addrClick (Sender)
+  dim i, k
+  dim text
+
+    dim tmp   : Set tmp = CreateObject("Scripting.Dictionary")
+    TSP.SaveSelection
+    if tw_l_lineup.cb_teambfirst.Checked=true then
+        TSP.SetTeamPos "B"
+        tw_l_lineup.cb_bb_name2.Text=  TSP.GetSTeam(TSP_LONG_NAME)
+    else
+        TSP.SetTeamPos "A"
+        tw_l_lineup.cb_bb_name1.Text=  TSP.GetSTeam(TSP_LONG_NAME)
+    end if
+    i = 0
+    TSP.SetPlayerPos TSP_First, TSP_ALL, TSP_Actual
+    Do
+        if (TSP.GetTPlayer(TSP_status) = "O") or (TSP.GetTPlayer(TSP_status) = "R") then
+            i = i + 1
+            tmp.Item("BIB"  & i) = TSP.GetTPlayer(TSP_dress_nr)
+            tmp.Item("NAME" & i) = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_second_name)
+            tmp.Item("TEXT" & i) = TSP.GetTPlayer(TSP_pos_in_game)
+        end if
+    Loop Until (TSP.SetPlayerPos("NEXT", "ALL", TSP_Actual) = False)
+
+
+    text="Reservebank - " &TSP.GetSTeam(TSP_LONG_NAME)
+    for k = 1 to i
+        if ucase(tmp.Item("TEXT" & k) )= "GOALKEEPER" then
+            text= tmp.Item("BIB"  & k)&" "&tmp.Item("NAME" & k)
+        end if
+    next
+    for k = 1 to i
+        if ucase(tmp.Item("TEXT" & k) )<> "GOALKEEPER" then
+            text= text&"   -   "&tmp.Item("BIB"  & k)&" "&tmp.Item("NAME" & k)
+        end if
+    next
+    text=text&"       +++"
+    tw_l_lineup.ed_bb_headline.Text=text
+    
+    if tw_l_lineup.cb_teambfirst.Checked=true then
+        TSP.SetTeamPos "A"
+        tw_l_lineup.cb_bb_name1.Text=  TSP.GetSTeam(TSP_LONG_NAME)
+    else
+        TSP.SetTeamPos "B"
+        tw_l_lineup.cb_bb_name2.Text=  TSP.GetSTeam(TSP_LONG_NAME)
+    end if
+    i = 0
+    TSP.SetPlayerPos TSP_First, TSP_ALL, TSP_Actual
+    Do
+        if (TSP.GetTPlayer(TSP_status) = "O") or (TSP.GetTPlayer(TSP_status) = "R") then
+            i = i + 1
+            tmp.Item("BIB"  & i) = TSP.GetTPlayer(TSP_dress_nr)
+            tmp.Item("NAME" & i) = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_second_name)
+            tmp.Item("TEXT" & i) = TSP.GetTPlayer(TSP_pos_in_game)
+        end if
+    Loop Until (TSP.SetPlayerPos("NEXT", "ALL", TSP_Actual) = False)
+
+
+    text="Reservebank - " &TSP.GetSTeam(TSP_LONG_NAME)
+    for k = 1 to i
+        if ucase(tmp.Item("TEXT" & k) )= "GOALKEEPER" then
+            text= tmp.Item("BIB"  & k)&" "&tmp.Item("NAME" & k)
+        end if
+    next
+    for k = 1 to i
+        if ucase(tmp.Item("TEXT" & k) )<> "GOALKEEPER" then
+            text= text&"   -   "&tmp.Item("BIB"  & k)&" "&tmp.Item("NAME" & k)
+        end if
+    next
+    text=text&"       +++"
+    tw_l_lineup.ed_bb_crawl2.Text=text
+    TSP.RestoreSelection
+
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,94 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_Options_Btn_SaveClick (Sender)
+    SaveOptionData
+end sub
+
+
+SUB LoadOptionData
+    tw_Options.chb_HighlightGK.Checked  = GetIniOption("SUBSTITUTES_HIGHLIGHT_GK", false)
+    tw_Options.rg_GKPosition.ItemIndex  = MakeNUmber(GetIniOption("SUBSTITUTES_SORT_GK", 0),1,0,2,0)
+END SUB
+
+SUB SaveOptionData
+    SetIniOption "SUBSTITUTES_HIGHLIGHT_GK", tw_Options.chb_HighlightGK.Checked
+    SetIniOption "SUBSTITUTES_SORT_GK",  tw_Options.rg_GKPosition.ItemIndex
+END SUB
+
+
+
+' ***********************************************************************************************************
+' Speichert eine Option im Projektdatenfile
+' ***********************************************************************************************************
+SUB SetIniOption(ByVal Item, ByVal NewVal)
+    ' Strings-Objekt leeren
+    CC.Strings.StringsObj.Clear
+
+    ' Gesamtdaten des Projektdatenfiles laden
+    CC.Strings.StringsObj.CommaText = CC.DataFunctions.LoadProjectData("ProjectData")
+
+    ' Wert an Eintrag zuweisen, falls nicht vorhanden, wird Eintrag angelegt
+    IF NewVal = "" THEN NewVal = " " ' Leerstring wird als Option nicht gespeichert, daher Leerzeichen erzeugen
+    CC.Strings.StringsObj.Values(Item) = NewVal
+
+    ' Gesamtdaten in Projektdatenfile zurückschreiben
+    CC.DataFunctions.SaveProjectData "ProjectData", CC.Strings.StringsObj.CommaText
+END SUB
+
+
+' ***********************************************************************************************************
+' Liest eine Option aus dem Projektdatenfile
+' (falls nicht vorhanden, wird der Defaultwert zurückgegeben)
+' ***********************************************************************************************************
+FUNCTION GetIniOption (ByVal Item, ByVal Default)
+    ' Strings-Objekt leeren
+    CC.Strings.StringsObj.Clear
+
+    ' Gesamtdaten des Projektdatenfiles laden
+    CC.Strings.StringsObj.CommaText = CC.DataFunctions.LoadProjectData("ProjectData")
+
+    ' Überprüfen, ob Option schon vorhanden (IndexOfName => 0), sonst Defaultwert
+    IF CC.Strings.StringsObj.IndexOfName(Item) = -1 THEN
+        GetIniOption = Default
+    ELSE
+        GetIniOption = CC.Strings.StringsObj.Values(Item)
+        IF GetIniOption = " " THEN GetIniOption = "" ' s. Skript SetIniOption
+    END IF
+END FUNCTION
+
+
+' ***********************************************************************************************************
+' Entfernt eine Option aus dem Projektdatenfile und gibt (vorher) ihren Wert zurück
+' (wenn nicht vorhanden, dann Defaultwert zurückgeben)
+' ***********************************************************************************************************
+FUNCTION DeleteIniOption (ByVal Item, ByVal Default)
+    ' Strings-Objekt leeren
+    CC.Strings.StringsObj.Clear
+
+    ' Gesamtdaten des Projektdatenfiles laden
+    CC.Strings.StringsObj.CommaText = CC.DataFunctions.LoadProjectData("ProjectData")
+
+    ' Überprüfen, ob Option vorhanden (IndexOfName => 0), sonst Defaultwert
+    IF CC.Strings.StringsObj.IndexOfName(Item) = -1 THEN
+        DeleteIniOption = Default
+    ELSE
+        ' Wert der Variablen an Funktions-Rückgabe zuweisen
+        DeleteIniOption = CC.Strings.StringsObj.Values(Item)
+        IF DeleteIniOption = " " THEN DeleteIniOption = "" ' s. Skript SetIniOption
+
+        ' Eintrag löschen
+        CC.Strings.StringsObj.Delete(CC.Strings.StringsObj.IndexOfName(Item))
+        ' geänderte Daten in Projektdatenfile zurückschreiben
+        CC.DataFunctions.SaveProjectData "ProjectData", CC.Strings.StringsObj.CommaText
+    END IF
+END FUNCTION
+
+sub tw_Options_Btn_CloseClick (Sender)
+    tw_Options.Visible = false
+end sub
+
+</script_body>
+</script>

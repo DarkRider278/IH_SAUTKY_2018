@@ -1,0 +1,28 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_butterfly_bt_show_llClick (Sender)
+    show(0)
+end sub
+
+sub tw_butterfly_bt_show1Click (Sender)
+    show(1)
+end sub
+
+sub show(typ)
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim i
+    Data.Item("TYP") = typ
+    Data.Item("HLL") = tw_butterfly.tb_hl_l.Text
+    Data.Item("HLR") = tw_butterfly.tb_hl_r.Text
+    Data.Item("SLL") = tw_butterfly.tb_sl_l.Text
+    Data.Item("SLR") = tw_butterfly.tb_sl_r.Text
+
+    AllTV.TV__Butterfly Data
+    set Data = Nothing
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,300 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_konferenz_bt_UP1Click (Sender)
+    if msgbox("Sicher?!", vbOKCancel) = vbOK then
+        dim id : id = right(Sender.Name, 1)
+        if id = "0" then id = "10"
+        tw_konferenz.ComponentByName("score" & id).caption = cInt(EmptyToZero(tw_konferenz.ComponentByName("score" & id).caption)) + 1
+        if sender.Parent.UserData = CURRENT_MATCH_OPTA_ID then   ' Müssen wir im TSP auch aktualisieren?
+            if cint(id) mod 2 then  ' Heim oder Away Team?
+                TSP.SetScore-1, TSP_A, tw_konferenz.ComponentByName("score" & id).caption
+            else
+                TSP.SetScore-1, TSP_B, tw_konferenz.ComponentByName("score" & id).caption
+            end if
+        end if
+    end if
+end sub
+
+sub tw_konferenz_bt_DOWN1Click (Sender)
+    dim id : id = right(Sender.Name, 1)
+    if id = "0" then id = "10"
+    if cInt(EmptyToZero(tw_konferenz.ComponentByName("score" & id).caption)) <= 0 then exit sub
+    if msgbox("Sicher?!", vbOKCancel) = vbOK then
+        tw_konferenz.ComponentByName("score" & id).caption = cInt(EmptyToZero(tw_konferenz.ComponentByName("score" & id).caption)) - 1
+        if sender.Parent.UserData = CURRENT_MATCH_OPTA_ID then   ' Müssen wir im TSP auch aktualisieren?
+            if cint(id) mod 2 then  ' Heim oder Away Team?
+                TSP.SetScore-1, TSP_A, tw_konferenz.ComponentByName("score" & id).caption
+            else
+                TSP.SetScore-1, TSP_B, tw_konferenz.ComponentByName("score" & id).caption
+            end if
+        end if
+    end if
+end sub
+
+
+
+sub tw_konferenz_Clock1MouseUp (Sender, Button, Shift, X, Y)
+    dim period
+    dim clock
+    if shift = 0 then  ' Uhr start stop
+        set period = tw_konferenz.ComponentByName("period" & right(Sender.Name,1))
+        set clock  = tw_konferenz.ComponentByName("clock"  & right(Sender.name,1))
+
+'        if msgbox("Sicher?!", vbOKCancel) = vbOK then
+            sender.ClockEnabled = not Sender.ClockEnabled
+
+            if Sender.ClockEnabled then    ' Uhr wurde gestartet  -> Waren wir in einer Pause?
+                select case period.caption
+                    case "11", "2", "4", "6", "8"
+                        if msgbox("Switch to next game period?", vbYesNo) = vbYes then
+                            if period.caption = "11" then
+                                period.caption = "1"
+                            else
+                                period.caption = cInt(period.caption) + 1
+                                select case period.caption
+                                    case "1"  call clock.SetNewTime(0,0,0,0)
+                                    case "3"  call clock.SetNewTime(0,45,0,0)
+                                    case "5"  call clock.SetNewTime(0,90,0,0)
+                                    case "7"  call clock.SetNewTime(0,105,0,0)
+                                end select
+                            end if
+                        end if
+                end select
+            else                            ' Die Uhr wurde angehalten
+                select case period.caption
+                    case "1"
+                        if clock.Minutes >= 45 then
+                            if msgbox("Switch to half-time break?", vbYesNo) = vbYes then period.caption = "2"
+                        end if
+                    case "3"
+                        if (clock.hours >= 1) and (clock.Minutes >= 30) then
+                          '  if tw_konferenz.ComponentByName("score" & 2*i) = tw_konferenz.ComponentByName("score" & 2*i-1) then     ' GleichStand nach 90 Minuten --> Verlängerung 2x 15min?
+                          '      if msgbox("Switch to 2x 15min extra time?", vbYesNo) = vbYes then
+                           '         period.caption = "4"     ' Pause zwischen 2. Halbzeit und 1. Verlängerung
+                           '     else
+                            '        period.caption = "10"    ' Endstand
+                           '     end if
+                          '  else
+                                if msgbox("Switch to Game end result?", vbYesNo) = vbYes then period.caption = "10"
+                           ' end if
+                        end if
+                    case "5"
+                        if (clock.hours >= 1) (clock.Minutes >= 45) then
+                            if msgbox("Switch to half-time break?", vbYesNo) = vbYes then period.caption = "6"
+                        end if
+                    case "7"
+                        if clock.Minutes >= 45 then
+                            if msgbox("Switch to half-time break?", vbYesNo) = vbYes then period.caption = "2"
+                        end if
+                end select
+            end if
+ '       end if
+        if not sender.ClockEnabled then
+            tw_konferenz.ComponentByName("pn_game" & right(Sender.Name,1)).Color = clYellow
+        else
+            tw_konferenz.ComponentByName("pn_game" & right(Sender.Name,1)).Color= rgb(103,103,103)
+        end if
+
+        ' Wenn wir gerade das aktuelle Spiel verändern dann auch im TSP die Zeit anhalten
+        if sender.Parent.UserData = CURRENT_MATCH_OPTA_ID then
+            if IsNumeric(period.caption) then
+                tsp.SetHalfTime(cInt(period.caption))
+            end if
+            
+            if sender.ClockEnabled then
+                tsp.StartMainTime
+            else
+                tsp.StopMainTime
+            end if
+        end if
+    else
+        dim time : time = InputBox("Neue Uhrzeit:", "Uhr justieren", Sender.ClockText)
+        time = Split(time, ":")
+        if Ubound(time) <> 1 then exit sub
+        call sender.SetNewTime(0, time(0), time(1), 0)
+        if sender.Parent.UserData = CURRENT_MATCH_OPTA_ID then
+            if IsNumeric(tw_konferenz.ComponentByName("period" & right(Sender.name,1)).caption) then tsp.SetHalfTime(cInt(tw_konferenz.ComponentByName("period" & right(Sender.name,1)).caption))
+            call tsp.SetMainTime(0, sender.Minutes, sender.Seconds, 0)
+        end if
+    end if
+    set period = Nothing
+    set clock  = Nothing
+end sub
+
+sub tw_konferenz_period1DblClick (Sender)
+    dim new_period
+    new_period = InputBox("Change the actual game period: " & vbNewline & _
+                          " 1 - 1st Halftime" & vbNewline &_
+                          " 2 -   Halftime Break" & vbNewline &_
+                          " 3 - 2nd Halftime" & vbNewline &_
+                          " 4 -   After regular game time" & vbNewline &_
+                          " 5 - 1st extra time" & vbNewline &_
+                          " 6 -   extra halftime break" & vbNewline &_
+                          " 7 - 2nd extra time" & vbNewline &_
+                          " 8 -   After extra time" & vbNewline &_
+                          " 9 - Penalty Shootout" & vbNewline &_
+                          "10 - Final Results" & vbNewline &_
+                          "11 - KickOff" & vbNewline, "Set period", Sender.Caption)
+    if (new_period <> "") and (IsNumeric(new_period)) then sender.Caption = new_period
+    
+    if     (new_period = "1") or (new_period = "11") then
+        if msgbox("Set time to 0:00?", vbYesNo)   = vbYes then
+            tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).Stop
+            call tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).SetNewTime(0,0,0,0)
+        end if
+    elseif (new_period = "3") then
+        if msgbox("Set time to 45:00?", vbYesNo)  = vbYes then
+            tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).Stop
+            call tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).SetNewTime(0,45,0,0)
+        end if
+    elseif (new_period = "5") then
+        if msgbox("Set time to 90:00?", vbYesNo)  = vbYes then
+            tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).Stop
+            call tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).SetNewTime(0,90,0,0)
+        end if
+    elseif (new_period = "7") then
+        if msgbox("Set time to 105:00?", vbYesNo) = vbYes then
+            call tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).SetNewTime(0,105,0,0)
+            tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).Stop
+        end if
+    end if
+    
+    if sender.Parent.UserData = CURRENT_MATCH_OPTA_ID then
+        if IsNumeric(sender.caption) then tsp.SetHalfTime(cInt(sender.caption))
+        call tsp.SetMainTime(0, tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).Minutes, tw_konferenz.ComponentByName("clock" & right(Sender.name,1)).Seconds, 0)
+    end if
+end sub
+
+sub tw_konferenz_bt_load_scoresClick (Sender)
+    dim gID,i
+    for i = 1 to 5
+        gID = tw_konferenz.ComponentByName("pn_game" & i).UserData
+        if gID <> "" then
+            tw_konferenz.ComponentByName("score" & 2*i-1).Caption = EmptyToZero(TSP_get_info_from_db("ROUNDS_LIST", "SCORE_A", "TEXT", "g" & gID))
+            tw_konferenz.ComponentByName("score" & 2*i).Caption   = EmptyToZero(TSP_get_info_from_db("ROUNDS_LIST", "SCORE_B", "TEXT", "g" & gID))
+        end if
+    next
+end sub
+
+sub tw_konferenz_bt_show_karusellClick (Sender)
+    if tw_konferenz.bt_show_karusell.Down=true then
+        dim i
+        dim c
+        c=0
+        for i = 1 to 5
+            if tw_konferenz.ComponentByName("cb_karusell_"&i).Checked=true and tw_konferenz.ComponentByName("lb_team" & 2*i).Font.color = clBlack then
+                c=i
+                exit for
+            end if
+        next
+        if c >0 then
+            dim Data : set Data = CreateObject("Scripting.Dictionary")
+            ka_score=c
+            ka_side="A"
+            Data.Item("SCORE")= tw_konferenz.ComponentByName("score" & 2*c-1).Caption&" : " & tw_konferenz.ComponentByName("score" & 2*c).Caption
+            Data.Item("TEAMA")=tw_konferenz.ComponentByName("lb_team" & 2*c-1).Hint
+            Data.Item("TEAMB")=tw_konferenz.ComponentByName("lb_team" & 2*c).Hint
+            AllTV.TV__Karusell_Show Data
+            set Data = Nothing
+            system.bt_karusell.Enabled=true
+            if  pgMain.Btn_ShowDSS.Down =true then
+                pgMain.Btn_ShowDSSotherGames.Down=true
+            end if
+        else
+           tw_konferenz.bt_show_karusell.Down=false
+        end if
+    else
+        system.bt_karusell.Enabled=false
+        AllTV.TV__Karusell_Hide
+        ka_score=0
+        pgMain.Btn_ShowDSSotherGames.Down=false
+    end if
+end sub
+
+sub tw_konferenz_bt_nextkarusellClick (Sender)
+    dim c
+    dim i
+    c=0
+    dim s
+    s= ka_score +1
+    for i = s to 5
+        if tw_konferenz.ComponentByName("cb_karusell_"&i).Checked=true and tw_konferenz.ComponentByName("lb_team" & 2*i).Font.color = clBlack then
+            c=i
+            exit for
+        end if
+    next
+    if c<1 then
+        for i = 1 to 5
+            if tw_konferenz.ComponentByName("cb_karusell_"&i).Checked=true  and tw_konferenz.ComponentByName("lb_team" & 2*i).Font.color = clBlack then
+                c=i
+                exit for
+            end if
+        next
+    end if
+    if c>0 then
+        dim Data : set Data = CreateObject("Scripting.Dictionary")
+        if ka_side="A" then
+            ka_side="B"
+        else
+            ka_side="A"
+        end if
+        ka_score=c
+        Data.Item("SIDE")=ka_side
+        Data.Item("SCORE")= tw_konferenz.ComponentByName("score" & 2*c-1).Caption&" : " & tw_konferenz.ComponentByName("score" & 2*c).Caption
+        Data.Item("TEAMA")=tw_konferenz.ComponentByName("lb_team" & 2*c-1).Hint
+        Data.Item("TEAMB")=tw_konferenz.ComponentByName("lb_team" & 2*c).Hint
+        AllTV.TV__Karusell_Next Data
+        's__VizPatht    = "scene/SKY/Redesign_2011/Austria"
+        'sScenet = "CB_Konf_Ergebnisse"
+        'if Data.Item("SIDE") = "A" then
+        '    EVE1.SendCommand "SCENE*" & s__VizPatht & "/"&sScenet&"*TREE*$SPIEL_1$txt_Erg*GEOM*TEXT SET " & Data.Item("SCORE")
+        '    EVE1.SendCommand "SCENE*" & s__VizPatht & "/"&sScenet&"*TREE*$SPIEL_1$txt_TeamHeim*GEOM*TEXT SET " & Data.Item("TEAMA")
+        '    EVE1.SendCommand "SCENE*" & s__VizPatht & "/"&sScenet&"*TREE*$SPIEL_1$txt_TeamGast*GEOM*TEXT SET " & Data.Item("TEAMB")
+        '    EVE1.DoEffect elBacklayer, "WECHSEL", efContinue
+        'else
+        '    EVE1.SendCommand "SCENE*" & s__VizPatht & "/"&sScenet&"*TREE*$SPIEL_2$txt_Erg*GEOM*TEXT SET " & Data.Item("SCORE")
+        '    EVE1.SendCommand "SCENE*" & s__VizPatht & "/"&sScenet&"*TREE*$SPIEL_2$txt_TeamHeim*GEOM*TEXT SET " & Data.Item("TEAMA")
+        '    EVE1.SendCommand "SCENE*" & s__VizPatht & "/"&sScenet&"*TREE*$SPIEL_2$txt_TeamGast*GEOM*TEXT SET " & Data.Item("TEAMB")
+        '    EVE1.DoEffect elBacklayer, "WECHSEL", efPlay
+        'end if
+        
+        set Data = Nothing
+    end if
+end sub
+
+sub tw_konferenz_cb_manual_karusellClick (Sender)
+  ' script tw_konferenz_cb_manual_karusellClick generated on 2/12/2015 at 2:09:59 PM
+  ' description of params:
+  ' Sender as IccCheckBox
+  tw_konferenz.bt_nextkarusell.Enabled=tw_konferenz.cb_manual_karusell.Checked
+end sub
+
+sub tw_konferenz_cb_rc_h_1Click (Sender)
+    dim dir
+    dim rh,rg
+    dim game
+
+    if sender.name= REDCARD_H then
+        rh=rg=0
+
+        if sender.checked then
+                AllTv.TV__DSS_Card_Show rh,rg
+        else
+            AllTv.TV__DSS_Card_Hide 0,0
+        end if
+    end if
+end sub
+
+sub tw_konferenz_bt_twittervotingClick (Sender)
+  ' script tw_konferenz_bt_twittervotingClick generated on 8/5/2016 at 10:53:41 AM
+  ' description of params:
+  ' Sender as IccButton
+    tw_twittervoting.Visible=true
+    tw_twittervoting.BringToFront
+end sub
+
+</script_body>
+</script>

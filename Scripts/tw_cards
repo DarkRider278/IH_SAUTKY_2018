@@ -1,0 +1,118 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_cards_bt_showClick (Sender)
+    ShowFoul "2 Min - "& tw_cards.cb_foul.text
+end sub
+
+sub tw_cards_rg_cardClick (Sender)
+    tw_cards.cb_foul.ItemIndex=tw_cards.rg_card.ItemIndex
+end sub
+
+sub tw_cards_cb_logoChange (Sender)
+  ' script tw_cards_cb_logoChange generated on 7/1/2016 at 11:15:39 AM
+  ' description of params:
+  ' Sender as IccComboBox
+
+end sub
+
+sub ShowFoul(text)
+    Dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("NAME")      = tw_cards.ed_name.text
+    Data.Item("FNAME")      = tw_cards.ed_fname.text
+    Data.Item("LOGO")      = tw_cards.cb_logo.text
+    'Data.Item("CARD_CODE") = tw_cards.rg_card.ItemIndex + 1
+    Data.Item("SUBLINE")   = text
+    Data.Item("NR")     = tw_cards.ed_NR.text
+    Data.Item("SHOWHS")     = tw_cards.cb_showHS.Checked
+    AllTV.TV__BB_Card Data
+    set Data = Nothing
+end sub
+
+sub tw_cards_bt_show1Click (Sender)
+  ShowFoul "5 Min - "& tw_cards.cb_foul.text
+end sub
+
+sub tw_cards_bt_show2Click (Sender)
+    if tw_cards.rg_double.ItemIndex=0 then
+        ShowFoul tw_cards.cb_foul.text
+    else
+        dim t
+        t= tw_cards.rg_double.Items.Strings(tw_cards.rg_double.ItemIndex) & " Min - "&tw_cards.cb_foul.text
+        if Trim(tw_cards.cb_foul_2.text) <> "" then t=t & " / "&  tw_cards.cb_foul_2.text
+        ShowFoul  t
+    end if
+end sub
+
+sub tw_cards_bt_infoClick (Sender)
+  if Sender.down then
+    dim name
+        name=tw_cards.ed_tvname.Text
+        if name = "" then
+            name=tw_cards.ed_name.text
+        end if
+         AllTV.TV__DSS_Zusatz_links name& " " &"2 Minuten - "& tw_cards.cb_foul.text
+    else
+        AllTV.TV__Hide_DSS_Zusatz_Links
+    end if
+
+end sub
+
+sub tw_cards_bt_info1Click (Sender)
+    if Sender.down then
+        dim name
+        name=tw_cards.ed_tvname.Text
+        if name = "" then
+            name=tw_cards.ed_name.text
+        end if
+        AllTV.TV__DSS_Zusatz_links name& " " &"5 Minuten - "& tw_cards.cb_foul.text
+    else
+        AllTV.TV__Hide_DSS_Zusatz_Links
+    end if
+
+end sub
+
+sub tw_cards_bt_info2Click (Sender)
+    if Sender.down then
+        dim name
+        name=tw_cards.ed_tvname.Text
+        if name = "" then
+            name=tw_cards.ed_name.text
+        end if
+        if tw_cards.rg_double.ItemIndex=0 then
+            AllTV.TV__DSS_Zusatz_links name& " " &"  "& tw_cards.cb_foul.text
+        else
+            dim t
+            t= tw_cards.rg_double.Items.Strings(tw_cards.rg_double.ItemIndex) & " Min - "&tw_cards.cb_foul.text
+            if Trim(tw_cards.cb_foul_2.text) <> "" then t=t & " / "&  tw_cards.cb_foul_2.text
+            AllTV.TV__DSS_Zusatz_links  name& " " &"  "&t
+        end if
+
+         'AllTV.TV__DSS_Zusatz_links tw_cards.ed_name.text& " " &" - "& tw_cards.cb_foul.text
+    else
+        AllTV.TV__Hide_DSS_Zusatz_Links
+    end if
+
+end sub
+
+sub tw_cards_bt_show3Click (Sender)
+    ShowFoul "10 Min - "& tw_cards.cb_foul.text
+end sub
+
+sub tw_cards_bt_info3Click (Sender)
+    if Sender.down then
+        dim name
+        name=tw_cards.ed_tvname.Text
+        if name = "" then
+            name=tw_cards.ed_name.text
+        end if
+         AllTV.TV__DSS_Zusatz_links name& " " &"10 Minuten - "& tw_cards.cb_foul.text
+    else
+        AllTV.TV__Hide_DSS_Zusatz_Links
+    end if
+end sub
+
+</script_body>
+</script>

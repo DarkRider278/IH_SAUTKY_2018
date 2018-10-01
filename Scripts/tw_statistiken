@@ -1,0 +1,337 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+dim PLAYER_STATS_SEASON : set PLAYER_STATS_SEASON = CreateObject("Scripting.Dictionary")
+PLAYER_STATS_SEASON.item("")                        = "-------"
+PLAYER_STATS_SEASON.item("Tore")                    = "G"
+PLAYER_STATS_SEASON.item("Assists")                 = "A"
+PLAYER_STATS_SEASON.item("Punkte")                  = "P"
+PLAYER_STATS_SEASON.item("Strafminuten")            = "PIM"
+PLAYER_STATS_SEASON.item("Plus/Minus")              = "plusminus"
+PLAYER_STATS_SEASON.item("Powerplay-Tore")          = "PPG"
+PLAYER_STATS_SEASON.item("Powerplay-Assist")        = "PPA"
+PLAYER_STATS_SEASON.item("Unterzahl-Tore")          = "SH"
+PLAYER_STATS_SEASON.item("Unterzahl-Assists")       = "SHA"
+PLAYER_STATS_SEASON.item("Game Winning Goals")      = "GWG"
+PLAYER_STATS_SEASON.item("Winner in OT")            = "OT"
+PLAYER_STATS_SEASON.item("Shots on Goal")           = "S"
+PLAYER_STATS_SEASON.item("Trefferqoute")            = "SP"
+PLAYER_STATS_SEASON.item("Eiszeit gesamt")          = "TOI"
+PLAYER_STATS_SEASON.item("Eiszeit pro Shift")       = "TOI_Shift"
+PLAYER_STATS_SEASON.item("Shifts gesamt")           = "Shift"
+PLAYER_STATS_SEASON.item("Gewonnene Bullys")        = "FOW"
+PLAYER_STATS_SEASON.item("Bullyquote")              = "FOP"
+PLAYER_STATS_SEASON.item("Bully-Saldo")             = "FO_plusminus"
+PLAYER_STATS_SEASON.item("Point/Goal/Cold")         = "Streaks"
+PLAYER_STATS_SEASON.item("Bodychecks")              = "Hits"
+PLAYER_STATS_SEASON.item("Geblockte Schüsse")       = "SB"
+PLAYER_STATS_SEASON.item("Shots against")           = "SA"
+PLAYER_STATS_SEASON.item("Goals against")           = "GA"
+PLAYER_STATS_SEASON.item("Goal against average")    = "GAA"
+PLAYER_STATS_SEASON.item("Saves")                   = "SV"
+PLAYER_STATS_SEASON.item("Fangquote")               = "SVP"
+PLAYER_STATS_SEASON.item("Shots against in Unterzahl") = "SA_SH"
+PLAYER_STATS_SEASON.item("Saves in Unterzahl")      = "SV_SH"
+PLAYER_STATS_SEASON.item("Time on ice in Unterzahl")= "TOI_SH"
+PLAYER_STATS_SEASON.item("Assists")                 = "A"
+PLAYER_STATS_SEASON.item("Strafminuten")            = "PIM"
+PLAYER_STATS_SEASON.item("Spiele")            = "GAMES"
+
+
+dim PLAYER_STATS_MATCH : set PLAYER_STATS_MATCH = CreateObject("Scripting.Dictionary")
+PLAYER_STATS_MATCH.item("")                        = "-------"
+PLAYER_STATS_MATCH.item("Tore")                    = "G"
+PLAYER_STATS_MATCH.item("Assists")                 = "A"
+PLAYER_STATS_MATCH.item("Punkte")                  = "P"
+PLAYER_STATS_MATCH.item("Strafminuten")            = "PIM"
+PLAYER_STATS_MATCH.item("Plus/Minus")              = "plusminus"
+PLAYER_STATS_MATCH.item("Powerplay-Tore")          = "PPG"
+PLAYER_STATS_MATCH.item("Powerplay-Assist")        = "PPA"
+PLAYER_STATS_MATCH.item("Unterzahl-Tore")          = "SH"
+PLAYER_STATS_MATCH.item("Unterzahl-Assists")       = "SHA"
+PLAYER_STATS_MATCH.item("Game Winning Goals")      = "GWG"
+PLAYER_STATS_MATCH.item("Winner in OT")            = "OT"
+PLAYER_STATS_MATCH.item("Shots on Goal")           = "S"
+PLAYER_STATS_MATCH.item("Trefferqoute")            = "SP"
+PLAYER_STATS_MATCH.item("Eiszeit gesamt")          = "TOI"
+PLAYER_STATS_MATCH.item("Eiszeit pro Shift")       = "TOI_Shift"
+PLAYER_STATS_MATCH.item("Shifts gesamt")           = "Shift"
+PLAYER_STATS_MATCH.item("Gewonnene Bullys")        = "FOW"
+PLAYER_STATS_MATCH.item("Bullyquote")              = "FOP"
+PLAYER_STATS_MATCH.item("Bully-Saldo")             = "FO_plusminus"
+PLAYER_STATS_MATCH.item("Point/Goal/Cold")         = "Streaks"
+PLAYER_STATS_MATCH.item("Bodychecks")              = "Hits"
+PLAYER_STATS_MATCH.item("Geblockte Schüsse")       = "SB"
+PLAYER_STATS_MATCH.item("Shots against")           = "SA"
+PLAYER_STATS_MATCH.item("Goals against")           = "GA"
+PLAYER_STATS_MATCH.item("Goal against average")    = "GAA"
+PLAYER_STATS_MATCH.item("Saves")                   = "SV"
+PLAYER_STATS_MATCH.item("Fangquote")               = "SVP"
+PLAYER_STATS_MATCH.item("Shots against in Unterzahl") = "SA_SH"
+PLAYER_STATS_MATCH.item("Saves in Unterzahl")      = "SV_SH"
+PLAYER_STATS_MATCH.item("Time on ice in Unterzahl")= "TOI_SH"
+PLAYER_STATS_MATCH.item("Assists")                 = "A"
+PLAYER_STATS_MATCH.item("Strafminuten")            = "PIM"
+
+' SIEMIC: DAS IST DAS MAPPING ZWISCHEN DEM PARAMETER NAMEN IN DER DROPDOWN LISTE (TW_STATISTIKEN) UND DER TSP DATENBANK SPALTE!
+' Die linke Seite kann nach belieben umgenannt werden. Die Datenbank Spalte besser nich...
+
+
+' Anzeigen als VB oder IB
+sub tw_statistiken_bt_show_vbClick (Sender)
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim i, k, pID   ,tid
+    k = 0
+    for i = 1 to 8
+        if Trim(tw_statistiken.ComponentByName("cb_name" & i).Text) <> "" then
+            k = k + 1
+            Data.Item("NR" & k)      = trim(tw_statistiken.Grid1.Cells(i-1,0))
+            ' Ich hab in der ComboBox die SpielerID versteckt. Die muss erstmal weg
+            if instr(tw_statistiken.ComponentByName("cb_name" & i).Text, "(") >0 then
+                pID = split(tw_statistiken.ComponentByName("cb_name" & i).Text, "(")(1)
+                Data.Item("NAME"    & k) = (GetNameTranslation("P", pID, TSP_player_name ))
+                tid= TSP_get_info_from_db( "PLAYERS_2","TEAM_ID","PLAYER_ID",pid )
+                Data.Item("LOGO"    & k) = GetNameTranslation("T", tid, "LOGO")
+            elseif instr(tw_statistiken.ComponentByName("cb_name" & i).Text, "#") >0 then
+                Data.Item("NAME"    & k) = split(tw_statistiken.ComponentByName("cb_name" & i).Text, "#")(0)
+                Data.Item("LOGO"    & k) = split(tw_statistiken.ComponentByName("cb_name" & i).Text, "#")(1)
+            else
+                Data.Item("NAME"    & k) = tw_statistiken.ComponentByName("cb_name" & i).Text
+            end if
+            Data.Item("PARAM_A" & k) = trim(tw_statistiken.Grid1.Cells(i-1,2))
+            Data.Item("PARAM_B" & k) = trim(tw_statistiken.Grid1.Cells(i-1,3))
+        end if
+    next
+    if k = 0 then exit sub
+    Data.Item("ITEMCOUNT")  = k
+    Data.Item("TITLE")      = tw_statistiken.ed_title.text
+    Data.Item("SUBTITLE")      = tw_statistiken.ed_subtitle.text
+    Data.Item("HEADER_A")   = tw_statistiken.cb_param1.text
+    Data.Item("HEADER_B")   = tw_statistiken.cb_param2.text
+    'Data.Item("BACKGROUND") = pgMain.cb_Background.checked
+    Data.Item("TWO_PARAMS") = (trim(tw_statistiken.cb_param2.Text) <> "")
+    Data.Item("AS_INFOBOX") = (Sender is tw_statistiken.bt_show_ib)
+    if (k < 3) and  Data.Item("AS_INFOBOX") then
+        msgbox "This graphic requires at LEAST 3 players!"
+        exit sub
+    end if
+    HideVorlaufLogos
+    AllTV.TV__VB_IB_PlayerStatsTable Data
+    set Data = Nothing
+end sub
+
+
+
+sub tw_statistiken_cb_name1Change (Sender)
+    tw_PLAYER_STATS_REFRESH_DATA Sender
+    if (Sender.UserData = True) then exit sub
+    dim i,k
+    if len(Sender.Text) < 1 then exit sub
+    for i = 0 to Sender.Items.Count - 1
+        if Sender.text = left(sender.Items.Strings(i), len(Sender.Text)) then
+            k = len(Sender.Text)
+            Sender.Text      = sender.Items.Strings(i)
+            Sender.SelStart  = k
+            Sender.SelLength = len(Sender.Text) - k
+            tw_PLAYER_STATS_REFRESH_DATA Sender
+            exit for
+        end if
+    next
+end sub
+
+
+' ALLE DATEN DES DIALOGS AKTUALISIEREN
+sub tw_PLAYER_STATS_REFRESH_DATA (Sender)
+    dim i,j,k, obj, param, db_param1, db_param2, sql, db_id, tmp, pID
+    dim val1, val2
+
+    ' Anzahl Parameter?
+    if trim(tw_statistiken.cb_param2.text) = "" then
+        tw_statistiken.Grid1.ColCount = 3
+    else
+        tw_statistiken.Grid1.ColCount = 4
+        tw_statistiken.Grid1.ColWidths(3) = tw_statistiken.Grid1.ColWidths(2)
+    end if
+
+    ' Wenn CURRENT MATCH ausgewählt wurde, dann entferne ich alle Spieler aus der Auswahlliste die gar nicht im Spiel sind...
+    if Sender is tw_statistiken.rg_statsType then
+        for i = 1 to 8
+            set obj = tw_statistiken.ComponentByName("cb_name" & i)
+            obj.Items.clear()
+            if tw_statistiken.rg_statsType.ItemIndex = 0 then
+                obj.Items.CommaText = ALL_PLAYERS
+            else
+                obj.Items.CommaText = CURRENT_PLAYERS
+                obj.Text = obj.items.strings(obj.Items.IndexOf(obj.Text))
+            end if
+            obj.Items.Add " "
+        next
+    end if
+
+    ' TODO: LIEBER NUR EINEN (Geänderten) EINTRAG AKTUALISIEREN ANSTATT ALLE 8 SPIELER?
+    ' Brauchen wir Season oder Match Statistiken?
+    if tw_statistiken.rg_statsType.ItemIndex = 0 then    ' SEASON STATS -> aus TSP DB
+        db_param1 = PLAYER_STATS_SEASON.item(tw_statistiken.cb_param1.Text)
+        db_param2 = PLAYER_STATS_SEASON.item(tw_statistiken.cb_param2.Text)
+ 'cc.SF.DebugText db_param1
+        for i = 1 to 8
+            if UBound(split(tw_statistiken.ComponentByName("cb_name" & i).Text, "(")) = 1 then  ' Die Datenbank ID aus der ComboBox schneiden
+                db_id = trim(split(tw_statistiken.ComponentByName("cb_name" & i).Text, "(")(1))
+                if db_param1 <> "" then
+                    tw_statistiken.Grid1.Cells(i-1, 2) = EmptyToZero(TSP_get_info_from_db("PLAYERS_2", db_param1, "PLAYER_ID", db_id))
+                else
+                    tw_statistiken.Grid1.Cells(i-1, 2) = ""
+                end if
+                if db_param2 <> "" then
+                    tw_statistiken.Grid1.Cells(i-1, 3) = EmptyToZero(TSP_get_info_from_db("PLAYERS_2", db_param2, "PLAYER_ID", db_id))
+                else
+                    tw_statistiken.Grid1.Cells(i-1, 3) = ""
+                end if
+            end if
+        next
+    else
+        db_param1 = PLAYER_STATS_MATCH.item(tw_statistiken.cb_param1.Text)
+        db_param2 = PLAYER_STATS_MATCH.item(tw_statistiken.cb_param2.Text)
+
+        ' AUSWAHL MATCH STATISTIK
+        ' STATISTIKEN für die gewählten Spieler
+        for i = 1 to 8
+            ' erstmal die TSP_DB-ID rausbekommen, sofern vorhanden
+            tmp = split(tw_statistiken.ComponentByName("cb_name" & i).Text, "(")
+            if Ubound(tmp) = 1 then
+                pID = TSP_get_info_from_db("PLAYERS_2", "OPTA_ID", "PLAYER_ID", tmp(1))
+                if db_param1 <> "" then  tw_statistiken.Grid1.Cells(i-1,2) = EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & db_param1))
+                if db_param2 <> "" then  tw_statistiken.Grid1.Cells(i-1,3) = EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & db_param2))
+            else
+                tw_statistiken.Grid1.Cells(i-1, 2) = ""
+                tw_statistiken.Grid1.Cells(i-1, 3) = ""
+            end if
+        next
+    end if
+
+    set obj = Nothing
+end sub
+
+sub tw_statistiken_rg_statsTypeClick (Sender)
+    dim param
+    tw_statistiken.cb_param1.Items.clear
+    tw_statistiken.cb_param2.Items.clear
+    if tw_statistiken.rg_statsType.ItemIndex = 0 then
+        ' Die Auswahlboxen mit Stat Parametern füllen
+        for each param in PLAYER_STATS_SEASON.keys()
+            tw_statistiken.cb_param1.Items.Add param
+            tw_statistiken.cb_param2.Items.Add param
+        next
+        'tw_statistiken.cb_param2.Items.Add " "
+    else
+        for each param in PLAYER_STATS_MATCH.keys()
+            tw_statistiken.cb_param1.Items.Add param
+            tw_statistiken.cb_param2.Items.Add param
+        next
+        'tw_statistiken.cb_param2.Items.Add " "
+    end if
+    tw_PLAYER_STATS_REFRESH_DATA Sender
+end sub
+
+
+' Lade die 8 besten Spieler basierend auf den Season oder Match Statistiken
+sub tw_statistiken_bt_getTopClick (Sender)
+    dim i,j,k, obj, param, db_param1, db_param2, sql, db_id, tmp, pID
+    dim val1, val2
+
+    if tw_statistiken.rg_statsType.ItemIndex = 0 then   ' SEASON
+        db_param1 = PLAYER_STATS_SEASON.item(tw_statistiken.cb_param1.Text)
+        db_param2 = PLAYER_STATS_SEASON.item(tw_statistiken.cb_param2.Text)
+
+ 'cc.sf.DebugText LEAGUE_TEAMS
+        if db_param1 <> "" then
+             sql = "SELECT * from PLAYERS_2 INNER JOIN PLAYERS_1 ON PLAYERS_2.PLAYER_ID=PLAYERS_1.DB_ID  ORDER BY " & db_param1
+             if db_param2 <> "-------" then    sql = sql & " DESC," & db_param2
+             'WHERE team_id IN (" & LEAGUE_TEAMS & ")
+             sql = sql & " DESC"
+        end if
+        i = 0                   ' TODO: EInen weg finden nicht immer ALLE Spieler abzurufen. "LIMIT" und "TOP" funktionieren jedoch anscheinend nicht
+        'cc.sf.DebugText sql
+        if TSP.LoadSQLData(sql) then
+            If TSP.SetSQLPos("First") Then
+                Do
+                    i = i + 1
+                    if i <= 8 then
+                        if (db_param1 <> "") then tw_statistiken.Grid1.Cells(i-1, 2) = EmptyToZero(TSP.GetSQLData(db_param1))
+                        if (db_param2 <> "") then tw_statistiken.Grid1.Cells(i-1, 3) = EmptyToZero(TSP.GetSQLData(db_param2))
+                        tw_statistiken.ComponentByName("cb_name" & i).text = TSP.GetSQLData("second_name") & ", " & TSP.GetSQLData("first_name") & " (" & TSP.GetSQLData("PLAYER_ID")
+                    end if
+                    'cc.sf.DebugText get_info_from_db("PLAYERS_2", db_param1, "OPTA_ID", TSP.GetSQLData("PLAYER_ID"))
+                Loop While TSP.SetSQLPos("Next")
+            end if
+        end if
+        do while i+1 <= 8       ' Die anderen Felder leeren
+            i = i + 1
+            tw_statistiken.ComponentByName("cb_name" & i).text = ""
+        loop
+    else
+        db_param1 = PLAYER_STATS_MATCH.item(tw_statistiken.cb_param1.Text)
+        db_param2 = PLAYER_STATS_MATCH.item(tw_statistiken.cb_param2.Text)
+
+        dim sort_array(7)
+        for k = 0 to tw_statistiken.cb_name1.Items.Count - 1
+            tmp = split(tw_statistiken.cb_name1.Items.Strings(k), "(")
+            if Ubound(tmp) = 1 then     ' Ich brauche die playerid von allen aktuellen Spielern
+                pID = TSP_get_info_from_db("PLAYERS_2", "OPTA_ID", "PLAYER_ID", tmp(1))
+            else
+                pID = ""
+            end if
+
+            if CURRENT_MATCH_DATA.count = 0 then
+                CC.SF.DEBUGTEXT "MATCH DATA FOR THIS GAME IS (STILL?) MISSING!", clRed
+                exit sub
+            end if
+
+
+            if db_param1 <> "" then val1 = EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & db_param1))
+            if db_param2 <> "-------" then val2 = EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & pID & "|" & db_param2))
+
+            ' Einfacher Sortieralgorithmus
+            if (val1 <> "") or (val2 <> "") then    ' Wenn wir gar keine Werte haben kommt er nicht in die Auswahl
+                for i = 0 to 7
+                    if sort_array(i) = "" then  ' Noch gar nicht befüllt
+                        sort_array(i) = pID
+                        exit for
+                    else
+                        if cint(EmptyToZero(val1)) > cint(EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & sort_array(i) & "|" & db_param1))) then ' besserer Wert
+                            for j = 7 to i+1 Step -1     ' Neuer bestwert. Alle nachfolgenden "rutschen" einen Platz tiefer
+                                sort_array(j) = sort_array(j-1)
+                            next
+                            sort_array(i) = pID
+                            exit for
+                        elseif cint(EmptyToZero(val1)) = cint(EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & sort_array(i) & "|" & db_param1))) then ' Beide Gleich
+                            if (val2 <> "") and (cint(EmptyToZero(val2)) > cint(EmptyToZero(CURRENT_MATCH_DATA.item("PLAYER|" & sort_array(i) & "|" & db_param2)))) then
+                                for j = 7 to i+1 Step -1  ' Beide gleich gut. Vergleiche den 2. Statistik Parameter
+                                    sort_array(j) = sort_array(j-1)
+                                next
+                                sort_array(i) = pID
+                                exit for
+                            end if
+                        end if
+                    end if
+                next
+            end if
+         next
+         ' Füllen der Tabelle mit den gefundenen Werten
+         for i = 0 to 7
+            tw_statistiken.Grid1.Cells(i,2) = CURRENT_MATCH_DATA.item("PLAYER|" & sort_array(i) & "|" & db_param1)
+            tw_statistiken.Grid1.Cells(i,3) = CURRENT_MATCH_DATA.item("PLAYER|" & sort_array(i) & "|" & db_param2)
+            ' Nun noch das ganze Spiel rückwärts. Ich brauche den SpielerNamen zur PID
+            db_id = TSP_get_info_from_db("PLAYERS_1", "DB_ID", "text1", sort_array(i))
+            if db_id <> "" then
+                tw_statistiken.ComponentByName("cb_name" & i+1).text = TSP.GetPlayerByID(TSP_HPlayer, db_id, "second_name") & ", " & TSP.GetPlayerByID(TSP_HPlayer, db_id, "first_name") & " (" & TSP.GetPlayerByID(TSP_HPlayer, db_id, "DB_ID")
+            else
+                tw_statistiken.ComponentByName("cb_name" & i+1).text = ""
+            end if
+         next
+    end if
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,100 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub pg_settings_bt_Erg4Click (Sender)
+  dim i
+    dim tn
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim k : k = 0
+    for i = 1 to pg_settings.grid.RowCount - 1
+        if Trim(pg_settings.grid.Cells(i, GetColIdx(pg_settings.grid, "Club"))) <> "" then
+            k = k + 1
+            tn= pg_settings.grid.Cells(i, GetColIdx(pg_settings.grid, "Club"))
+            Data.Item("NAME"  & k) = split(tn,"#")(0)
+            Data.Item("PLACE" & k) = pg_settings.grid.Cells(i, GetColIdx(pg_settings.grid, "#"))
+            Data.Item("GAMES" & k) = pg_settings.grid.Cells(i, GetColIdx(pg_settings.grid, "Games"))
+            Data.Item("GOALS" & k) = pg_settings.grid.Cells(i, GetColIdx(pg_settings.grid, "Goals"))
+            Data.Item("DIFF"  & k) = pg_settings.grid.Cells(i, GetColIdx(pg_settings.grid, "Diff"))
+            Data.Item("PTS"   & k) = pg_settings.grid.Cells(i, GetColIdx(pg_settings.grid, "Pts"))
+            Data.Item("HL"    & k) =(pg_settings.grid.Cells(i, GetColIdx(pg_settings.grid, "HL?")) = "X")
+            Data.Item("TREND" & k) = pg_settings.grid.Cells(i, GetColIdx(pg_settings.grid, "Trend"))
+            if Instr(tn,"#") then Data.Item("LOGO"  & k) = split(tn,"#")(1)
+        end if
+    next
+
+    Data.Item("ITEMCOUNTTAB")  = k
+    Data.Item("TITLE")      = pg_settings.ed_opt_title.Text
+    Data.Item("OPT_TITLE") = pg_settings.ed_opt_zusatz.Text
+    Hide_DSS
+    HideVorlaufLogos
+    AllTV.TV__VB_Standing20 Data
+    Set Data = Nothing
+end sub
+
+sub pg_settings_bt_Erg1Click (Sender)
+  dim i
+  dim tn,tn2
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim k : k = 0
+    for i = 1 to pg_settings.grid2.RowCount - 1
+        if Trim(pg_settings.grid2.Cells(i, GetColIdx(pg_settings.grid2, "Team 1"))) <> "" then
+            k = k + 1
+            tn=pg_settings.grid2.Cells(i, GetColIdx(pg_settings.grid2, "Team 1"))
+            Data.Item("NAME_A" & k) = split(tn,"#")(0)
+            tn2= pg_settings.grid2.Cells(i, GetColIdx(pg_settings.grid2, "Team 2"))
+            Data.Item("NAME_B" & k) = split(tn2,"#")(0)
+            Data.Item("RESULT" & k) = pg_settings.grid2.Cells(i, GetColIdx(pg_settings.grid2, "Result"))
+            Data.Item("HL"    & k) =(pg_settings.grid2.Cells(i, GetColIdx(pg_settings.grid2, "HL?")) = "X")
+            if Instr(tn,"#") then Data.Item("LOGO_A" & k) = split(tn,"#")(1)
+            if Instr(tn2,"#") then Data.Item("LOGO_B" & k) = split(tn2,"#")(1)
+        end if
+    next
+    Data.Item("ITEMCOUNT")  = k
+
+    Data.Item("OPT_TITLE")      = pg_settings.ed_opt_title1.Text
+    Data.Item("OPT_ZUSATZ") = pg_settings.ed_opt_zusatz1.Text
+
+
+    Hide_DSS
+    HideVorlaufLogos
+    AllTV.TV__VB_Erg20 Data
+    Set Data = Nothing
+end sub
+
+sub pg_settings_PageShow (Sender)
+  save_gui_settings
+    LAST_TABSHEET = Sender.Name
+
+end sub
+
+sub pg_settings_bt_standings1Click (Sender)
+  tw_standing_CL.Visible=true
+  tw_standing_CL.BringToFront
+
+end sub
+
+sub pg_settings_btn_connctclockClick (Sender)
+    pentime_h1=-1
+    pentime_h2=-1
+    pentime_g1=-1
+    pentime_g2=-1
+    ppactive=""
+  if System.TCPClientInterface1.Active then
+    System.TCPClientInterface1.Active=false
+    pg_settings.btn_connctclock.Color=clRed
+    pg_settings.btn_connctclock.ColorFocused=clRed
+    pg_settings.btn_connctclock.ColorMouseOver=clRed
+  else
+    System.TCPClientInterface1.Active = true
+    'System.TCPClientInterface1.SendBuffer Chr(2) & "!CONNECT" & Chr(3)
+    pg_settings.btn_connctclock.Color=clGreen
+    pg_settings.btn_connctclock.ColorFocused=clGreen
+    pg_settings.btn_connctclock.ColorMouseOver=clGreen
+  end if
+
+end sub
+
+</script_body>
+</script>

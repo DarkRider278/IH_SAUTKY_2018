@@ -1,0 +1,34 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_quoten_bt_showClick (Sender)
+    Hide_DSS
+    dim LFrame : LFrame = (tw_quoten.UserData = "ADMIRAL Quoten")
+    dim quoten(2)
+    quoten(0) = tw_quoten.ed_quoten1.text
+    quoten(1) = tw_quoten.ed_quoten2.text
+    quoten(2) = tw_quoten.ed_quoten3.text
+    tw_quoten.Visible = False
+    AllTV.TV__Skyscraper tw_quoten.ed_name1.Text, tw_quoten.ed_name2.Text, quoten, LFrame
+
+end sub
+
+sub tw_quoten_bt_show_cbClick (Sender)
+
+end sub
+
+sub tw_quoten_bt_show_cbMouseUp (Sender, Button, Shift, X, Y)
+  dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("NAME1")=tw_quoten.ed_name1.Text
+    Data.Item("NAME2")=tw_quoten.ed_name2.Text
+    Data.Item("Q1")= tw_quoten.ed_quoten1.text
+    Data.Item("Q2")= tw_quoten.ed_quoten2.text
+    Data.Item("Q3")= tw_quoten.ed_quoten3.text
+    Data.Item("TYP")=(Button = 0)
+    AllTV.TV__Quoten Data
+end sub
+
+</script_body>
+</script>

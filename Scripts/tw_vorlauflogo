@@ -1,0 +1,83 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_vorlauflogo_rg_typClick (Sender)
+    if tw_vorlauflogo.rg_typ.ItemIndex=0 then
+        tw_vorlauflogo.lbl_hour.Visible=false
+        tw_vorlauflogo.lbl_min.Visible=false
+        tw_vorlauflogo.lbl_score.Visible=false
+        tw_vorlauflogo.ed_hour.Visible=false
+        tw_vorlauflogo.ed_min.Visible=false
+        tw_vorlauflogo.ed_score.Visible=false
+        tw_vorlauflogo.ed_text.Visible=false
+        tw_vorlauflogo.lbl_text.Visible=false
+    elseif  tw_vorlauflogo.rg_typ.ItemIndex=1 then
+        tw_vorlauflogo.lbl_hour.Visible=false
+        tw_vorlauflogo.lbl_min.Visible=false
+        tw_vorlauflogo.lbl_score.Visible=true
+        tw_vorlauflogo.ed_hour.Visible=false
+        tw_vorlauflogo.ed_min.Visible=false
+        tw_vorlauflogo.ed_score.Visible=true
+        tw_vorlauflogo.ed_text.Visible=false
+        tw_vorlauflogo.lbl_text.Visible=false
+    elseif  tw_vorlauflogo.rg_typ.ItemIndex=2 then
+        tw_vorlauflogo.lbl_hour.Visible=true
+        tw_vorlauflogo.lbl_min.Visible=true
+        tw_vorlauflogo.lbl_score.Visible=false
+        tw_vorlauflogo.ed_hour.Visible=true
+        tw_vorlauflogo.ed_min.Visible=true
+        tw_vorlauflogo.ed_score.Visible=false
+        tw_vorlauflogo.ed_text.Visible=false
+        tw_vorlauflogo.lbl_text.Visible=false
+    else
+        tw_vorlauflogo.lbl_hour.Visible=false
+        tw_vorlauflogo.lbl_min.Visible=false
+        tw_vorlauflogo.lbl_score.Visible=false
+        tw_vorlauflogo.ed_hour.Visible=false
+        tw_vorlauflogo.ed_min.Visible=false
+        tw_vorlauflogo.ed_score.Visible=false
+        tw_vorlauflogo.ed_text.Visible=true
+        tw_vorlauflogo.lbl_text.Visible=true
+    end if
+end sub
+
+sub tw_vorlauflogo_bt_showClick (Sender)
+    if tw_vorlauflogo.bt_show.Down =true then
+        dim Data : set Data = CreateObject("Scripting.Dictionary")
+        Data.Item("TYP")=tw_vorlauflogo.rg_typ.ItemIndex
+        Data.Item("LOGO1") = TSP_get_info_from_db("TEAMS", "LOGO", "LONG_NAME", tw_vorlauflogo.cb_name1.Text)
+        Data.Item("LOGO2") = TSP_get_info_from_db("TEAMS", "LOGO", "LONG_NAME", tw_vorlauflogo.cb_name2.Text)
+        Data.Item("SCORE") = tw_vorlauflogo.ed_score.Text
+        Data.Item("TEXT") = tw_vorlauflogo.ed_text.Text
+        Data.Item("LEFT")=tw_vorlauflogo.cb_left.Checked
+
+        dim th
+        th=(tw_vorlauflogo.ed_hour.Text - Hour(Now())  ) *3600
+        dim tm
+        tm=(tw_vorlauflogo.ed_min.Text - Minute(Now()))*60
+        dim ts
+        ts= 0-Second(Now())
+        dim t
+        t=th+tm+ts
+
+        Data.Item("TIME")=t
+        AllTV.TV__VorlaufLogo_Show Data
+        set Data = Nothing
+        tw_vorlauflogo.bt_show.Color=clRed
+        tw_vorlauflogo.bt_show.ColorFocused=clRed
+        tw_vorlauflogo.bt_show.ColorMouseOver=clRed
+        tw_vorlauflogo.bt_show.Caption="Hide"
+    else
+        AllTV.TV__VorlaufLogo_Hide
+        tw_vorlauflogo.bt_show.Color=clBtnFace
+        tw_vorlauflogo.bt_show.ColorFocused=clBtnFace
+        tw_vorlauflogo.bt_show.ColorMouseOver=clBtnFace
+        tw_vorlauflogo.bt_show.Caption="Show"
+    end if
+
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,128 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+FUNCTION GetCSVData(ByRef myGrid)
+    DIM i, j, myText
+    myText = ""
+    FOR i = 0 TO myGrid.RowCount - 1
+        FOR j = 0 TO myGrid.ColCount - 1
+            myText = myText & myGrid.Cells(i,j)
+            IF j < myGrid.ColCount - 1 THEN
+                myText = myText & ";"
+            END IF
+        NEXT
+        IF i < myGrid.RowCount - 1 THEN
+            myText = myText & vbCrLf
+        END IF
+    NEXT
+    GetCSVData = myText
+END FUNCTION
+
+FUNCTION SaveAsCSV (ByRef myGrid, ByVal strFileName)
+    DIM myCSVData, myFile
+    myCSVData = GetCSVData(myGrid)
+    IF NOT strFileName = "" THEN
+        SaveCSVData strFileName, myCSVData
+    END IF
+    SaveAsCSV = myFile
+END FUNCTION
+
+SUB LoadFromCSV (ByRef myGrid, ByVal strFileName)
+    if not cc.Files.FileExists(strFileName) then
+        CC.SF.debugtext "CANNOT LOAD TEAM LOGO MAPPING!!"
+        exit sub
+    end if
+    IF NOT strFileName = "" THEN
+        SetCSVData myGrid, LoadCSVData(strFileName)
+    END IF
+END sub
+
+FUNCTION LoadCSVData (ByVal myFileName)
+    DIM myText, fso, myFile
+
+    myText = ""
+    SET fso      = CreateObject("Scripting.FileSystemObject")
+    SET myFile   = fso.OpenTextFile(myFileName, 1, false, true)
+    DO WHILE myFile.AtEndOfStream <> True
+        myText = myText & myFile.ReadLine & vbCrLf
+    LOOP
+    myFile.Close
+    LoadCSVData = myText
+END FUNCTION
+
+SUB SaveCSVData (ByVal myFileName, ByVal myCSVData)
+    DIM fso, myFile
+    SET fso     = CreateObject("Scripting.FileSystemObject")
+    SET myFile  = fso.OpenTextFile(myFileName, 2, True, true)
+    myFile.Write myCSVData
+    myFile.Close
+END SUB
+
+FUNCTION SetCSVData(ByRef myGrid, ByVal myText)
+    DIM myLines, myLine, tmpLine, i, j
+    myLines = Split(myText, vbCrLf)
+
+    myGrid.RowCount = UBound(myLines) ' Zeilenanzahl setzen
+    FOR i = 0 TO UBound(myLines)
+        myLine = Split(myLines(i), ";")
+
+        If i = 0 THEN
+           myGrid.ColCount = UBOUND(myLine)+1' Spaltenanzahlt setzen
+        END IF
+        FOR j = 0 TO UBOUND(myLine)
+            tmpLine = myLine(j)
+            IF Left(tmpLine, 1) = Chr(34) THEN
+                tmpLine = Replace(tmpLine, Chr(34),"",1,1)
+            END IF
+            IF Right(tmpLine, 13) = Chr(34) & Chr(34) & Chr(34) THEN
+                tmpLine = Replace(tmpLine, Chr(34)&Chr(34), "")
+            END IF
+            myGrid.Cells(i,j ) = tmpLine
+        NEXT
+    NEXT
+END FUNCTION
+
+
+FUNCTION LoadCSVDataAsArray (ByVal myFileName)
+    DIM myText, fso, myFile, retArray()
+
+    myText = ""
+    SET fso      = CreateObject("Scripting.FileSystemObject")
+    SET myFile   = fso.OpenTextFile(myFileName, 1)
+    DO WHILE myFile.AtEndOfStream <> True
+        myText = myText & myFile.ReadLine
+        IF NOT myFile.AtEndOfStream THEN
+            myText = myText & vbCrLf
+        END IF
+    LOOP
+    myFile.Close
+
+    myLines = Split(myText, vbCrLf)
+
+    FOR i = 0 TO UBound(myLines)
+        myLine = Split(myLines(i), ";")
+
+        IF i = 0 THEN
+           REDIM retArray(UBound(myLines), UBOUND(myLine))
+        END IF
+        FOR j = 0 TO UBOUND(myLine)
+            tmpLine = Replace(trim(myLine(j)), Chr(34), "")
+
+            'IF Left(tmpLine, 1) = Chr(34) THEN
+            '    tmpLine = Replace(tmpLine, Chr(34),"",1,1)
+            'END IF
+            'IF Right(tmpLine, 13) = Chr(34) & Chr(34) & Chr(34) THEN
+            '    tmpLine = Replace(tmpLine, Chr(34)&Chr(34), "")
+            'END IF
+            retArray(i,j) = tmpLine
+
+            'myGrid.Cells(i,j ) = tmpLine
+        NEXT
+    NEXT
+
+    LoadCSVDataAsArray = retArray
+END FUNCTION
+
+</script_body>
+</script>

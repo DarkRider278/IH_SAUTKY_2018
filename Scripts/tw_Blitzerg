@@ -1,0 +1,125 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_Blitzerg_ComboBox1Change (Sender)
+    if (Sender.UserData = True) then exit sub
+    dim i,k
+    if len(Sender.Text) < 1 then exit sub
+    for i = 0 to Sender.Items.Count - 1
+        if Sender.text = left(sender.Items.Strings(i), len(Sender.Text)) then
+            k = len(Sender.Text)
+            Sender.Text      = sender.Items.Strings(i)
+            Sender.SelStart  = k
+            Sender.SelLength = len(Sender.Text) - k
+            exit for
+        end if
+    next
+end sub
+
+sub tw_Blitzerg_ComboBox1KeyPress (Sender, Key)
+    Sender.UserData = ( (Key < 65) or (Key > 172) ) ' Steuerzeichen ignorieren
+end sub
+
+
+
+sub tw_Blitzerg_bt_showClick (Sender)
+    dim i,k
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    for i = 1 to 6
+        if (Trim(tw_Blitzerg.ComponentByName("cb_name_A" & i).Text) <> "") and (Trim(tw_Blitzerg.ComponentByName("cb_name_B" & i).Text) <> "") then
+            if tw_Blitzerg.ComponentByName("cb_show" & i).checked then
+                k = k + 1
+                Data.Item("NAME_A" & k) = TSP.GetTeamByName(tw_Blitzerg.ComponentByName("cb_name_A" & i).Text, TSP.GetGroup(), TSP_SHORT_NAME)
+                'cc.sf.DebugText "NAME"& Data.Item("NAME_A" & k)
+                if Data.Item("NAME_A" & k)= "" then
+                    Data.Item("NAME_A" & k) =tw_Blitzerg.ComponentByName("cb_name_A" & i).Text
+                end if
+                Data.Item("NAME_B" & k) = TSP.GetTeamByName(tw_Blitzerg.ComponentByName("cb_name_B" & i).Text, TSP.GetGroup(), TSP_SHORT_NAME)
+                if Data.Item("NAME_B" & k)= "" then
+                    Data.Item("NAME_B" & k) =tw_Blitzerg.ComponentByName("cb_name_B" & i).Text
+                end if
+                Data.Item("RESULT" & k) = Trim(tw_Blitzerg.ComponentByName("ed_result" & i).Text)
+                Data.Item("HL" & k)     = Trim(tw_Blitzerg.ComponentByName("cb_HL" & i).checked)
+            end if
+        end if
+    next
+    if k = 0 then exit sub
+    Data.Item("HEADER") = tw_Blitzerg.ed_title.Text
+    Data.Item("ITEMCOUNT")   = k
+  '  Data.Item("HEADER_TYPE") = tw_Blitzerg.rg_header.ItemIndex
+    AllTV.TV__IB_BlitzErgebnisse Data
+    set Data = Nothing
+end sub
+
+sub tw_Blitzerg_bt_Refresh_BlitzErgClick (Sender)
+    dim i,k
+
+    'If TSP.LoadSQLData("SELECT * FROM ROUNDS_LIST WHERE round='" & tsp.GetRound(TSP_ROUND) & "'") then
+    If TSP.LoadSQLData("SELECT * FROM ROUNDS_LIST WHERE (round='" & tsp.GetRound(TSP_ROUND) & "')and (league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "')") then
+        i = 0
+        If TSP.SetSQLPos("First") Then
+            Do
+                i = i + 1
+                if i <= 6 then
+                    tw_Blitzerg.ComponentByName("cb_name_A" & i).ItemIndex = tw_Blitzerg.ComponentByName("cb_name_A" & i).Items.IndexOf(TSP.GetSQLData("team_a_name"))
+                    tw_Blitzerg.ComponentByName("cb_name_B" & i).ItemIndex = tw_Blitzerg.ComponentByName("cb_name_B" & i).Items.IndexOf(TSP.GetSQLData("team_b_name"))
+                    tw_Blitzerg.ComponentByName("ed_result" & i).Text = TSP.GetSQLData("score_a") & ":" & TSP.GetSQLData("score_b")
+
+                    ' WICHTIG: Wenn es in den Konferenz Fenstern neuere Daten gibt, dann nehme ich lieber diese ("neuer" heißt bei mir, höherer Score
+                    for k = 1 to 5
+                        if "g" & tw_konferenz.ComponentByName("pn_game" & k).UserData = TSP.GetSQLData("text") then
+                            if (cInt(EmptyToZero(tw_konferenz.ComponentByName("score" & 2*k-1).Caption)) > cInt(EmptyToZero(TSP.GetSQLData("score_a")))) or _
+                               (cInt(EmptyToZero(tw_konferenz.ComponentByName("score" & 2*k  ).Caption)) > cInt(EmptyToZero(TSP.GetSQLData("score_b")))) then
+                                cc.sf.debugtext "ACHTUNG, Nutze die Daten aus dem Spiel Konferenz Fenster für Spiel " & i, clBlue
+                                tw_Blitzerg.ComponentByName("ed_result" & i).Text = tw_konferenz.ComponentByName("score" & 2*k-1).Caption & ":" & tw_konferenz.ComponentByName("score" & 2*k).Caption
+                             end if
+                        end if
+                    next
+                end if
+             Loop While TSP.SetSQLPos("Next")
+        end if
+    end if
+end sub
+
+sub down (Sender)
+    dim id : id = right(Sender.Name,1)
+    dim tmp
+    tmp = tw_Blitzerg.ComponentByName("cb_name_A" & id+1).ItemIndex
+    tw_Blitzerg.ComponentByName("cb_name_A" & id+1).ItemIndex = tw_Blitzerg.ComponentByName("cb_name_A" & id).ItemIndex
+    tw_Blitzerg.ComponentByName("cb_name_A" & id).ItemIndex = tmp
+    tmp = tw_Blitzerg.ComponentByName("cb_name_B" & id+1).ItemIndex
+    tw_Blitzerg.ComponentByName("cb_name_B" & id+1).ItemIndex = tw_Blitzerg.ComponentByName("cb_name_B" & id).ItemIndex
+    tw_Blitzerg.ComponentByName("cb_name_B" & id).ItemIndex = tmp
+    tmp = tw_Blitzerg.ComponentByName("ed_result" & id+1).text
+    tw_Blitzerg.ComponentByName("ed_result" & id+1).text = tw_Blitzerg.ComponentByName("ed_result" & id).text
+    tw_Blitzerg.ComponentByName("ed_result" & id).text = tmp
+    tmp = tw_Blitzerg.ComponentByName("cb_HL" & id+1).checked
+    tw_Blitzerg.ComponentByName("cb_HL" & id+1).checked = tw_Blitzerg.ComponentByName("cb_HL" & id).checked
+    tw_Blitzerg.ComponentByName("cb_HL" & id).checked = tmp
+end sub
+
+sub up (Sender)
+    dim id : id = right(Sender.Name,1)
+    dim tmp
+    tmp = tw_Blitzerg.ComponentByName("cb_name_A" & id-1).ItemIndex
+    tw_Blitzerg.ComponentByName("cb_name_A" & id-1).ItemIndex = tw_Blitzerg.ComponentByName("cb_name_A" & id).ItemIndex
+    tw_Blitzerg.ComponentByName("cb_name_A" & id).ItemIndex = tmp
+    tmp = tw_Blitzerg.ComponentByName("cb_name_B" & id-1).ItemIndex
+    tw_Blitzerg.ComponentByName("cb_name_B" & id-1).ItemIndex = tw_Blitzerg.ComponentByName("cb_name_B" & id).ItemIndex
+    tw_Blitzerg.ComponentByName("cb_name_B" & id).ItemIndex = tmp
+    tmp = tw_Blitzerg.ComponentByName("ed_result" & id-1).text
+    tw_Blitzerg.ComponentByName("ed_result" & id-1).text = tw_Blitzerg.ComponentByName("ed_result" & id).text
+    tw_Blitzerg.ComponentByName("ed_result" & id).text = tmp
+    tmp = tw_Blitzerg.ComponentByName("cb_HL" & id-1).checked
+    tw_Blitzerg.ComponentByName("cb_HL" & id-1).checked = tw_Blitzerg.ComponentByName("cb_HL" & id).checked
+    tw_Blitzerg.ComponentByName("cb_HL" & id).checked = tmp
+end sub
+
+sub tw_Blitzerg_cb_templateChange (Sender)
+  tw_Blitzerg.ed_title.Text = tw_Blitzerg.cb_template.Text
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,673 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+sub save_gui_settings()
+    if LAST_TABSHEET <> pgMain.Name then exit sub
+    dim i, obj
+    for i = 0 to CC.SF.CCParentComponentCount - 1
+        set obj = cc.SF.CCParentComponent(i)
+        if obj.ComponentType = "TccToolWindow" then
+            Call SetIniOption(obj.Name, obj.Visible)
+            if not (obj is ToolWindow1) and not (obj is tw_konferenz) then obj.Visible = False  ' Danach verstecken
+        end if
+    next
+    set obj = nothing
+    ToolWindow1.Visible = true
+    tw_konferenz.Visible = false
+end sub
+
+sub restore_gui_settings()
+    dim i, obj
+    for i = 0 to CC.SF.CCParentComponentCount - 1
+        set obj = cc.SF.CCParentComponent(i)
+        if obj.ComponentType = "TccToolWindow" then
+             obj.Visible = cBool(GetIniOption(obj.Name, "false"))
+        end if
+    next
+    set obj = nothing
+    ToolWindow1.Visible = true
+    tw_konferenz.Visible = false
+end sub
+
+' Wandelt einen Zahlenstring fehlertolerant in den gewünschten Typ und überprüft den zulässigen Wertebereich
+' Formate: 1 - Integer, 2 - Long, 3 - Single, 4 - Byte, 5 - Double (Default, da größter Wertebereich)
+' für MinVal und/oder MaxVal Leerstring übergeben, um Ober-/Untergrenze zu deaktivieren
+Function MakeNumber(ByVal strWert, ByVal NrFormat, ByVal MinVal, ByVal MaxVal, ByVal DefVal)
+    Dim sep
+
+    ' Dezimaltrennzeichen ermitteln
+    sep = Chr(CC.SF.DecimalSeparator)
+
+    On Error Resume Next
+    Err.Clear ' Fehler löschen, um  neue Fehler erkennen zu können
+
+    ' Vorgabewert in richtigen Typ umwandeln (bei Single/Double-Werte Dezimaltrennzeichen überprüfen)
+    Select Case NrFormat
+        Case 1 ' Integer
+            DefVal = CInt(DefVal)
+        Case 2 ' Long
+            DefVal = CLng(DefVal)
+        Case 3 ' Single
+            DefVal = CStr(DefVal)
+            DefVal = Replace(DefVal, ",", sep)
+            DefVal = Replace(DefVal, ".", sep)
+            DefVal = CSng(DefVal)
+        Case 4 ' Byte
+            DefVal = CByte(DefVal)
+        Case Else ' Double als Standard - größter Wertebereich
+            DefVal = CStr(DefVal)
+            DefVal = Replace(DefVal, ",", sep)
+            DefVal = Replace(DefVal, ".", sep)
+            DefVal = CDbl(DefVal)
+    End Select
+
+    ' wenn Fehler bei Umwandlung, Vorgabewert auf 0 setzen
+    If Err.Number > 0 Then
+        DefVal = 0
+        Err.Clear
+    End If
+
+    ' gesuchten Wert in gewünschten Typ umwandeln (bei Single/Double-Werte Dezimaltrennzeichen überprüfen)
+    Select Case NrFormat
+        Case 1 ' Integer
+            DefVal = CInt(DefVal)
+            MakeNumber = CInt(strWert)
+        Case 2 ' Long
+            DefVal = CLng(DefVal)
+            MakeNumber = CLng(strWert)
+        Case 3 ' Single
+            DefVal = CSng(DefVal)
+
+            strWert = Replace(strWert, ",", sep)
+            strWert = Replace(strWert, ".", sep)
+            MakeNumber = CSng(strWert)
+        Case 4 ' Byte
+            DefVal = CByte(DefVal)
+            MakeNumber = CByte(strWert)
+        Case Else ' Double als Standard - größter Wertebereich
+            DefVal = CDbl(DefVal)
+
+            strWert = Replace(strWert, ",", sep)
+            strWert = Replace(strWert, ".", sep)
+            MakeNumber = CDbl(strWert)
+    End Select
+
+    ' wenn Fehler bei Umwandlung, dann Vorgabewert einsetzen
+    If Err.Number > 0 Then MakeNumber = DefVal
+    Err.Clear
+
+    ' Überprüfen, ob gesetzte Grenzen für Wertebereich eingehalten sind (bei min und max schaltet "" die Überprüfung ab)
+    If IsNumeric(MinVal) Then
+        If MakeNumber < MinVal Then MakeNumber = DefVal
+    End If
+    If IsNumeric(MaxVal) Then
+        If MakeNumber > MaxVal Then MakeNumber = DefVal
+    End If
+End Function
+
+
+FUNCTION Lists_LinesPerFullPageArray(ByVal intLines, ByVal intLinesPerPage)
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    ' intLines          ... Gesamtanzahl aller darzustellenden Zeilen
+    ' intLinesPerPage   ... Anzahl der maximal verfügbaren Zeilen pro Seite
+    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    DIM arr(), intPageCount,i
+    DIM iMaxRest, iTmp, iFullPageLines
+
+    IF intLines <= 0 OR intLinesPerPage <= 0 THEN
+        Lists_LinesPerFullPageArray = arr
+        EXIT FUNCTION
+    END IF
+    'optimale Ausnutzung der Seiten bzw. Zeilen, für den Fall über 2 Seiten und das die ersten Seiten stets komplett gefüllt sind
+    iMaxRest = intLines mod intLinesPerPage                 'Ausgangswert der maximalen Zeilen für letzte Seite bestimmen
+    iFullPageLines = intLinesPerPage                        'Ausgangswert der Zeilenanzahl für volle Seiten bestimmen
+    If iMaxRest <> 0 Then
+        For i = 1 to (intLinesPerPage - 1)
+            iTmp = intLines mod (intLinesPerPage - i)           'Neuer Ausgangswert der maximalen Zeilen für letzte Seite bestimmen bei verringerter Zeilen pro Seite
+            If iTmp < iMaxRest Then
+                If iTmp = 0 then
+                    iMaxRest = (intLinesPerPage - i)            'Wenn es genau passt, nicht 0 sondern volle Zeilenanzahl
+                    iFullPageLines = (intLinesPerPage - i)
+                    intPageCount = (intLines \ iFullPageLines)  'Seitenanzahl bestimmen: Ganzzahldivision aller Zeilen durch Zeilenanzahl für volle Seiten + 1 Seite (Restseite)
+                Else
+                    intPageCount = (intLines \ iFullPageLines) + 1
+                End If
+                Exit For                                        'Wenn der neue Wert kleiner dem des Altem ist --> abbrechen
+            Else
+                iMaxRest = iTmp                                 'Wenn der neue Wert größer dem des Altem ist --> Zeilenanzahl für letzte Seite und Zeilenanzahl für volle Seiten setzen
+                iFullPageLines = (intLinesPerPage - i)
+                intPageCount = (intLines \ iFullPageLines) + 1  'Seitenanzahl bestimmen: Ganzzahldivision aller Zeilen durch Zeilenanzahl für volle Seiten + 1 Seite (Restseite)
+            End If
+        Next
+    Else
+        intPageCount = intLines \ intLinesPerPage
+        iMaxRest = intLinesPerPage
+    End If
+    REDIM arr(intPageCount - 1)
+    FOR i = 1 TO intPageCount                               'alle Seiten durchlaufen
+        If i < intPageCount Then arr(i-1) = iFullPageLines Else arr(i-1) = iMaxRest
+    NEXT
+    Lists_LinesPerFullPageArray = arr
+END FUNCTION
+
+'*******************************************************************************
+'Übergibt den Index einer Spalte in einem Grid in der GUI, anhand des übergebenen Spaltentitel
+Function GetColIdx(ByRef o_Tab, ByVal sCol)
+
+    GetColIdx = -1
+
+    If not isObject(o_Tab) Then Exit Function
+    If o_Tab is Nothing Then Exit Function
+
+    dim TmpIdx : TmpIdx = o_Tab.ColumnHeaders.IndexOf(sCol)
+
+    If not TmpIdx = -1 Then
+       GetColIdx = TmpIdx
+    Else
+       cc.sf.DebugText "Could't find Column '" & sCol & "' in " & o_Tab.Name, clRed
+    End If
+End Function
+
+'*******************************************************************************
+'Übergibt den Index einer Spalte in einem Grid in der GUI, anhand des übergebenen Spaltentitel
+Function GetRowIdx(ByRef o_Tab, ByVal sRow)
+    dim i
+
+    GetRowIdx = -1
+
+    If not isObject(o_Tab) Then Exit Function
+    If o_Tab is Nothing Then Exit Function
+
+
+    for i = 0 to o_Tab.rowCount - 1
+        if o_Tab.Cells(i,0)  = sRow then
+            GetRowIdx = i
+            exit function
+        end if
+    next
+
+    cc.sf.DebugText "Could't find Row '" & sRow & "' in " & o_Tab.Name, clRed
+End Function
+
+' schließenden Backslash an Pfadangabe sicherstellen (anfügen, falls nicht vorhanden)
+Function QualifyPath(ByVal sPath)
+    If Not Right(sPath, 1) = "\" Then
+        sPath = sPath & "\"
+    End If
+    QualifyPath = sPath
+End Function
+
+Function GetData(TeamCode, DressNr)
+
+         
+     If not Isnumeric(DressNr) Then
+        GetData = ""
+     Else
+
+        GetData = GetNameTranslation("TV", TSP.GetPlayerByNR(TSP_TPlayer, DressNr, TeamCode, TSP_player_id), TSP_second_name )
+     End if
+End Function
+
+Function GetString(ByVal Item, ByVal LangIdx)
+
+    Dim temp, itemfound, SearchItem, Lang
+    itemfound = False
+    
+    if Trim(Item) = "" then
+        GetString = ""
+        exit function
+    end if
+
+    SearchItem = lcase(Trim(Item))
+    If LangIdx = 0 Then
+       Lang = "GER"
+    Else
+       Lang = "ENG"
+    End If
+    
+    System.BDE_DS_Language.First
+    Do While Not System.BDE_DS_Language.EOF
+        temp = lcase(trim(System.BDE_DS_Language.FieldByName("Item")))
+        If temp = SearchItem Then
+            itemfound = True
+            Exit Do
+        End If
+        System.BDE_DS_Language.Next
+    Loop
+
+    If itemfound Then
+       GetString = NotEmpty(System.BDE_DS_Language.FieldByName(Lang))
+    Else
+        DbgErr "Item '" & Item & "' not found in Language-database"
+        GetString = "?" & Item
+    End If
+End Function
+
+
+Function NotEmpty(ByVal Wert)
+    If IsNull(Wert) Then Wert = ""
+    If IsEmpty(Wert) Then Wert = ""
+    If Len(Wert) = 1 Then
+        If Asc(Wert) = 0 Then Wert = ""
+    End If
+    If Trim(Wert) = "" Then Wert = ""
+    NotEmpty = Wert
+End Function
+
+
+function GetTeamData()
+    dim oData : set oData = CreateObject("Scripting.Dictionary")
+    TSP.SaveSelection
+    TSP.SetTeamPos "A"
+
+    oData.Item("T_LNAME_1")     = GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_long_name) ' TSP.GetSTeam(TSP_long_name)
+    oData.Item("T_SNAME_1")     = GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_nick_name) ' TSP.GetSTeam(TSP_short_name)
+    oData.Item("T_LOGO_1")      = TSP.GetSTeam(TSP_logo)
+    oData.Item("T_SCORE_1")     = TSP.GetScore(0, "A")
+    oData.Item("T_OLD_SCORE_1") = TSP.GetScore(1,TSP_A)
+    oData.Item("T_AGGSCORE_1")  = MakeNumber(oData.Item("T_SCORE_1"), 1, 0, "", 0) + MakeNumber(oData.Item("T_OLD_SCORE_1"), 1, 0, "", 0)
+
+    TSP.SetTeamPos "B"
+    oData.Item("T_LNAME_2")     = GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_long_name) 'TSP.GetSTeam(TSP_long_name)
+    oData.Item("T_SNAME_2")     = GetNameTranslation("T", TSP.GetSTeam(TSP_db_id), TSP_nick_name) ' TSP.GetSTeam(TSP_short_name)
+    oData.Item("T_LOGO_2")      = TSP.GetSTeam(TSP_logo)
+    oData.Item("T_SCORE_2")     = TSP.GetScore(0, "B")
+    oData.Item("T_OLD_SCORE_2") = TSP.GetScore(1, TSP_B)
+    oData.Item("T_AGGSCORE_2")  = MakeNumber(oData.Item("T_SCORE_2"), 1, 0, "", 0) + MakeNumber(oData.Item("T_OLD_SCORE_2"), 1, 0, "", 0)
+    
+    TSP.RestoreSelection
+    set GetTeamData = oData
+end function
+
+FUNCTION AutoText(ByRef oData, ByVal strText)
+       strText = Replace(strText, "%AX", oData.Item("T_AGGSCORE_1"))
+       strText = Replace(strText, "%AY", oData.Item("T_AGGSCORE_2"))
+       strText = Replace(strText, "%X", oData.Item("T_SCORE_1"))
+       strText = Replace(strText, "%Y", oData.Item("T_SCORE_2"))
+
+       IF oData.Item("T_AGGSCORE_1") >= oData.Item("T_AGGSCORE_2") THEN
+           strText = Replace(strText, "%WINNER", oData.Item("T_LNAME_1"))
+       ELSE
+           strText = Replace(strText, "%WINNER", oData.Item("T_LNAME_2"))
+       END IF
+
+       strText = Replace(strText, "%TEAMA", oData.Item("T_LNAME_1"))
+       strText = Replace(strText, "%TEAMB", oData.Item("T_LNAME_2"))
+       AutoText = strText
+END FUNCTION
+
+
+Sub OnMainScoreChange()
+    AllTV.TV__Update_MainScore
+End Sub
+
+
+Sub OnMainClockStartStop()
+    dim iTime, iPeriod, iLimit,i
+    dim ms
+    dim h,m,s
+    iTime = TSP.GetTime(TSP_Time, 0)
+    iPeriod = TSP.GetTime(TSP_HalfTime)
+    
+    oData.Item("MAINTIME")   = Check4InJury(iTime, iPeriod)
+    'oData.Item("INJURYTIME") = GetAddTime(iTime, iPeriod)
+    'oData.Item("MAINTIME_DIRECTION") = 1
+    If (iPeriod = 1) or (iPeriod = 2) Then
+       iLimit = 0
+    Elseif (iPeriod = 3) or (iPeriod = 4) Then
+       iLimit = 0
+    Elseif (iPeriod = 5) or (iPeriod = 6) Then
+       iLimit = 0
+    Elseif (iPeriod = 7) or (iPeriod = 8) Then
+       iLimit = 0
+    Elseif (iPeriod = 10) or (iPeriod = 11) Then
+       iLimit = 0
+    End If
+    oData.Item("MAINTIME_DIRECTION") = 0
+    oData.Item("MAINTIME_LIMIT") = iLimit
+
+    If TSP.GetTime(TSP_Status, 0)  Then
+       AllTV.TV__Start_MainClock oData
+    Else
+       AllTV.TV__Stop_MainClock  oData
+    End If
+
+
+End Sub
+
+
+Function GetAddTime(ByVal iTime, ByVal iPeriod)
+
+    'msgbox iTime & " <> " & iPeriod
+
+    GetAddTime = -1
+
+    If (iPeriod = 1) or (iPeriod = 2) Then
+       If iTime >= 2700000 Then
+          GetAddTime = iTime - 2700000
+       End If
+    Elseif (iPeriod = 3) or (iPeriod = 4) Then
+       If iTime >= 5400000 Then
+          GetAddTime = iTime - 5400000
+       End If
+    Elseif (iPeriod = 5) or (iPeriod = 6) Then
+       If iTime >= 6300000 Then
+          GetAddTime = iTime - 6300000
+       End If
+    Elseif (iPeriod = 7) or (iPeriod = 8) Then
+       If iTime >= 7200000 Then
+          GetAddTime = iTime - 7200000
+       End If
+    End If
+End Function
+
+
+Function Check4InJury(ByVal iTime, ByVal iPeriod)
+
+    Check4InJury = iTime
+
+
+    If (iPeriod = 1) or (iPeriod = 2) Then
+       If iTime >= 2700000 Then
+          Check4InJury = 2700000
+       End If
+
+    Elseif (iPeriod = 3) or (iPeriod = 4) Then
+       If iTime >= 5400000 Then
+          Check4InJury = 5400000
+       End If
+
+    Elseif (iPeriod = 5) or (iPeriod = 6) Then
+       If iTime >= 6300000 Then
+          Check4InJury = 6300000
+       End If
+
+    Elseif (iPeriod = 7) or (iPeriod = 8) Then
+       If iTime >= 7200000 Then
+          Check4InJury = 7200000
+       End If
+    End If
+End Function
+
+
+Sub ReadTVConnections()
+    on error resume next
+    Dim intCount, i, k
+
+    dim previous    ' store the previous selection
+
+    For k = 1 to 4
+        with pnConnections.ComponentByName("cmb_Conn_" & CStr(k))
+            ' Remember the actual selection
+            if .Itemindex <> -1 Then
+               previous = .Items.strings(.itemIndex)
+            else
+               previous = ""
+            end if
+
+            .Items.Clear    ' Clear all items
+            For i = 0 To CC.TVConnections.GetConnectionCount - 1    ' Add all available connections
+                .Items.Add(CC.TVConnections.Connections(i).Address)
+            next
+            
+            .ItemIndex = .Items.IndexOf(previous)   ' reselect previous selection (if possible)
+            if .ItemIndex = -1 Then
+                pnConnections.ComponentByName("cmb_ConnType_" & k).ItemIndex = -1
+                pnConnections.ComponentByName("opt_Use"       & k).Checked   = false
+                pnConnections.ComponentByName("cmb_Lang_"     & k).ItemIndex = -1
+            end if
+        end with
+    Next
+
+    on error goto 0
+    Enable_apply_button Nothing     ' Check current settings
+    pnConnections.Btn_SaveConnections.Visible = True
+    pnConnections.Visible = True
+    pnConnections.BringToFront
+End Sub
+
+Sub SaveTVConnections (Sender)
+    Set AllTV = New cls_Grafikaufrufe
+    if AllTV.TV_InitConnections Then
+        pnConnections.Btn_SaveConnections.Visible = False
+        pnConnections.SendToBack ' Verstecke das ToolWindow wenn es nicht angedockt wurde
+        if pnConnections.Floating Then pnConnections.Visible = False
+        ' Init Layout Button hervorheben!
+        pg_settings.Btn_PreLoad_VizScenes.Color          = clGreen
+        pg_settings.Btn_PreLoad_VizScenes.ColorFocused   = clGreen
+        pg_settings.Btn_PreLoad_VizScenes.ColorMouseOver = clGreen
+        System.TCPClock.Host=cc.TVConnections.Connections(0).Address
+        System.TCPClock.Active=true
+    Else
+        pnConnections.Btn_SaveConnections.Visible = True
+        pnConnections.BringToFront
+    end if
+End Sub
+
+
+'*******************************************************************************
+Function EmptyToZero(ByVal Value)
+    'if Value = "-1" then Value = 0    ' Raus damit!!!!!
+    If Value ="" Then
+        EmptyToZero = 0
+    Elseif isNumeric(value)  then
+        EmptyToZero = CLng(Value)
+    else
+        EmptyToZero = Value
+    End If
+    EmptyToZero = CStr(EmptyToZero)
+End Function
+
+' ***********************************************************************************************************
+' Send message to Debug window (black font)
+Sub Dbg(ByVal Message)
+    CC.SF.DebugText Message, 0
+End Sub
+
+
+' ***********************************************************************************************************
+' Send error message to Debug window (red font)
+Sub DbgErr(ByVal Message)
+    CC.SF.DebugText Message, 255
+    CC.SF.Beep
+End Sub
+
+' ***********************************************************************************************************
+' Trennt händische Eingaben in Edits etc. nach Sprache
+Function GetLangTxt(Input, ByVal sType)
+  Dim ArrField, Tmp
+
+     GetLangTxt = ""
+
+     If Instr(1, Input,Trim("$$")) = 0 then
+        GetLangTxt = Input
+     Else
+        If sType = "0" Then  'Je nach Verbindungstyp Feldzuweisung
+           ArrField = 0
+         ElseIf sType = "1" Then
+           ArrField = 1
+         End If
+
+        Tmp = Split(Input, "$$", -1, 1)
+
+        GetLangTxt = Tmp(ArrField)
+     End if
+End Function
+
+
+
+
+' ******************************************************************************
+' Gibt den Inhalt eines Dictionaryobjectes wieder
+' ******************************************************************************
+PRIVATE FUNCTION ShowDataObject(ByRef Data)
+    dim myData, myKeys, myText, i
+    IF IsObject(Data) THEN
+        myData = Data.Items
+        myKeys = Data.Keys
+        myText = ""
+        FOR i =0 TO UBound(myData)
+            IF NOT ( isarray(myData(i)) or isobject(myData(i))) THEN
+                myText = myText & myKeys(i) & ":  " & myData(i) & vbCrLf
+            ELSE
+
+            END IF
+        NEXT
+        cc.sf.DebugText myText, clBlack
+    ELSE
+        cc.sf.DebugText "ShowDataObject - NoData", clBlack
+    END IF
+END FUNCTION
+
+' ******************************************************************************
+' Wandelt einen Wert fehlertolerant in einen Boolschen Wert um
+' ******************************************************************************
+FUNCTION CBoolType(ByVal Value, ByVal DefVal)
+    DIM bResult
+
+    ON ERROR Resume NEXT
+    Err.Clear ' Fehler löschen, um  neue Fehler erkennen zu können
+
+    ' Vorgabewert formatieren
+    DefVal = CBool(DefVal)
+
+    ' wenn Fehler bei Umwandlung, Vorgabewert auf False setzen
+    IF NOT Err.Number = 0 THEN
+        DefVal = False
+        Err.Clear
+    END IF
+
+    ' Wert konvertieren
+    bResult = CBool(Value)
+
+    ' wenn Fehler bei Umwandlung, dann Vorgabewert einsetzen
+    IF NOT Err.Number = 0 THEN
+        bResult = DefVal
+    END IF
+
+    CBoolType = bResult
+END FUNCTION
+
+
+' ******************************************************************************
+' Wandelt eine Zahl fehlertolerant in den gewünschten Typ und überprüft den zulässigen Wertebereich
+' TargetType: VB-Datentyp-Konstanten (vbDouble als Default, da größter Wertebereich)
+' Min/Max: Null (nicht 0 !) übergeben, um Prüfung zu deaktivieren
+' ******************************************************************************
+FUNCTION CNumType(ByVal Value, ByVal TargetType, ByVal Min, ByVal Max, ByVal DefaultValue)
+    DIM vResult, sDecimalSign, bUseDefault
+
+    ' Dezimaltrennzeichen ermitteln
+    sDecimalSign = Chr(CC.SF.DecimalSeparator)
+
+    ON ERROR Resume NEXT
+    Err.Clear ' Fehler löschen, um  neue Fehler erkennen zu können
+
+    bUseDefault = False
+
+    IF NOT VarType(Value) = TargetType THEN
+        ' Minimalwert in richtigen Typ umwandeln (bei Single/Double-Werte Dezimaltrennzeichen überprüfen)
+        SELECT CASE TargetType
+            CASE vbByte     : vResult = CByte(Value)
+            CASE vbInteger  : vResult = CInt(Value)
+            CASE vbLong     : vResult = CLng(Value)
+            CASE vbSingle   : vResult = CSng(Replace(Replace(CStr(Value), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+            CASE vbCurrency : vResult = CCur(Replace(Replace(CStr(Value), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+            CASE ELSE       : vResult = CDbl(Replace(Replace(CStr(Value), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+        END SELECT
+
+        ' wenn Fehler bei Umwandlung, dann Vorgabewert einsetzen
+        IF NOT Err.Number = 0 THEN
+            bUseDefault = True
+            Err.Clear
+        END IF
+    ELSE
+        vResult = Value
+    END IF
+
+    ' Überprüfen, ob gesetzte Grenzen für Wertebereich eingehalten sind (bei Min und Max schaltet Null die Überprüfung ab)
+    IF NOT (bUseDefault Or IsNull(Min)) THEN
+        IF NOT VarType(Min) = TargetType THEN
+            ' Minimalwert in richtigen Typ umwandeln (bei Single/Double-Werte Dezimaltrennzeichen überprüfen)
+            SELECT CASE TargetType
+                CASE vbByte     : Min = CByte(Min)
+                CASE vbInteger  : Min = CInt(Min)
+                CASE vbLong     : Min = CLng(Min)
+                CASE vbSingle   : Min = CSng(Replace(Replace(CStr(Min), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+                CASE vbCurrency : Min = CCur(Replace(Replace(CStr(Min), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+                CASE ELSE       : Min = CDbl(Replace(Replace(CStr(Min), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+            END SELECT
+        END IF
+
+        IF Err.Number = 0 THEN
+            IF vResult < Min THEN bUseDefault = True
+        ELSE
+            Err.Clear
+        END IF
+    END IF
+
+    IF NOT (bUseDefault Or IsNull(Max)) THEN
+        IF NOT VarType(Max) = TargetType THEN
+            ' Maximalwert in richtigen Typ umwandeln (bei Single/Double-Werte Dezimaltrennzeichen überprüfen)
+            SELECT CASE TargetType
+                CASE vbByte     : Max = CByte(Max)
+                CASE vbInteger  : Max = CInt(Max)
+                CASE vbLong     : Max = CLng(Max)
+                CASE vbSingle   : Max = CSng(Replace(Replace(CStr(Max), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+                CASE vbCurrency : Max = CCur(Replace(Replace(CStr(Max), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+                CASE ELSE       : Max = CDbl(Replace(Replace(CStr(Max), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+            END SELECT
+        END IF
+
+        IF Err.Number = 0 THEN
+            IF vResult > Max THEN bUseDefault = True
+        ELSE
+            Err.Clear
+        END IF
+    END IF
+
+    IF bUseDefault THEN
+        IF NOT VarType(DefaultValue) = TargetType THEN
+            ' Vorgabewert in richtigen Typ umwandeln (bei Single/Double-Werte Dezimaltrennzeichen überprüfen)
+            SELECT CASE TargetType
+                CASE vbByte     : DefaultValue = CByte(DefaultValue)
+                CASE vbInteger  : DefaultValue = CInt(DefaultValue)
+                CASE vbLong     : DefaultValue = CLng(DefaultValue)
+                CASE vbSingle   : DefaultValue = CSng(Replace(Replace(CStr(DefaultValue), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+                CASE vbCurrency : DefaultValue = CCur(Replace(Replace(CStr(DefaultValue), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+                CASE ELSE       : DefaultValue = CDbl(Replace(Replace(CStr(DefaultValue), ",", sDecimalSign), ".", sDecimalSign))' korrektes Dezimaltrennzeichen setzen
+            END SELECT
+
+            ' wenn Fehler bei Umwandlung, Vorgabewert auf 0 setzen
+            IF NOT Err.Number = 0 THEN
+                DefaultValue = 0
+                Err.Clear
+            END IF
+        END IF
+
+        vResult = DefaultValue
+    END IF
+
+    CNumType = vResult
+END FUNCTION
+
+
+
+FUNCTION GetNameTrans(ByVal strValue)
+    DIM retValue
+    IF objNameTrans.Exists(strValue) THEN ' Übersetzung
+        objNameTrans.Item(strValue) = ""
+        
+    ELSE
+        retValue = trim(objNameTrans.Item(strValue))
+        IF LEN(retValue) = 0 THEN
+            GetNameTrans = strValue ' original Wert zurückgeben
+        ELSE
+            GetNameTrans = objNameTrans.Item(strValue) ' Übersetzung zurückgeben
+        END IF
+    END IF
+END FUNCTION
+
+</script_body>
+</script>

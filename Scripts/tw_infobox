@@ -1,0 +1,17 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_infobox_bt_showClick (Sender)
+
+    AllTV.TV__IB_Infobox tw_infobox.ed_title.Text, tw_infobox.ed_subline.Text,tw_infobox.ed_subline1.Text,tw_infobox.ed_subline2.Text
+end sub
+
+sub tw_infobox_bt_liveClick (Sender)
+     AllTV.TV__PlayDir("WECHSEL")
+
+end sub
+
+</script_body>
+</script>

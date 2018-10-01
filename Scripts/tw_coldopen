@@ -1,0 +1,30 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_coldopen_bt_showClick (Sender)
+   dim Data : set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("PAGE1")=tw_coldopen.ed_page_1.Text
+    Data.Item("PAGE2")=tw_coldopen.ed_page_2.Text
+    Data.Item("PAGE3")=tw_coldopen.ed_page_3.Text
+    TSP.SaveSelection
+        TSP.SetTeamPos("A") 'Werte TeamA
+        Data.Item("LOGO1") = TSP.GetSTeam(TSP_logo)
+        TSP.SetTeamPos("B") 'Werte Team B
+        Data.Item("LOGO2") = TSP.GetSTeam(TSP_logo)
+        TSP.RestoreSelection
+    AllTV.TV__BB_ColdOpen Data
+    set Data = Nothing
+end sub
+
+sub tw_coldopen_bt_show1Click (Sender)
+  AllTV.TV__PlayDir("WECHSEL")
+end sub
+
+sub tw_coldopen_bt_show2Click (Sender)
+    AllTV.TV__PlayDir("WECHSEL")
+end sub
+
+</script_body>
+</script>

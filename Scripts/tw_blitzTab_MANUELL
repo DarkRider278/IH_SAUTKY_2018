@@ -1,0 +1,410 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+' Findet den maximalen Werte in der angegeben Spalte (col) und fängt bei Zeile (start_row) mit suchen an
+' Gibt NUR DIE ZEILE DES WERTES ZURÜCK! NICHT DER WERT SELBER
+function get_max_value_idx(col, start_row)
+    dim max_i : max_i = start_row
+    dim max   : max   = cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(max_i, col)))      ' Theoretisch kann ich mir diese Variable sparen. Aber sie erleichtert das Lesen des Codes
+    dim i
+    for i = start_row + 1 to tw_blitzTab_MANUELL.Grid1.RowCount - 1
+        if cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i, col))) > max then
+            max = cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i, col)))
+            max_i = i
+        end if
+    next
+    get_max_value_idx = max_i
+end function
+
+sub get_standings_of_day(day)
+   ' if msgbox("Vorhandene Daten in der Tabelle LÖSCHEN?", vbYesNo) = vbYes then
+        tw_blitzTab_MANUELL.Grid1.Clear(false)
+        tw_blitzTab_MANUELL.Grid2.Clear(false)
+   ' end if
+
+    dim fName : FName = "srml-" & CURRENT_LEAGUE & "-" & pgData.cb_season.Text & "-seasonstandings.xml"
+    fName = pgData.ed_XML_Path.Text & "\" & fName
+    if not cc.Files.FileExists(fName) then
+        cc.sf.debugtext "Required F36 Feed is missing!! " & fName, clRed
+        exit sub
+    else
+        cc.sf.debugtext "USING F36 Feed " & fName, clBlue
+    end if
+    dim NodeList,i,objNode, oList, sql
+    dim team_id, team_name
+
+    If not oXML.load(fName) Then
+       DbgErr "Cannot find or read XML-File! " & fName
+       Exit Sub
+    End If
+    i = 0
+
+    Set NodeList = oXML.SelectNodes("//TeamStandings[@Matchday='" & day & "']/TeamRecord")
+    If NodeList.Length = 0 Then
+       DbgErr "Found no Standings for day " & day
+    Else
+        For each objNode in NodeList
+           i = i + 1
+           team_id   = objNode.GetAttribute("TeamRef")
+           team_name = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "tv_name_3", team_id)
+           tw_blitzTab_MANUELL.Grid1.Cells(i,0) = team_name
+           tw_blitzTab_MANUELL.Grid2.Cells(i,0) = team_name
+           tw_blitzTab_MANUELL.Grid2.Cells(0,i) = team_name
+           
+           tw_blitzTab_MANUELL.Grid1.Cells(i,1) = EmptyToZero(text(objNode.SelectSingleNode("./Standing/Points")))
+           tw_blitzTab_MANUELL.Grid1.Cells(i,2) = cInt(EmptyToZero(text(objNode.SelectSingleNode("./Standing/For"))))  - cInt(EmptyToZero(text(objNode.SelectSingleNode("./Standing/Against"))))
+           tw_blitzTab_MANUELL.Grid1.Cells(i,3) = EmptyToZero(text(objNode.SelectSingleNode("./Standing/For")))
+           tw_blitzTab_MANUELL.Grid1.Cells(i,4) = EmptyToZero(text(objNode.SelectSingleNode("./Standing/Won")))
+           tw_blitzTab_MANUELL.Grid1.Cells(i,5) = EmptyToZero(text(objNode.SelectSingleNode("./Standing/AwayWon")))
+           tw_blitzTab_MANUELL.Grid1.Cells(i,6) = EmptyToZero(text(objNode.SelectSingleNode("./Standing/Played")))
+           tw_blitzTab_MANUELL.Grid1.Cells(i,7) = EmptyToZero(text(objNode.SelectSingleNode("./Standing/Position")))
+        Next
+    End If
+    Set NodeList = Nothing
+    
+    ' Nun noch die direkten Duelle
+    FName = "srml-" & CURRENT_LEAGUE & "-" & pgData.cb_season.Text & "-results.xml"
+    fName = pgData.ed_XML_Path.Text & "\" & fName
+    if not cc.Files.FileExists(fName) then
+        cc.sf.debugtext "Required F1 Feed is missing!! " & fName, clRed
+        exit sub
+    else
+        cc.sf.debugtext "USING F1 Feed " & fName, clBlue
+    end if
+
+    If not oXML.load(fName) Then
+       DbgErr "Cannot find or read XML-File! " & fName
+       Exit Sub
+    End If
+
+    dim match_day, away_team, winner, home_team, col, row
+    Set NodeList = oXML.SelectNodes("//MatchData")
+    If NodeList.Length = 0 Then
+       DbgErr "Found no Match Results earlier than day " & day
+    Else
+        For each objNode in NodeList
+           match_day = objNode.SelectSingleNode("./MatchInfo").GetAttribute("MatchDay")
+           if cInt(match_day) < day then        ' Daten müssen VOR dem ausgewählten Tag liegen
+                winner    = objNode.SelectSingleNode("./MatchInfo").GetAttribute("MatchWinner")
+                away_team = objNode.SelectSingleNode("./TeamData[@Side='Away']").GetAttribute("TeamRef")
+                if winner = away_team then  ' Wir haben ein gewonnenes Auswärtsspiel
+                    home_team = objNode.SelectSingleNode("./TeamData[@Side='Home']").GetAttribute("TeamRef")
+                    ' Die Team Namen dazu
+                    away_team = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "tv_name_3", away_team)
+                    home_team = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "tv_name_3", home_team)
+                    
+                    col = GetColIdx(tw_blitzTab_MANUELL.Grid2, home_team)
+                    row = GetRowIdx(tw_blitzTab_MANUELL.Grid2, away_team)
+                    tw_blitzTab_MANUELL.Grid2.Cells(row, col) = cint(EmptyToZero(tw_blitzTab_MANUELL.Grid2.Cells(row, col))) + 1
+                end if
+           end if
+       Next
+    End If
+    Set NodeList = Nothing
+end sub
+
+sub tw_blitzTab_MANUELL_cb_dayChange (Sender)
+    tw_blitzTab_MANUELL.bt_update.enabled = True    ' Ich kann die Werte nur einmal übernehmen weil ich damit das Standing überschreibe!
+    'get_standings_of_day(tw_blitzTab_MANUELL.cb_day.Text)
+    
+
+        games = 0
+        i = 0
+        If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE league_id = '"  & TSP.GetRound(TSP_LEAGUE_ID) &  "'") then
+            If TSP.SetSQLPos("First") Then
+                Do
+                    rank = cInt(EmptyToZero(TSP.GetSQLData("RANK")))
+                    if (rank <= 12) and (rank > 0) then
+                        i = i + 1
+
+                        tw_blitzTab_MANUELL.Grid1.Cells(i, 0)  = TSP.GetSQLData("short_name")
+                        tw_blitzTab_MANUELL.Grid1.Cells(i, 3) = TSP.GetSQLData("GOALS")
+                        diff = cint(EmptyToZero(TSP.GetSQLData("GOALS"))) - cint(EmptyToZero(TSP.GetSQLData("GOALS_AGAINST")))
+                        'if diff > 0 then diff = "+" & diff
+                        tw_blitzTab_MANUELL.Grid1.Cells(i, 2)   = diff
+                        tw_blitzTab_MANUELL.Grid1.Cells(i,1)   = TSP.GetSQLData("POINTS")
+                        tw_blitzTab_MANUELL.Grid1.Cells(i,4)   = TSP.GetSQLData("WON")
+                        tw_blitzTab_MANUELL.Grid1.Cells(i,6)   = TSP.GetSQLData("ANZGAMES")
+                        tw_blitzTab_MANUELL.Grid1.Cells(i,7)   = TSP.GetSQLData("RANK_PREV")
+                        tw_blitzTab_MANUELL.Grid1.Cells(i,5)   = 0
+                        tw_blitzTab_MANUELL.Grid1.Cells(i,8)   = cInt(EmptyToZero(TSP.GetSQLData("TEXT_1")))*10
+                    end if
+                Loop While TSP.SetSQLPos("Next")
+            end if
+        end if
+        
+        for i = 5 to 1 step -1
+        call STABLE_sort_by_col(i)
+    next
+end sub
+
+sub score_update (Sender)
+    ' Vllt. später mal interessant
+end sub
+
+' Die Daten des aktuellen Spieltags  in die Tabellen einpflegen
+sub tw_blitzTab_MANUELL_bt_updateClick (Sender)
+    dim i, team_home, team_away, away_won, row, col, row_home, row_away, score_home, score_away
+    Sender.Enabled  = False                         ' Ich kann die Werte nur einmal übernehmen weil ich damit das Standing überschreibe!
+    dim isot
+    for i = 1 to 6
+        if tw_blitzTab_MANUELL.ComponentByName("cb_playing" & i).checked =true then
+            isot= tw_blitzTab_MANUELL.ComponentByName("cb_OT" & i).checked
+        ' Wenn da keine Scores drinnen stehen ignoriere ich dieses MATCH KOMPLETT!!
+            if (trim(tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).text) <> "") and (trim(tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).text) <> "") then
+               team_home  = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "LONG_Name", tw_blitzTab_MANUELL.ComponentByName("teamA" & i).text)
+               team_away  = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "LONG_Name", tw_blitzTab_MANUELL.ComponentByName("teamB" & i).text)
+               row_home   = GetRowIdx(tw_blitzTab_MANUELL.Grid1, team_home)       ' Die entsprechende Zeile in der Standing Tabelle
+               row_away   = GetRowIdx(tw_blitzTab_MANUELL.Grid1, team_away)
+               score_home = cInt(EmptyToZero(tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).text))
+               score_away = cInt(EmptyToZero(tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).text))
+
+
+               ' Die Punkte und Siege aktualisieren
+               if     score_home < score_away then
+                    ' AWAY hat gesiegt    ->  Away Punkte  +3
+                    if isot then
+                        tw_blitzTab_MANUELL.Grid1.Cells(row_away, 1) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_away, 1))) + 2
+                        tw_blitzTab_MANUELL.Grid1.Cells(row_home, 1) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_home, 1))) + 1
+                    else
+                        tw_blitzTab_MANUELL.Grid1.Cells(row_away, 1) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_away, 1))) + 3
+                    end if
+
+                    tw_blitzTab_MANUELL.Grid1.Cells(row_away, 4) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_away, 4))) + 1 ' ein weiterer Sieg
+               elseif score_home = score_away then
+                    ' UNENTSCHIEDEN -> Beide Teams Punkte + 1
+                    tw_blitzTab_MANUELL.Grid1.Cells(row_away, 1) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_away, 1))) + 1
+                    tw_blitzTab_MANUELL.Grid1.Cells(row_home, 1) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_home, 1))) + 1
+               else
+                    ' Home hat gesiegt    ->  Home Punkte  +3
+                    if isot then
+                        tw_blitzTab_MANUELL.Grid1.Cells(row_away, 1) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_away, 1))) + 1
+                        tw_blitzTab_MANUELL.Grid1.Cells(row_home, 1) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_home, 1))) + 2
+                    else
+                        tw_blitzTab_MANUELL.Grid1.Cells(row_home, 1) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_home, 1))) + 3
+                    end if
+                    tw_blitzTab_MANUELL.Grid1.Cells(row_home, 4) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_home, 4))) + 1 ' ein weiterer Sieg
+               end if
+
+               ' Die Tor-Differenz Aktualisieren
+               tw_blitzTab_MANUELL.Grid1.Cells(row_home, 2) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_home, 2))) + (score_home - score_away)
+               tw_blitzTab_MANUELL.Grid1.Cells(row_away, 2) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_away, 2))) + (score_away - score_home)
+
+               ' Die Tore Aktualisieren
+               tw_blitzTab_MANUELL.Grid1.Cells(row_home, 3) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_home, 3))) + score_home
+               tw_blitzTab_MANUELL.Grid1.Cells(row_away, 3) = cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_away, 3))) + score_away
+
+
+               if (tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).text <> "") and (tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).text <> "") then ' Dann haben sie gespielt!
+                    tw_blitzTab_MANUELL.Grid1.Cells(row_away, 6) = cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_away, 6))) + 1
+                    tw_blitzTab_MANUELL.Grid1.Cells(row_home, 6) = cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(row_home, 6))) + 1
+               end if
+            end if
+        end if
+    next
+    
+end sub
+
+' Vertauscht zwei Zeilen der Tabelle
+sub swap_rows(a,b)
+    dim tmp,i
+    for i = 0 to tw_blitzTab_MANUELL.Grid1.ColCount - 1
+        tmp = tw_blitzTab_MANUELL.Grid1.cells(b,i)
+        tw_blitzTab_MANUELL.Grid1.cells(b,i) = tw_blitzTab_MANUELL.Grid1.cells(a,i)
+        tw_blitzTab_MANUELL.Grid1.cells(a,i) = tmp
+    next
+end sub
+
+' Schiebt eine Zeile in der Tabelle umher. Die anderen "rutschen tiefer"
+sub move_row(from, target)
+    dim i, step_
+    from = cInt(from) : target = cInt(target)
+
+    if target < from then
+        step_ = -1
+    else
+        step_ = 1
+    end if
+    for i = from to (target - step_) step step_
+        call swap_rows(i, i + step_)
+    next
+end sub
+
+' Die welt könnte viel einfacher sein wenn "SortByCol" stabil sortieren würde
+sub STABLE_sort_by_col(col)
+    dim max_i, i
+    for i = 1 to tw_blitzTab_MANUELL.Grid1.rowcount - 1
+         max_i = get_max_value_idx(col, i) ' Finde den verbleibenden(!) größten Wert der Spalte
+         call move_row(max_i, i)
+    next
+end sub
+
+' prüft ob zwei zeilen denselben Inhalt haben
+function equal_row(a,b)
+    dim i
+    equal_row = true
+    for i = 1 to tw_blitzTab_MANUELL.Grid1.ColCount - 1
+        if tw_blitzTab_MANUELL.Grid1.Cells(a,i) <> tw_blitzTab_MANUELL.Grid1.Cells(b,i) then
+            equal_row = false
+            exit function
+        end if
+    next
+end function
+
+sub tw_blitzTab_MANUELL_bt_calc_tableClick (Sender)
+    dim i,k, aktuelles_team, offset, row_a, row_b, away_goals_aktuell, away_goals_compare
+    for i = 5 to 1 step -1
+        call STABLE_sort_by_col(i)
+    next
+    call STABLE_sort_by_col(8)
+    dim npos,gp
+
+    ' Jetzt ist wirklich ALLES sortiert. --> Plätze vergeben und Tabelle raus
+    tw_blitztab.Visible = true
+    tw_blitztab.BringToFront
+    tw_blitztab.Grid1.Clear(false)
+    tw_blitztab.Grid1.FixedCols=0
+    for i = 1 to tw_blitzTab_MANUELL.Grid1.RowCount-1
+        npos=i
+        gp=tw_blitzTab_MANUELL.Grid1.Cells(i,8)
+        tw_blitztab.Grid1.Cells(i,1) = "X"
+        tw_blitztab.Grid1.Cells(i,2) = i & "."
+        if gp <> "" then
+            if gp="10" then
+                npos=npos-6   'Sollte bei 6 Teams eigentlich immer klappen nach den sortieren
+            end if
+            tw_blitztab.Grid1.Cells(i,2) = npos & "."
+            tw_blitztab.Grid1.Cells(i,0) =cint(gp)+npos
+        end if
+        tw_blitztab.Grid1.Cells(i,3) = TSP_get_info_from_db("TEAMS", "LONG_NAME", "SHORT_NAME",  tw_blitzTab_MANUELL.Grid1.Cells(i,0))
+        ' Tore - TorDifferenz = Goals_against
+        
+        tw_blitztab.Grid1.Cells(i,4) = tw_blitzTab_MANUELL.Grid1.Cells(i,3) & ":" & cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,3))) - cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,2)))
+        tw_blitztab.Grid1.Cells(i,5) = tw_blitzTab_MANUELL.Grid1.Cells(i,2)
+        if cint(EmptyToZero(tw_blitztab.Grid1.Cells(i,5))) > 0 then
+            tw_blitztab.Grid1.Cells(i,5) = "+" & tw_blitztab.Grid1.Cells(i,5)
+        end if
+        
+        tw_blitztab.Grid1.Cells(i,6) = tw_blitzTab_MANUELL.Grid1.Cells(i,1)
+    next
+    tw_Blitzerg.Visible = true
+    tw_Blitzerg.BringToFront
+    'tw_Blitzerg.Grid.Clear(false)
+    for i = 1 to 6
+
+        tw_Blitzerg.ComponentByName("cb_name_A" & i).Text = tw_blitzTab_MANUELL.ComponentByName("teamA" & i).Text
+        tw_Blitzerg.ComponentByName("cb_name_B" & i).Text = tw_blitzTab_MANUELL.ComponentByName("teamB" & i).Text
+        tw_Blitzerg.ComponentByName("ed_result" & i).text = tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text & ":" & tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text
+    next
+     call tw_blitztab.Grid1.SortByCol(0,true)
+    tw_blitztab.Grid1.FixedCols=1
+    
+end sub
+
+sub tw_blitzTab_MANUELL_bt_calc_table1Click (Sender)
+ dim i,k, aktuelles_team, offset, row_a, row_b, away_goals_aktuell, away_goals_compare
+    for i = 5 to 1 step -1
+        call STABLE_sort_by_col(i)
+    next
+    call STABLE_sort_by_col(8)
+    dim npos,gp
+        ' Jetzt ist wirklich ALLES sortiert. --> Plätze vergeben und Tabelle raus
+    tw_standing.Visible = true
+    tw_standing.BringToFront
+    tw_standing.grid.Clear(false)
+    tw_standing.grid.FixedCols=0
+    for i = 1 to tw_blitzTab_MANUELL.Grid1.RowCount-1
+        npos=i
+        gp=tw_blitzTab_MANUELL.Grid1.Cells(i,8)
+        tw_standing.grid.Cells(i,1) = i & ". "
+        if gp <> "" then
+            if gp="10" then
+                npos=npos-6   'Sollte bei 6 Teams eigentlich immer klappen nach den sortieren
+            end if
+            tw_standing.grid.Cells(i,1) = npos & "."
+            tw_standing.grid.Cells(i,0) =cint(gp)+npos
+            if  npos < cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,7))) then
+                tw_standing.grid.Cells(i,2) = "+"
+            elseif npos > cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,7))) then
+                tw_standing.grid.Cells(i,2) = "-"
+            else
+                tw_standing.grid.Cells(i,2) = ""
+            end if
+        else
+            if  i < cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,7))) then
+                tw_standing.grid.Cells(i,2) = "+"
+            elseif i > cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,7))) then
+                tw_standing.grid.Cells(i,2) = "-"
+            else
+                tw_standing.grid.Cells(i,2) = ""
+            end if
+        end if
+        tw_standing.grid.Cells(i,3) = TSP_get_info_from_db("TEAMS", "LONG_NAME", "SHORT_NAME",  tw_blitzTab_MANUELL.Grid1.Cells(i,0)) & TSP_get_info_from_db("TEAMS", "TV_NAME_2", "SHORT_NAME",  tw_blitzTab_MANUELL.Grid1.Cells(i,0))
+        tw_standing.grid.Cells(i,4) = tw_blitzTab_MANUELL.Grid1.Cells(i,6)
+        ' Tore - TorDifferenz = Goals_against
+        tw_standing.grid.Cells(i,5) = tw_blitzTab_MANUELL.Grid1.Cells(i,3) & ":" & cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,3))) - cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,2)))
+        tw_standing.grid.Cells(i,6) = tw_blitzTab_MANUELL.Grid1.Cells(i,2)
+        if cint(EmptyToZero(tw_standing.grid.Cells(i,6))) > 0 then
+            tw_standing.grid.Cells(i,6) = "+" & tw_standing.grid.Cells(i,6)
+        end if
+        tw_standing.grid.Cells(i,7) = tw_blitzTab_MANUELL.Grid1.Cells(i,1)
+    next
+    call tw_standing.grid.SortByCol(0,true)
+    tw_standing.grid.FixedCols=1
+    tw_standing.grid.Cells(1,1) = "1. "
+    for i = 1 to 6
+        tw_standing.Grid2.Cells(i, 1) = tw_blitzTab_MANUELL.ComponentByName("teamA" & i).Text
+        tw_standing.Grid2.Cells(i, 3) = tw_blitzTab_MANUELL.ComponentByName("teamB" & i).Text
+        tw_standing.Grid2.Cells(i, 2) = tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text & ":" & tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text
+    next
+end sub
+
+sub tw_blitzTab_MANUELL_bt_calc_lformClick (Sender)
+ dim i,k, aktuelles_team, offset, row_a, row_b, away_goals_aktuell, away_goals_compare
+    for i = 5 to 1 step -1
+        call STABLE_sort_by_col(i)
+    next
+
+    ' Jetzt ist wirklich ALLES sortiert. --> Plätze vergeben und Tabelle raus
+
+    tw_l_info.gr_s_tab.clear(false)
+    tw_l_info.gr_s_tab.clear (false)
+    tw_l_interview.gr_s_tab.clear (false)
+    for i = 1 to tw_blitzTab_MANUELL.Grid1.RowCount-1
+        tw_l_info.gr_s_tab.Cells(i,1) = i &"."
+        tw_l_interview.gr_s_tab.Cells(i,1) = i&"."
+        if     i < cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,7))) then
+            tw_l_info.gr_s_tab.Cells(i,2) = "+"
+            tw_l_interview.gr_s_tab.Cells(i,2) = "+"
+        elseif i > cint(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,7))) then
+            tw_l_info.gr_s_tab.Cells(i,2) = "-"
+            tw_l_interview.gr_s_tab.Cells(i,2) = "-"
+        else
+            tw_l_info.gr_s_tab.Cells(i,2) = ""
+            tw_l_interview.gr_s_tab.Cells(i,2) = ""
+        end if
+        tw_l_info.gr_s_tab.Cells(i,3) = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "SHORT_NAME",  tw_blitzTab_MANUELL.Grid1.Cells(i,0)) & TSP_get_info_from_db("TEAMS", "TV_NAME_2", "SHORT_NAME",  tw_blitzTab_MANUELL.Grid1.Cells(i,0))
+        tw_l_interview.gr_s_tab.Cells(i,3) = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "SHORT_NAME",  tw_blitzTab_MANUELL.Grid1.Cells(i,0)) & TSP_get_info_from_db("TEAMS", "TV_NAME_2", "SHORT_NAME",  tw_blitzTab_MANUELL.Grid1.Cells(i,0))
+        tw_l_info.gr_s_tab.Cells(i,4) = tw_blitzTab_MANUELL.Grid1.Cells(i,6)
+        tw_l_interview.gr_s_tab.Cells(i,4) = tw_blitzTab_MANUELL.Grid1.Cells(i,6)
+        ' Tore - TorDifferenz = Goals_against
+        tw_l_info.gr_s_tab.Cells(i,5) = tw_blitzTab_MANUELL.Grid1.Cells(i,3) & ":" & cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,3))) - cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,2)))
+        tw_l_interview.gr_s_tab.Cells(i,5) = tw_blitzTab_MANUELL.Grid1.Cells(i,3) & ":" & cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,3))) - cInt(EmptyToZero(tw_blitzTab_MANUELL.Grid1.Cells(i,2)))
+        tw_l_info.gr_s_tab.Cells(i,6) = tw_blitzTab_MANUELL.Grid1.Cells(i,2)
+        tw_l_interview.gr_s_tab.Cells(i,6) = tw_blitzTab_MANUELL.Grid1.Cells(i,2)
+        if cint(EmptyToZero(tw_standing.grid.Cells(i,6))) > 0 then
+            tw_l_info.gr_s_tab.Cells(i,6) = "+" & tw_l_info.gr_s_tab.Cells(i,6)
+            tw_l_interview.gr_s_tab.Cells(i,6) = "+" & tw_l_interview.gr_s_tab.Cells(i,6)
+        end if
+        tw_l_info.gr_s_tab.Cells(i,7) = tw_blitzTab_MANUELL.Grid1.Cells(i,1)
+        tw_l_interview.gr_s_tab.Cells(i,7) = tw_blitzTab_MANUELL.Grid1.Cells(i,1)
+    next
+
+
+
+end sub
+
+</script_body>
+</script>

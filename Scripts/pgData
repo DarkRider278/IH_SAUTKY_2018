@@ -1,0 +1,1555 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+DIM objTeamStat
+dim oTeamIDs  : set oTeamIDs   = CreateObject("Scripting.Dictionary")
+dim oMatchData: set oMatchData = CreateObject("Scripting.Dictionary")   ' Der Spielstand fuer das aktuelle gewählte Spiel
+dim oXML
+oXML.async = false
+oXML.SetProperty "SelectionLanguage", "XPath"
+oXML.SetProperty "ServerHTTPRequest", False
+oXML.validateOnParse = False
+oXML.resolveExternals = False
+
+
+sub TSP_UPDATE_PLAYER_STATUS(opta_id, what, value)
+    dim sql : sql = "SELECT "& what &" FROM PLAYERS_2.DBF WHERE (OPTA_ID='"& opta_id &"') AND (TEAM_ID<>'0')"
+    out_.SQL          = sql
+    out_.RequestLive  = True
+    out_.Active       = True
+    out_.Edit
+    out_.FieldByName(what) = value
+    out_.Post
+    out_.RequestLive  = False
+    out_.Active       = False
+end sub
+
+
+' Update des Bundesliga Standing (Punkte Tabelle)
+' FEED F3 -> Bei jedem Tor etwa
+sub HD_UPDATE_GAME_RESULTS(file)         ' -results.xml
+    On Error resume Next
+
+    cc.SF.Debugtext "[FileWatcher " & split(now())(1) & "] UPDATE GAME_RESULTS " & file, clBlue
+
+    'exit sub
+
+
+    dim NodeList,i,objNode, oList, sql
+    dim team_id
+
+    If not oXML.load(file) Then
+       DbgErr "Cannot find or read XML-File! " & file
+       Exit Sub
+    End If
+
+    Set NodeList = oXML.SelectNodes("//data/rows")
+    If NodeList.Length = 0 Then
+       DbgErr "Found no Games"
+    Else
+        For each objNode in NodeList
+            out_.SQL          = "SELECT * FROM ROUNDS_LIST.DBF WHERE text='"& objNode.SelectSingleNode(".//id").Text &"'"
+            out_.RequestLive  = True
+            out_.Active       = True
+            if Trim(out_.FieldByName("db_id")) <> "" then
+                out_.Edit
+                out_.FieldByName("score_a") = cint(EmptyToZero(Text(objNode.SelectSingleNode(".//homeTeamScore"))))
+                out_.FieldByName("score_b") = cint(EmptyToZero(Text(objNode.SelectSingleNode(".//awayTeamScore"))))
+                out_.Post
+            end if
+            out_.RequestLive  = False
+            out_.Active       = False
+        Next
+    End If
+    Set NodeList = Nothing
+end sub
+
+public function try_to_find_hashtag(text)
+    if text = "" then exit function
+    dim tag
+    for each tag in split(text)
+        if left(tag,1) = "#" then
+            if     uCase(tag) = "#SKYBULIAT" then
+                try_to_find_hashtag = "#SkyBuliAT"
+                exit function
+            elseif uCase(tag) = "#SKYBULI" then
+                try_to_find_hashtag = "#SkyBuli"
+                exit function
+            elseif uCase(tag) = "#SKYTUT" then
+                try_to_find_hashtag = "#SkyTuT"
+                exit function
+            elseif uCase(tag) = "#SKYTUT" then
+                try_to_find_hashtag = "#SkyBuliAT"
+                exit function
+            end if
+        end if
+    next
+end function
+
+
+public function import_twitter_xml(url)
+    dim NodeList, objNode, count, autor
+    import_twitter_xml = 0
+'    dim toXML = CreateObject("Microsoft.XMLDOM")
+
+    oXML.async = false
+    oXML.SetProperty "SelectionLanguage", "XPath"
+    oXML.SetProperty "ServerHTTPRequest", False
+    oXML.validateOnParse = False
+    oXML.resolveExternals = False
+
+    if oXML.load(url) then
+        set NodeList = oXML.SelectNodes("//status")
+        for each objNode in NodeList
+            autor = text(objNode.SelectSingleNode("./user/screen_name"))
+            tw_crawl_speichern.ed_text.text  = autor & ": " & text(objNode.SelectSingleNode(".//text"))
+            tw_crawl_speichern.ed_text2.text = try_to_find_hashtag(text(objNode.SelectSingleNode(".//text")))
+            tw_crawl_speichern.DataBar1.SaveData "[XML]" & text(objNode.SelectSingleNode(".//created_at"))
+            count = count + 1
+        next
+        import_twitter_xml = count
+    else
+        cc.sf.debugtext "Cannot load from " & url, clRed
+    end if
+    set NodeList = Nothing
+    set objNode  = Nothing
+end function
+
+
+' Update des Bundesliga Standing (Punkte Tabelle)
+' FEED F3 -> Bei jedem Tor etwa
+sub HD_UPDATE_STANDING(file)
+    On Error resume Next
+    cc.SF.Debugtext "[FileWatcher " & split(now())(1) & "] UPDATE STANDINGS " & file, clBlue
+    dim NodeList,i,objNode, oList, sql
+    dim team_id
+    dim pr,r
+
+    If not oXML.load(file) Then
+       DbgErr "Cannot find or read XML-File! " & file
+       Exit Sub
+    End If
+
+    Set NodeList = oXML.SelectNodes("//rows")
+    If NodeList.Length = 0 Then
+       DbgErr "Found no Standings", clRed
+    Else
+        For each objNode in NodeList
+            out_.SQL          = "SELECT * FROM TEAMS.DBF WHERE tv_name_3='"&  text(objNode.SelectSingleNode(".//id")) &"'"
+
+            out_.RequestLive  = True
+            out_.Active       = True
+
+            if trim(out_.FieldByName("db_id")) <> "" then       ' Nur eintragen wenn wir das Team überhaupt kennen!!!
+                out_.Edit
+                out_.FieldByName("won")      = text(objNode.SelectSingleNode(".//gamesWon"))
+                out_.FieldByName("lost")     = text(objNode.SelectSingleNode(".//gamesLost"))
+                out_.FieldByName("tied")     = text(objNode.SelectSingleNode(".//gamesTied"))
+                out_.FieldByName("anzgames") = text(objNode.SelectSingleNode(".//gamesPlayed"))
+                out_.FieldByName("goals")    = text(objNode.SelectSingleNode(".//goalsFor"))
+                out_.FieldByName("goals_against") = text(objNode.SelectSingleNode(".//goalsAgainst"))
+                out_.FieldByName("points")    = text(objNode.SelectSingleNode(".//points"))
+                out_.FieldByName("rank")      = text(objNode.SelectSingleNode(".//tableRank"))
+                if not IsNumeric(text(objNode.SelectSingleNode(".//tableRankImprovement"))) then
+                    out_.FieldByName("rank_prev") = text(objNode.SelectSingleNode(".//tableRank"))
+                else
+                    pr= CInt(text(objNode.SelectSingleNode(".//tableRankImprovement")) )
+                    r=  CInt(text(objNode.SelectSingleNode(".//tableRank"))     )
+                    if pr=0 then
+                        pr= r
+                    elseif pr >0 then
+                        pr=r+pr
+                    else
+                        pr=r+pr
+                    end if
+                    out_.FieldByName("rank_prev") =  pr
+                end if
+                out_.Post
+            end if
+            out_.RequestLive  = False
+            out_.Active       = False
+        Next
+    End If
+    Set NodeList = Nothing
+end sub
+
+function formattime(time)
+
+    dim m,s
+    m=Int(time/60)
+
+
+    s=time-(m*60)
+
+    if s<10 then s="0"&s
+    formattime=m&":"&s
+end function
+
+function formatgoalminute(time)
+    if Instr(time,":") then
+        dim ts
+        ts=Split(time,":")
+        if Ubound(ts)<1 then
+           formatgoalminute=time
+        else
+            dim tm
+            tm=cint(ts(0))
+            if cint(ts(1))>0 then tm=tm+1
+            formatgoalminute = tm
+        end if
+    else
+        formatgoalminute=time
+    end if
+end function
+
+' Update des Bundesliga Standing (Punkte Tabelle)
+' F9 Feed --> Aller 90Sekunden oder früher
+sub HD_UPDATE_MATCH(file)
+
+    on error resume next
+    cc.SF.DebugText "[FileWatcher " & split(now())(1) & "] UPDATE MATCH RESULTS " & file, clBlue
+    dim gameID, SIDE, x, pID, tmp, tmpNode, objNode, NodeList, i, a,b,c,d,e ,sidexml
+    dim tmp_match_data : set tmp_match_data = CreateObject("Scripting.Dictionary")  ' ich packe die Spieldaten nochmal in ein extra Dictionary damit ich mehrere Spiele gleichzeitig verwalten kann
+    'tmp = split(file, "-")
+    'gameID = mid(tmp(Ubound(tmp)-1), 2)  ' Das Vorletzte Element im Dateinamen, minus ein führendes Zeichen
+
+
+    If not oXML.load(file) Then
+       DbgErr "XML-File konnte nicht geladen werden! " & file
+       Exit Sub
+    End If
+    gameID  =text(oXML.SelectSingleNode(".//data/gameData/id"))
+
+    tmp_match_data.item("ATTENDANCE") = text(oXML.SelectSingleNode(".//data/gameData/attendance"))    ' Zuschauer Zahlen
+    tmp_match_data.item("MATCH_TIME") = text(oXML.SelectSingleNode(".//data/gameData/scheduledTime"))
+    tmp_match_data.item("REFEREE")    = text(oXML.SelectSingleNode(".//data/gameData/gameOfficials/ref1/firstname")) & " " & text(oXML.SelectSingleNode(".//data/gameData/gameOfficials/ref1/lastname"))
+    tmp_match_data.item("REFEREE2")    = text(oXML.SelectSingleNode(".//data/gameData/gameOfficials/ref2/firstname")) & " " & text(oXML.SelectSingleNode(".//data/gameData/gameOfficials/ref2/lastname"))
+    tmp_match_data.item("LINEMAN1")    = text(oXML.SelectSingleNode(".//data/gameData/gameOfficials/linesman1/firstname")) & " " & text(oXML.SelectSingleNode(".//data/gameData/gameOfficials/linesman1/lastname"))
+    tmp_match_data.item("LINEMAN2")    = text(oXML.SelectSingleNode(".//data/gameData/gameOfficials/linesman2/firstname")) & " " & text(oXML.SelectSingleNode(".//data/gameData/gameOfficials/linesman2/lastname"))
+
+    i=0
+    dim temp
+    dim toah,toag
+    dim foh,foa
+    toah=0
+    toag=0
+    foh=0
+    foa=0
+    Set objNode = oXML.SelectSingleNode("//data")
+    set NodeList = objNode.SelectNodes("./gameData/periodStats")
+    for each tmpNode in NodeList         ' Traversiere alle Karten
+        i = text(tmpNode.SelectSingleNode(".//period") )
+        tmp_match_data.item("HOME|PS" & i & "|GOALS") = text(tmpNode.SelectSingleNode(".//homeScore"))
+        tmp_match_data.item("AWAY|PS" & i & "|GOALS") = text(tmpNode.SelectSingleNode(".//awayScore"))
+        tmp_match_data.item("HOME|PS" & i & "|S") = text(tmpNode.SelectSingleNode(".//homeShotsOnGoal"))
+        tmp_match_data.item("AWAY|PS" & i & "|S") = text(tmpNode.SelectSingleNode(".//awayShotsOnGoal"))
+
+        'tmp_match_data.item("HOME|PIM" & i & "|PIM") = text(tmpNode.SelectSingleNode(".//homePenaltyLength"))
+        'tmp_match_data.item("AWAY|PIM" & i & "|PIM") = text(tmpNode.SelectSingleNode(".//awayPenaltyLength"))
+        temp= text(tmpNode.SelectSingleNode(".//timeOnAttackHome"))
+
+        toah=toah+Cint(temp)
+        tmp_match_data.item("HOME|PS" & i & "|AT") =formattime(temp)
+
+        temp = text(tmpNode.SelectSingleNode(".//timeOnAttackAway"))
+        toag=toag+Cint(temp)
+        tmp_match_data.item("AWAY|PS" & i & "|AT") =formattime(temp)
+
+        tmp_match_data.item("HOME|PS" & i & "|FO") = text(tmpNode.SelectSingleNode(".//faceoffsWonHome "))
+        tmp_match_data.item("AWAY|PS" & i & "|FO") = text(tmpNode.SelectSingleNode(".//faceoffsWonAway "))
+        foh=foh+Cint( tmp_match_data.item("HOME|PS" & i & "|FO"))
+        fog=fog+Cint( tmp_match_data.item("AWAY|PS" & i & "|FO"))
+
+    next
+    tmp_match_data.item("HOME|FO") = foh
+    tmp_match_data.item("AWAY|FO") = fog
+    tmp_match_data.item("HOME|AT") =formattime(toah)
+    tmp_match_data.item("AWAY|AT") =formattime(toag)
+
+    for x = 1 to 2
+        if x = 1 then
+            SIDE = "HOME"
+            sidexml="home"
+            'Set objNode = oXML.SelectSingleNode("//TeamData[@Side='Home']")
+        else
+            SIDE = "AWAY"
+            sidexml="away"
+            'Set objNode = oXML.SelectSingleNode("//TeamData[@Side='Away']")
+        end if
+
+        ' TEAM Import Karten
+        i = 0
+        set NodeList = objNode.SelectNodes("./"&sidexml&"Penalties")
+        for each tmpNode in NodeList         ' Traversiere alle Karten
+            i = i + 1
+            tmp_match_data.item(SIDE&"|CARD" & i & "|TIME") = text(tmpNode.SelectSingleNode(".//gameTimeFormatted") )
+            tmp_match_data.item(SIDE&"|CARD" & i & "|PID")  = text(tmpNode.SelectSingleNode(".//offender/id") )
+            tmp_match_data.item(SIDE&"|CARD" & i & "|TYPE") = text(tmpNode.SelectSingleNode(".//offence") )
+        next
+        tmp_match_data.item(SIDE&"|CARDS") = NodeList.Length
+
+        ' TEAM Import Goals
+        i = 0
+        set NodeList = objNode.SelectNodes("./"&sidexml&"Goals")
+        For each tmpNode in NodeList
+            i = i + 1
+            tmp_match_data.item(SIDE&"|GOAL" & i & "|TIME") = text(tmpNode.SelectSingleNode(".//gameTimeFormatted") )
+            tmp_match_data.item(SIDE&"|GOAL" & i & "|PID")  = text(tmpNode.SelectSingleNode(".//scoredBy/id") )
+            tmp_match_data.item(SIDE&"|GOAL" & i & "|TYPE") = text(tmpNode.SelectSingleNode(".//gameStrength") )
+
+ '           if (pgMain.Grd_Scorer.RowCount-1)<i then pgMain.Grd_Scorer.AddRow
+            'if x= 1 then
+'                pgMain.Grd_Scorer.Cells(i,0)= formatgoalminute(tmp_match_data.item(SIDE&"|GOAL" & i & "|TIME"))
+'                pgMain.Grd_Scorer.Cells(i,1)= text(tmpNode.SelectSingleNode(".//scoredBy/playerJerseyNr") )
+'            else
+'                pgMain.Grd_Scorer.Cells(i,3)= formatgoalminute(tmp_match_data.item(SIDE&"|GOAL" & i & "|TIME")  )
+'                pgMain.Grd_Scorer.Cells(i,4)= text(tmpNode.SelectSingleNode(".//scoredBy/playerJerseyNr") )
+'            end if
+        next
+        tmp_match_data.item(SIDE&"|GOALS") = NodeList.Length
+
+        set NodeList = objNode.SelectNodes(".//"&sidexml&"FieldPlayers")
+        For each objNode in NodeList
+            pID = text(objNode.SelectSingleNode("./id"))
+
+
+            tmp_match_data.item("PLAYER|"& pID &"|G")        = text(objNode.SelectSingleNode("./goals"))
+            tmp_match_data.item("PLAYER|"& pID &"|A")        = text(objNode.SelectSingleNode("./assists"))
+            tmp_match_data.item("PLAYER|"& pID &"|PIM")     = text(objNode.SelectSingleNode("./penaltyMinutes"))
+            tmp_match_data.item("PLAYER|"& pID &"|plusminus")     = text(objNode.SelectSingleNode("./plusMinus"))
+            tmp_match_data.item("PLAYER|"& pID &"|P")   = text(objNode.SelectSingleNode("./points"))
+            tmp_match_data.item("PLAYER|"& pID &"|SB")   = text(objNode.SelectSingleNode("shotsBlocked"))
+            tmp_match_data.item("PLAYER|"& pID &"|S")    = text(objNode.SelectSingleNode("./shotsOnGoal"))
+            tmp_match_data.item("PLAYER|"& pID &"|SA")   = text(objNode.SelectSingleNode("./shotsTaken"))
+            tmp_match_data.item("PLAYER|"& pID &"|TOI")   = text(objNode.SelectSingleNode("./timeOnIce"))
+            tmp_match_data.item("PLAYER|"& pID &"|Shift")   = text(objNode.SelectSingleNode("./shifts"))
+            a=  text(objNode.SelectSingleNode("./faceoffsTotal"))
+            b=  text(objNode.SelectSingleNode("./faceoffsWon"))
+
+            if (a<>"") and (b<>"") then
+                tmp_match_data.item("PLAYER|"& pID &"|FOW") = b
+                tmp_match_data.item("PLAYER|"& pID &"|FOP") = (cint(b) /Cint(a))*100
+                'tmp_match_data.item("PLAYER|"& pID &"|FO_plusminus") =( cint(b) /Cint(a))*100
+            end if
+        next
+
+        Set objNode = oXML.SelectSingleNode("//data")
+         set NodeList = objNode.SelectNodes(".//"&sidexml&"Penalties")
+         dim penall, pen1,pen2,pen3,penot
+         dim perpen
+         penall=0
+         i=0
+         pen1=0
+         pen2=0
+         pen3=0
+         penot=0
+        For each tmpNode in NodeList
+            i=i+1
+
+            tmp_match_data.item(SIDE&"|PIM" & i & "|TIME")  = Cint(text(tmpNode.SelectSingleNode("./penaltyLength")))/60
+            perpen= text(tmpNode.SelectSingleNode("./gameTimePeriod"))
+            tmp_match_data.item(SIDE&"|PIM" & i & "|PER")   = text(tmpNode.SelectSingleNode("./gameTimePeriod"))
+            if perpen = 1 then
+                pen1= pen1+ (tmp_match_data.item(SIDE&"|PIM" & i & "|TIME"))
+            elseif perpen=2 then
+                pen2= pen2+ (tmp_match_data.item(SIDE&"|PIM" & i & "|TIME"))
+            elseif perpen=3 then
+                pen3= pen3+ (tmp_match_data.item(SIDE&"|PIM" & i & "|TIME"))
+            else
+                pen4ot= pen1ot+ (tmp_match_data.item(SIDE&"|PIM" & i & "|TIME"))
+            end if
+            if tmp_match_data.item(SIDE&"|PIM" & i & "|TIME") <> "" then  penall=penall+ Cint(tmp_match_data.item(SIDE&"|PIM" & i & "|TIME"))
+
+        next
+
+        tmp_match_data.item(SIDE&"|PIM") = penall
+        
+        'Das Löschen wenn in PS
+        tmp_match_data.item(SIDE&"|PS1|PIM") = pen1
+        tmp_match_data.item(SIDE&"|PS2|PIM") = pen2
+        tmp_match_data.item(SIDE&"|PS3|PIM") = pen3
+        tmp_match_data.item(SIDE&"|PSOT|PIM") = penOT
+                
+
+        ' TEAM Allgemeine Stats
+
+        a      = text(objNode.SelectSingleNode("./"&sidexml&"TeamStats/faceoffsWon"))
+        b     = text(objNode.SelectSingleNode("./"&sidexml&"TeamStats/faceoffsTotal"))
+        tmp_match_data.item(SIDE&"|S")      = text(objNode.SelectSingleNode("./"&sidexml&"TeamStats/shotsOnGoal"))
+
+        if (a<>"") and (b<>"") then
+            tmp_match_data.item(SIDE &"|FOW") = b
+            if CInt(a) <>0 then
+                tmp_match_data.item(SIDE&"|FOP") = (cint(b) /Cint(a))*100
+            else
+                tmp_match_data.item(SIDE&"|FOP")=0
+            end if
+                'tmp_match_data.item("PLAYER|"& pID &"|FO_plusminus") =( cint(b) /Cint(a))*100
+        end if
+
+    next
+    
+    ' Hier schreib ich in die TSP Datenbank den Spielstand!
+    out_.SQL          = "SELECT * FROM ROUNDS_LIST.DBF WHERE text='g"& gameID&"'"
+    out_.RequestLive  = True
+    out_.Active       = True
+    out_.Edit
+    out_.FieldByName("score_a") = cint(EmptyToZero(tmp_match_data.item("HOME|GOALS")))
+    out_.FieldByName("score_b") = cint(EmptyToZero(tmp_match_data.item("AWAY|GOALS")))
+    out_.Post
+    out_.RequestLive  = False
+    out_.Active       = False
+
+
+
+
+    Set objNode     = Nothing
+    Set tmpNode     = Nothing
+    set NodeList    = Nothing
+
+    set oMatchData.item(gameID) = tmp_match_data        ' Speichere die Spieldaten im Dictionary mit desser SPielID als Key
+
+
+
+    if cstr(CURRENT_MATCH_OPTA_ID) = cStr(gameID) then
+        set CURRENT_MATCH_DATA = tmp_match_data
+        update_GUI_match_data(tmp_match_data)
+    end if
+  '  set tmp_match_data = nothing    ich weiss nicht was passiert wenn ich das jetzt auf nothing setze
+end sub
+
+sub HD_UPDATE_MATCH_Current(file)
+
+    on error resume next
+    cc.SF.DebugText "[FileWatcher " & split(now())(1) & "] UPDATE MATCH RESULTS " & file, clBlue
+    dim gameID, SIDE, x, pID, tmp, tmpNode, objNode, NodeList, i, a,b,c,d,e ,sidexml
+    dim tmp_match_data : set tmp_match_data = CreateObject("Scripting.Dictionary")  ' ich packe die Spieldaten nochmal in ein extra Dictionary damit ich mehrere Spiele gleichzeitig verwalten kann
+    'tmp = split(file, "-")
+    'gameID = mid(tmp(Ubound(tmp)-1), 2)  ' Das Vorletzte Element im Dateinamen, minus ein führendes Zeichen
+
+
+    If not oXML.load(file) Then
+       DbgErr "XML-File konnte nicht geladen werden! " & file
+       Exit Sub
+    End If
+    gameID  =CURRENT_MATCH_OPTA_ID
+
+
+    i=0
+    dim temp
+    dim toah,toag
+    dim foh,foa
+    toah=0
+    toag=0
+    foh=0
+    foa=0
+    Set objNode = oXML.SelectSingleNode("//hockeydata")
+    set NodeList = objNode.SelectNodes("./gameData")
+    for each tmpNode in NodeList         ' Traversiere alle Karten
+        i = text(tmpNode.SelectSingleNode(".//Period") )
+        if i="SUMME" then
+            tmp_match_data.item("HOME|AT") = formattime(Cint(text(tmpNode.SelectSingleNode(".//TimeOnAttackASeconds"))))
+            tmp_match_data.item("AWAY|AT") = formattime(CInt(text(tmpNode.SelectSingleNode(".//TimeOnAttackBSeconds"))))
+            tmp_match_data.item("HOME|FO") = text(tmpNode.SelectSingleNode(".//FaceoffsA"))
+            tmp_match_data.item("AWAY|FO") = text(tmpNode.SelectSingleNode(".//FaceoffsB"))
+            tmp_match_data.item("HOME|S") = text(tmpNode.SelectSingleNode(".//ShotsOnGoalA"))
+            tmp_match_data.item("AWAY|S") = text(tmpNode.SelectSingleNode(".//ShotsOnGoalB"))
+            tmp_match_data.item("HOME|SB") = text(tmpNode.SelectSingleNode(".//BlockedShotsA"))
+            tmp_match_data.item("AWAY|SB") = text(tmpNode.SelectSingleNode(".//BlockedShotsB"))
+            tmp_match_data.item("HOME|HITS") = text(tmpNode.SelectSingleNode(".//HitsA"))
+            tmp_match_data.item("AWAY|HITS") = text(tmpNode.SelectSingleNode(".//HitsB"))
+            tmp_match_data.item("HOME|GOALS") = text(tmpNode.SelectSingleNode(".//GoalsA"))
+            tmp_match_data.item("AWAY|GOALS") = text(tmpNode.SelectSingleNode(".//GoalsB"))
+            tmp_match_data.item("HOME|PPGF") = text(tmpNode.SelectSingleNode(".//PPGoalsA"))
+            tmp_match_data.item("AWAY|PPGF") = text(tmpNode.SelectSingleNode(".//PPGoalsB"))
+            tmp_match_data.item("HOME|SV") = text(tmpNode.SelectSingleNode(".//SavePercA"))
+            tmp_match_data.item("AWAY|SV") = text(tmpNode.SelectSingleNode(".//SavePercB"))
+            tmp_match_data.item("HOME|PEN") = text(tmpNode.SelectSingleNode(".//AnzPenaltysA"))
+            tmp_match_data.item("AWAY|PEN") = text(tmpNode.SelectSingleNode(".//AnzPenaltysB"))
+            tmp_match_data.item("HOME|PIM") = text(tmpNode.SelectSingleNode(".//PenaltyMinutesA"))
+            tmp_match_data.item("AWAY|PIM") = text(tmpNode.SelectSingleNode(".//PenaltyMinutesB"))
+
+        else
+            if Instr(i,"OT")>0 then
+                i="OT"
+            end if
+            tmp_match_data.item("HOME|PS" & i & "|AT") = formattime(CInt(text(tmpNode.SelectSingleNode(".//TimeOnAttackASeconds"))))
+            tmp_match_data.item("AWAY|PS" & i & "|AT") = formattime(CInt(text(tmpNode.SelectSingleNode(".//TimeOnAttackBSeconds"))))
+            tmp_match_data.item("HOME|PS" & i & "|FO") = text(tmpNode.SelectSingleNode(".//FaceoffsA"))
+            tmp_match_data.item("AWAY|PS" & i & "|FO") = text(tmpNode.SelectSingleNode(".//FaceoffsB"))
+            tmp_match_data.item("HOME|PS" & i & "|S") = text(tmpNode.SelectSingleNode(".//ShotsOnGoalA"))
+            tmp_match_data.item("AWAY|PS" & i & "|S") = text(tmpNode.SelectSingleNode(".//ShotsOnGoalB"))
+            tmp_match_data.item("HOME|PS" & i & "|SB") = text(tmpNode.SelectSingleNode(".//BlockedShotsA"))
+            tmp_match_data.item("AWAY|PS" & i & "|SB") = text(tmpNode.SelectSingleNode(".//BlockedShotsB"))
+            tmp_match_data.item("HOME|PS" & i & "|HITS") = text(tmpNode.SelectSingleNode(".//HitsA"))
+            tmp_match_data.item("AWAY|PS" & i & "|HITS") = text(tmpNode.SelectSingleNode(".//HitsB"))
+            tmp_match_data.item("HOME|PS" & i & "|GOALS") = text(tmpNode.SelectSingleNode(".//GoalsA"))
+            tmp_match_data.item("AWAY|PS" & i & "|GOALS") = text(tmpNode.SelectSingleNode(".//GoalsB"))
+            tmp_match_data.item("HOME|PS" & i & "|PPGF") = text(tmpNode.SelectSingleNode(".//PPGoalsA"))
+            tmp_match_data.item("AWAY|PS" & i & "|PPGF") = text(tmpNode.SelectSingleNode(".//PPGoalsB"))
+            tmp_match_data.item("HOME|PS" & i & "|SV") = text(tmpNode.SelectSingleNode(".//SavePercA"))
+            tmp_match_data.item("AWAY|PS" & i & "|SV") = text(tmpNode.SelectSingleNode(".//SavePercB"))
+            tmp_match_data.item("HOME|PS" & i & "|PEN") = text(tmpNode.SelectSingleNode(".//AnzPenaltysA"))
+            tmp_match_data.item("AWAY|PS" & i & "|PEN") = text(tmpNode.SelectSingleNode(".//AnzPenaltysB"))
+            tmp_match_data.item("HOME|PS" & i & "|PIM") = text(tmpNode.SelectSingleNode(".//PenaltyMinutesA"))
+            tmp_match_data.item("AWAY|PS" & i & "|PIM") = text(tmpNode.SelectSingleNode(".//PenaltyMinutesB"))
+        end if
+    next
+
+    set oMatchData.item(gameID) = tmp_match_data        ' Speichere die Spieldaten im Dictionary mit desser SPielID als Key
+
+    if cstr(CURRENT_MATCH_OPTA_ID) = cStr(gameID) then
+        set CURRENT_MATCH_DATA = tmp_match_data
+        update_GUI_match_data(tmp_match_data)
+    end if
+  '  set tmp_match_data = nothing    ich weiss nicht was passiert wenn ich das jetzt auf nothing setze
+end sub
+
+' Update der Live Spielergebnisse
+' F26 Feed --> Bei jedem größeren SPielEvent
+ sub OPTA_UPDATE_LIVE_SCORES(file)
+    if tw_konferenz.cb_manual.Checked then
+        cc.SF.DebugText "MANUAL MODE ENABLED! --> IGNORING LIVE SCORES UPDATE " & file, clRed
+        EXIT SUB
+    end if
+ 
+    cc.SF.DebugText "[FileWatcher " & split(now())(1) & "] UPDATE LIVE SCORES " & file, clBlue
+    '    cc.sf.wait 250
+    dim i,k,x, ResultsList, ResultNode, GamesList, GameNode, score_home, score_away, gameID
+
+    If not oXML.load(file) Then
+       cc.sf.debugtext "Cannot find or read XML-File! " & file, clRed
+       Exit Sub
+    End If
+    Set ResultsList = oXML.SelectNodes("//results[@latest='TRUE']")
+    If ResultsList.Length = 0 Then
+       DbgErr "Found no Live Scores"
+    Else
+        For each ResultNode in ResultsList                     ' Alle Spiele die gleichzeitig Anstoß haben sind in einer ResultListe
+            Set GamesList  = ResultNode.SelectNodes("./result")
+            for each GameNode in GamesList                     ' Iteriere über alle Spiele der ResultListe
+                gameID = GameNode.GetAttribute("game-id")
+                for x = 1 to 5                                  ' Haben wir dieses Spiel in der Konferenz offen?
+                     if (tw_konferenz.ComponentByName("pn_game" & x).Visible) and (tw_konferenz.ComponentByName("pn_game" & x).UserData = gameID) then
+                        score_home = cInt(gameNode.SelectSingleNode("./home-team/score").Text)
+                        score_away = cInt(gameNode.SelectSingleNode("./away-team/score").Text)
+                        ' Ich übernehme den Live Score NUR DANN wenn er höher ist, als der in meiner Liste! (Die Live Scores müssen nicht das aktuellste sein)
+                        if (score_home > cInt(tw_konferenz.ComponentByName("score" & 2*x-1).Caption)) then
+                            tw_konferenz.ComponentByName("score" & 2*x-1).Caption = score_home
+                        end if
+                        if (score_away > cInt(tw_konferenz.ComponentByName("score" & 2*x).Caption)) then
+                            tw_konferenz.ComponentByName("score" & 2*x).Caption = score_away
+                        end if
+                        
+                        select case GameNode.GetAttribute("period")
+                            case "First Half"           tw_konferenz.ComponentByName("period" & x).Caption = "1"
+                            case "Half Time"            tw_konferenz.ComponentByName("period" & x).Caption = "2"    ' Pause
+                            case "Second Half"          tw_konferenz.ComponentByName("period" & x).Caption = "3"
+                            case "Extra Time"           tw_konferenz.ComponentByName("period" & x).Caption = "4"    ' Pause
+                            case "Extra First Half"     tw_konferenz.ComponentByName("period" & x).Caption = "5"
+                            case "Extra Half Time"      tw_konferenz.ComponentByName("period" & x).Caption = "6"    ' Pause
+                            case "Extra Second Half"    tw_konferenz.ComponentByName("period" & x).Caption = "7"
+                            case "After Extra"          tw_konferenz.ComponentByName("period" & x).Caption = "8"    ' Pause
+                            case "Penalty Shootout"     tw_konferenz.ComponentByName("period" & x).Caption = "9"    ' Elfmeter
+                            case "PostMatch"            tw_konferenz.ComponentByName("period" & x).Caption = "10"   ' END STAND
+                            case "Full Time"            tw_konferenz.ComponentByName("period" & x).Caption = "10"   ' END STAND
+                            case "PreMatch"             tw_konferenz.ComponentByName("period" & x).Caption = "11"   ' Vor dem Anstoß
+                            case "Abandoned"            tw_konferenz.ComponentByName("period" & x).Caption = "X!"   ' ABGESAGT
+                            case else
+                                cc.sf.debugtext "UNKNOWN GAME PERIOD " & GameNode.GetAttribute("period"), clRed
+                        end select
+                        
+                         if cStr(gameID) = cStr(CURRENT_MATCH_OPTA_ID) then   ' Müssen wir im TSP auch aktualisieren?
+                            TSP.SetScore-1, TSP_A, tw_konferenz.ComponentByName("score" & 2*x-1).caption
+                            TSP.SetScore-1, TSP_B, tw_konferenz.ComponentByName("score" & 2*x).caption
+                            TSP.SetHalfTime(cInt(tw_konferenz.ComponentByName("period"  & x).caption))
+                        end if
+                        
+                        exit for
+                    end if
+                next
+            next
+        next
+    End If
+    Set GameNode    = Nothing
+    Set GamesList   = Nothing
+    Set ResultsList = Nothing
+    Set ResultNode  = Nothing
+end sub
+
+
+' SEASONSTATS -> Enthält Spieler Saison Statistiken
+sub HD_UPDATE_SEASON_STATS(file)
+    cc.sf.DebugText "[FileWatcher " & split(now())(1) & "] UPDATE SEASONSTATS " & file, clBlue
+    dim NodeList,i,objNode, oList, sql, tID, tTSPID  , j,stat
+    dim stat_list, stat_node, pID, pTSPID, team_id
+    dim duels_won, duels
+    dim ga,sa
+    dim tmpint
+    On Error resume Next
+
+    If not oXML.load(file) Then
+       DbgErr "Cannot find or read XML-File! " & file
+       Exit Sub
+    End If
+    tid    = text(oXML.SelectSingleNode(".//data/teamData/id"))
+    tTSPID=trim(TSP_get_info_from_db("TEAMS", "DB_ID", "tv_name_3", tid))
+
+    Set NodeList = oXML.SelectNodes("//playerStats")
+    If NodeList.Length = 0 Then
+       DbgErr "Found no Stats", clRed
+    Else
+        For i = 0 to NodeList.Length - 1
+
+            Set objNode = NodeList.Item(i)
+            pID    = text(objNode.SelectSingleNode("./id"))
+            pTSPID = TSP_get_info_from_db("PLAYERS_1", "DB_ID", "TEXT1", pID)
+
+            sql = "SELECT * FROM PLAYERS_2.DBF WHERE (OPTA_ID='"& pID &"') AND (TEAM_ID ='"&tTSPID&"')"
+            out_.SQL          = sql
+            out_.RequestLive  = True
+            out_.Active       = True
+            ga=1
+            sa=1
+
+            set stat_list = objNode.childNodes
+
+
+            if Trim(out_.FieldByName("db_id")) <> "" then
+                out_.Edit
+                for j = 0 to stat_list.Length -1
+                    Set stat_node = stat_list(j)
+
+                    select case stat_node.nodeName
+                        case "goals"            out_.FieldByName("G")   = stat_node.text
+                        case "assists"          out_.FieldByName("A") = stat_node.text
+                        case "points"           out_.FieldByName("P")         = stat_node.text
+                        case "penaltyMinutes"   out_.FieldByName("PIM")= stat_node.text
+                        case "plusMinus"        out_.FieldByName("plusminus")            = stat_node.text
+                        case "shotsOnGoal"     out_.FieldByName("S")  = stat_node.text
+                        case "scoringEfficiency"  out_.FieldByName("SP") = stat_node.text
+                        case "playingTime"   out_.FieldByName("TOI") = CInt(stat_node.text)/60
+                        case "faceoffs"  out_.FieldByName("FOW")            = stat_node.text
+                        case "faceoffPercentage"      out_.FieldByName("FOP")= stat_node.text
+                        case "shotsAgainst"
+                            out_.FieldByName("SA")= stat_node.text
+                            sa= CInt(stat_node.text)
+                        case "goalsAgainst"
+                            out_.FieldByName("GA")= stat_node.text
+                            ga= Cint(stat_node.text)
+                        case "goalsAgainstAverage"      out_.FieldByName("GAA")= stat_node.text
+                        case "savePercentage"      out_.FieldByName("SAP")= stat_node.text
+                        case "gamesPlayed"      out_.FieldByName("GAMES")= stat_node.text
+                        case default
+                            cc.sf.DebugText stat_node.tagName
+                    end select
+                next
+                out_.FieldByName("SV") = sa-ga
+
+                out_.Post
+            end if
+            out_.RequestLive  = False
+            out_.Active       = False
+        next
+    end if
+    
+    Set NodeList = oXML.SelectNodes("//goalkeeperStats")
+    If NodeList.Length = 0 Then
+       DbgErr "Found no Stats", clRed
+    Else
+        For i = 0 to NodeList.Length - 1
+
+            Set objNode = NodeList.Item(i)
+            pID    = text(objNode.SelectSingleNode("./id"))
+            pTSPID = TSP_get_info_from_db("PLAYERS_1", "DB_ID", "TEXT1", pID)
+
+            sql = "SELECT * FROM PLAYERS_2.DBF WHERE (OPTA_ID='"& pID &"') AND (TEAM_ID ='"&tTSPID&"')"
+            out_.SQL          = sql
+            out_.RequestLive  = True
+            out_.Active       = True
+            ga=1
+            sa=1
+
+            set stat_list = objNode.childNodes
+
+
+            if Trim(out_.FieldByName("db_id")) <> "" then
+                out_.Edit
+                for j = 0 to stat_list.Length -1
+                    Set stat_node = stat_list(j)
+
+                    select case stat_node.nodeName
+                        case "goals"            out_.FieldByName("G")   = stat_node.text
+                        case "assists"          out_.FieldByName("A") = stat_node.text
+                        case "points"           out_.FieldByName("P")         = stat_node.text
+                        case "penaltyMinutes"   out_.FieldByName("PIM")= stat_node.text
+                        case "plusMinus"        out_.FieldByName("plusminus")            = stat_node.text
+                        case "shotsOnGoal"     out_.FieldByName("S")  = stat_node.text
+                        case "scoringEfficiency"  out_.FieldByName("SP") = stat_node.text
+                        case "playingTime"
+                            out_.FieldByName("TOI") = CInt(Clng(stat_node.text)/60)
+                        case "faceoffs"  out_.FieldByName("FOW")            = stat_node.text
+                        case "faceoffPercentage"      out_.FieldByName("FOP")= stat_node.text
+                        case "shotsAgainst"
+                            out_.FieldByName("SA")= stat_node.text
+                            sa= Cint(stat_node.text)
+                        case "goalsAgainst"
+                            out_.FieldByName("GA")= stat_node.text
+                            ga= Cint(stat_node.text)
+                        case "goalsAgainstAverage"      out_.FieldByName("GAA")= stat_node.text
+                        case "savePercentage"
+                            out_.FieldByName("SAP")= stat_node.text
+                        case default
+                            cc.sf.DebugText stat_node.tagName
+                    end select
+                next
+                out_.FieldByName("SV") = sa-ga
+
+                out_.Post
+            end if
+            out_.RequestLive  = False
+            out_.Active       = False
+        next
+    end if
+
+    Set NodeList = oXML.SelectNodes("//teamStats")
+    If NodeList.Length = 0 Then
+       DbgErr "Found no Team Stats", clRed
+    Else
+        For i = 0 to NodeList.Length - 1
+            Set objNode = NodeList.Item(i)
+
+            set stat_list = objNode.childNodes
+            sql = "SELECT * FROM TEAMS.DBF WHERE tv_name_3='" & tID &"'"
+            out_.SQL          = sql
+            out_.RequestLive  = True
+            out_.Active       = True
+            set stat_list = objNode.childNodes
+            if Trim(out_.FieldByName("db_id")) <> "" then
+                out_.Edit
+
+               for j = 0 to stat_list.Length -1
+                    Set stat_node = stat_list(j)
+                    select case stat_node.nodeName  ' SIEMIC: DIE ZUORDNUNG IST VOLLKOMMEN WILLKÜRLICH!!!!!!
+                        case "powerplay"                    out_.FieldByName("PP_PP")   = stat_node.text
+                        case "powerplayPercentage"          out_.FieldByName("PPP")   = stat_node.text
+                        case "penaltykill"                  stat_node.text
+                        case "penaltyKillingPercentage"     out_.FieldByName("PKP")   = stat_node.text
+                        case "powerplayGoalsAgainst"        out_.FieldByName("PPGA")   = stat_node.text
+                        case "shorthandedGoalsAgainst"       stat_node.text
+                        case "shorthandedGoalsFor"        stat_node.text
+                        case "penaltyMinutes"        stat_node.text
+                        case "minorPenalties"        stat_node.text
+                        case "majorPenalties"        stat_node.text
+                        case "misconducts"        stat_node.text
+                        case "gameMisconducts"        stat_node.text
+                        case "matchPenalties"        stat_node.text
+                        case "penaltyMinutesPerGame"        stat_node.text
+                        case "shotsOnGoalTotal"             out_.FieldByName("S")= stat_node.text
+                        case "scoringEfficiency"        stat_node.text
+                        case "faceoffs"                 stat_node.text
+                        case "faceoffPercentage"             out_.FieldByName("FOP")= stat_node.text
+                        case default
+                            cc.sf.DebugText   stat_node.nodeName
+                    end select
+                next
+                out_.Post
+            end if
+            out_.RequestLive  = False
+            out_.Active       = False
+        next
+    end if
+    set objNode   = Nothing
+    set stat_list = Nothing
+    Set Nodelist  = Nothing
+    on error goto 0
+end sub
+
+
+' Es gibt ein OPTA Daten Update (wird vom FileDog aufgerufen)
+sub HD_FILE_CHANGED(Sender, file, file_idx,all)
+    if trim(file) = "" then exit sub
+    dim tmp      : tmp = split(file, "\")  ' Ich bin NUR am Dateiname interessiert
+    dim n : n = "[FileWatcher " & split(now())(1) & "] "
+    dim fname    : fname = tmp(Ubound(tmp))
+    dim compID   : compID   = CURRENT_LEAGUE
+    dim seasonID : seasonID = pgData.cb_season.Text
+
+    if left(fname,10) = "HD_Current"  then
+        call HD_UPDATE_MATCH_Current(file)
+    'elseif left(fname, 13) = "HD_Gamereport"   and all =true then
+     '   call HD_UPDATE_MATCH(file)
+    elseif left(fname, 12) = "HD_Standings"  and all =true then
+        call HD_UPDATE_STANDING(file)
+    elseif  left(fname, 7) = "HD_Team"     and all =true then
+        call HD_UPDATE_SEASON_STATS(file)
+    elseif left(fname, 11) = "HD_Schedule"   and all =true  then
+        call HD_UPDATE_GAME_RESULTS(file)
+
+    end if
+end sub
+
+
+' True wenn Datum in der (deutschen) Sommerzeit liegt
+function is_daylight_saving_time(date)
+  dim i, letzter_samstag
+  If Not IsDate( date ) Then cc.sf.debugtext "Datum ist fehlerhaft " & data, clred
+  Select Case Month(date)
+      Case 4,5,6,7,8,9      is_daylight_saving_time = true
+      Case 1,2,11,12        is_daylight_saving_time = false
+      Case 3                ' Sommerzeit beginnt am Letzten Samstag im März um 2:00 Uhr
+        is_daylight_saving_time = false
+        If Day(date) < 24 Then Exit Function
+        for i = 31 to 24 step -1                        ' Letzten Samstag suchen
+            if weekday("3/" & i & "/" & year(date)) = 7 then
+                letzter_samstag = i
+                exit for
+            end if
+        next
+        If (Day(date) < letzter_samstag) Then Exit Function
+        If (Day(date) = letzter_samstag) and (hour(date) < 2) then exit function
+        is_daylight_saving_time = true
+      Case 10               ' Sommerzeit endet am Letzen Samstag im Oktober um 3:00 Uhr
+        is_daylight_saving_time = true
+        If Day(date) < 24 Then Exit Function
+        for i = 31 to 24 step -1                        ' Letzten Samstag suchen
+            if weekday("10/" & i & "/" & year(date)) = 7 then
+                letzter_samstag = i
+                exit for
+            end if
+        next
+        If (Day(date) < letzter_samstag) Then Exit Function
+        If (Day(date) = letzter_samstag) and (hour(date) < 3) then exit function
+        is_daylight_saving_time = false
+  End Select
+End Function
+
+
+' Wandelt ein Datum aus einer bestimmten Zeitzone (GMT,BST) in MEZ, bzw. MESZ um
+function convert_to_local_time(time, zeitzone)
+    dim tmp_date
+    time=ConvertUTCToLocal(time/1000)
+    if zeitzone = "GMT" then
+        tmp_date = DateAdd("h",1,time)      ' GMT + 1 = MEZ
+    elseif zeitzone = "BST" then
+        tmp_date = time                     ' BST + 0 = MEZ
+    else
+        cc.sf.debugtext "Unbekannte Zeitzone " & zeitzone, clRed
+    end if
+    
+    ' prüfen ob das Datum in der Deutschen Sommerzeit liegt
+    if is_daylight_saving_time(tmp_date) then
+        tmp_date = DateAdd("h",1,tmp_date)  ' Noch eine Stunde hinzu!
+    end if
+    convert_to_local_time = tmp_date
+end function
+
+
+' get "what" from "db" where "where" = "Value"
+' Notiz: Nach knapp 15 Stunden Debuggen herausgefunden. Direkt Abfrage durch TSP stürzt extrem häufig ab. Lieber Umweg über BDE
+function TSP_get_info_from_db(db, what, where, value)
+    if (trim(what) = "") or (trim(where) = "") or (trim(value) = "") then
+'        msgbox "Fehler in der SQL Abfrage!  SELECT "& what &" FROM "& db &".DBF WHERE " & where & "='"& value &"'", clRed
+        TSP_get_info_from_db = ""
+        exit function
+    end if
+     on error resume next
+
+     value=replace(value,"'","''")
+
+     System.BdeDataSource1.SQL = "SELECT "& what &" FROM "& db &".DBF WHERE " & where & "='"& value &"'"
+     ' NICHT RAUSNEHMEN!! Liegt an einer Besonderheit der Players_2 DB
+     if db = "PLAYERS_2" then System.BdeDataSource1.SQL = System.BdeDataSource1.SQL & " AND team_id<>'0'"
+
+     out_.Active       = True
+     System.BdeDataSource1.First
+     TSP_get_info_from_db = System.BdeDataSource1.FieldByName(what)
+     System.BdeDataSource1.Last
+     System.BdeDataSource1.Active = False
+
+     on error goto 0
+
+    ' if TSP.LoadSQLData("SELECT "&  what & " FROM " & Ucase(db) & " WHERE " & where & "='" & value & "'") then
+    '        TSP_get_info_from_db = TSP.GetSQLData(what)
+    ' end if
+end function
+
+' Notlösung: Gibt den Text inhalt eines node Objectes zurück oder nix wenns gar keins ist
+function Text(ByRef node)
+    if not (node is nothing) then
+        text = node.text
+    else
+        text = ""
+    end if
+end function
+
+
+' Sucht eine XML Node mit bestimmten Filter Attribute
+' ist recht hilfreich wenn eine Node nicht gefunden wird.
+function get_xml_player_stat(ByRef node, filter,id)
+    dim tmp
+    set tmp = node.SelectSingleNode(".//"&filter)
+        if not (tmp is nothing) then
+        get_xml_player_stat = tmp.text
+        
+        if value = "playerFirstname" then
+            if PLAYER_FORNAME.exists(id) then
+                    get_xml_player_stat = PLAYER_FORNAME.item(id)
+            end if
+        elseif value = "playerLastname" then
+            if PLAYER_SURNAME.exists(id) then
+                    get_xml_player_stat = PLAYER_SURNAME.item(id)
+            end if
+        elseif value = "known_name" then
+            if PLAYER_NICKNAME.exists(id) then
+                    get_xml_player_stat = PLAYER_NICKNAME.item(id)
+            end if
+        end if
+    else
+        get_xml_player_stat = ""
+    end if
+    set tmp = Nothing
+end function
+
+function getTeamInfo(teaminfo,filter)
+    dim pos,pose
+    dim ts
+    pos=instr(teaminfo,""""&filter&"""")
+    if pos>0 then
+        pos=instr(pos,teaminfo,"""text"":")
+        pos=instr(pos,teaminfo," ")
+        pose=instr(pos+2,teaminfo,"""")
+        ts=mid(teaminfo,pos+2,pose-pos-2)
+        getTeamInfo=ts
+    else
+       getTeamInfo=""
+    end if
+end function
+
+Sub XML_Import_Teams (file , did,year)
+    Dim sXML, objXML, iCount, i, objNode, bFound, player_list, logo
+    dim jersey
+    dim tTeamID, tName, player_node, sWeight, sHeight, sBornDate, tShortName
+    dim sql, NodeList, k, pPlayerID, coach_id
+    dim symid
+    dim teaminfo  ,cfname,cname,cmname
+    dim tempinfo
+    CC.SF.ShowSplashForm "Laden XML-Daten", RGB(45, 90, 135)
+    
+    If not oXML.load(file) Then
+       DbgErr "XML-File konnte nicht geladen werden! " & file
+       cc.SF.HideSplashForm
+       Exit Sub
+    End If
+
+    ' Gruppe anlegen
+    dim gName
+    select case did
+    case "34"
+                gName  = "Grunddurchgang 2015/16"
+            case "810"
+                gName  = "Grunddurchgang 2016/17"
+            case "807"
+                gName  = "Grunddurchgang 2016/17"
+                compID="810"
+            case "1143"
+                gName  = "Zwischenrunde 2016/17"
+                compID="810"
+            case "1144"
+                gName  = "Zwischenrunde 2016/17"
+                compID="810"
+            case "1145"
+                gName  = "Playoff 2016/17"
+                compID="810"
+            case "1147"
+                gName  = "Playoff QF1 2016/17"
+                compID="810"
+            case "1148"
+                gName  = "Playoff QF2 2016/17"
+                compID="810"
+            case "1149"
+                gName  = "Playoff QF3 2016/17"
+                compID="810"
+            case "1150"
+                gName  = "Playoff QF4 2016/17"
+                compID="810"
+            case "1152"
+                gName  = "Playoff SF1 2016/17"
+                compID="810"
+            case "1153"
+                gName  = "Playoff SF2 2016/17"
+                compID="810"
+            case "1155"
+                gName  = "Playoff FIN 2016/17"
+                compID="810"
+            case "3460"
+                gName = "Grunddurchgang 2018/19"
+            case default
+                gName  = "NOCH NICHT"
+    end select
+    gName  = "Season 2016/17"
+    did="810"
+
+    dim gYear : gYear  = year
+    dim gShort: gShort = did
+    dim gID   : gID    = did
+
+
+    ' Ich brauche die GruppenID (DB) der aktuellen Gruppe. Notfalls leg ich sie neu an
+    dim internal_grp_id : internal_grp_id = TSP_get_info_from_db("GROUPS", "DB_ID", "text_1", gID)
+    'cc.sf.DebugText "GroupID:" &internal_grp_id
+    if trim(internal_grp_id) = "" then  ' Existiert noch nicht
+        out_.SQL          = "SELECT * FROM GROUPS.DBF"
+        out_.RequestLive  = True
+        out_.Active       = True
+        out_.Insert
+        out_.FieldByName("LONG_NAME")  = gName
+        out_.FieldByName("SHORT_NAME") = gShort
+        out_.FieldByName("TEXT_1")     = gID
+        out_.FieldByNumber(3) = gYear  ' = YEAR, aber YEAR ist reserviert. TODO: Per Regexp versuchen Jahreszahl aus dem Namen zu holen?
+        out_.Post
+        out_.RequestLive  = False
+        out_.Active       = False
+        internal_grp_id = TSP_get_info_from_db("GROUPS", "DB_ID", "text_1", gID)
+    end if
+
+    Set NodeList = oXML.SelectNodes(".//data")
+
+    ' traversiere alle Teams
+    If NodeList.Length = 0 Then
+       DbgErr "Found no Teams in " & file
+    Else
+        For i = 0 to NodeList.Length - 1    ' Für jedes Team
+            Set objNode = NodeList.Item(i)
+            tTeamID = objNode.SelectSingleNode("./teamData/id").Text
+            tName   = objNode.SelectSingleNode("./teamData/teamLongname").Text
+            symid   = objNode.SelectSingleNode("./teamData/teamShortname").Text
+
+            CC.SF.ShowSplashForm "Importiere " & Ucase(tName), RGB(45, 90, 135)
+
+            teaminfo=objNode.SelectSingleNode("./teamData/teamInformation").Text
+            cname=cfname=cmname=""
+            tempinfo=getTeamInfo(teaminfo,"Trainer")
+            tempinfo=split(tempinfo, " ")
+            if Ubound(tempinfo)=2 then
+                cfname= tempinfo(0)
+                cmname= tempinfo(1)
+                cname= tempinfo(2)
+            elseif Ubound(tempinfo)=1 then
+                cfname= tempinfo(0)
+                cname= tempinfo(1)
+            elseif Ubound(tempinfo)=0 then
+                cname= tempinfo(0)
+            else
+                cname=""
+            end if
+
+           ' Import des Trainers   Noch holen
+           
+            coach_id = tTeamID
+            if trim(TSP_get_info_from_db("OFFICIALS", "DB_ID", "text_1", coach_id)) = "" then
+                sql = "INSERT INTO OFFICIALS (first_name, mid_name, last_name, text_1) VALUES (""" & _
+                    cfname  & """,""" & _
+                    cmname & """,""" & _
+                    cname   & """,""" & _
+                    coach_id & """)"
+                if TSP.ExecSQL(sql) then
+'                        cc.sf.debugtext sql, clGreen
+                else
+                        cc.sf.debugtext sql, clRed
+                end if
+            end if
+
+            ' Existiert das Team schon?
+            if trim(TSP_get_info_from_db("TEAMS", "DB_ID", "TV_NAME_3", tTeamID)) = "" then
+                if TEAM_LOGOS.exists(tName) then
+                    logo = TEAM_LOGOS.item(tName)
+                else
+                    logo = Inputbox("Please enter VIZ logo name for Team """ & tName & """", "HockeyData XML IMPORT")
+                end if
+                if TEAM_SHORTNAME.exists(tName) then
+                    tShortName = TEAM_SHORTNAME.item(tName)
+                else
+                    tShortName = tName
+                end if
+                if TEAM_NICKNAME.exists(tName) then
+                    symid = TEAM_NICKNAME.item(tName)
+                elseif symid="" then
+                    symid = Inputbox("Please enter NickName(3 Letter Code) for Team """ & tName & """", "OPTA XML IMPORT")
+                end if
+
+                sql = "INSERT INTO TEAMS (long_name, short_name, tv_name_3, league_id, coach_1_id,logo,nick_name) VALUES " & _
+                    "("""& tName & """,""" & tShortName & """,""" & tTeamID & """,""" & internal_grp_id & """,""" & _
+                   TSP_get_info_from_db("OFFICIALS", "DB_ID", "text_1", coach_id) & """,""" & logo & """,""" & symid & """)"
+                   
+                if TSP.ExecSQL(sql) then
+
+                else
+                    cc.sf.debugtext sql, clRed
+                end if
+            end if
+
+            oTeamIDs.item(tTeamID) = tName  ' Ich merke mir mal die TeamID (XML) und den TeamNamen          ' EVtl brauch ich das nicht. Kann ich auch per SQL rausfinden
+
+            ' Import der Spieler dieses Teams
+            set player_list = objNode.SelectNodes("./teamRoster")
+            for k = 0 to player_list.Length - 1
+                set player_node = player_list.item(k)
+                pPlayerID = player_node.SelectSingleNode("./id").Text
+
+                ' Kenn ich den Spieler schon?
+                if trim(TSP_get_info_from_db("PLAYERS_1", "DB_ID", "text1", pPlayerID)) = "" then
+                    sWeight   = player_node.SelectSingleNode(".//playerWeight").Text
+                    sHeight   = player_node.SelectSingleNode(".//playerHeight").Text
+                    sBornDate = ""
+                    dim pname
+                    pname =  get_xml_player_stat(player_node, "playerFirstname",pPlayerID) & " " & get_xml_player_stat(player_node,  "playerLastname",pPlayerID)
+                    If UCase(sWeight)   = "UNKNOWN" Then sWeight = 0
+                    If UCase(sHeight)   = "UNKNOWN" Then sHeight = 0
+                    if UCase(sBornDate) = "UNKNOWN" Then sbornDate = ""
+                    sql = "INSERT INTO PLAYERS_1 (first_name, second_name, mid_name, tv_name, nick_name, height, weight, born_date, Nationality, text1) VALUES (""" & _
+                        get_xml_player_stat(player_node, "playerFirstname",pPlayerID)  & """,""" & _
+                        get_xml_player_stat(player_node,  "playerLastname",pPlayerID) & """,""" & _
+                        get_xml_player_stat(player_node,  "mid_name",pPlayerID)    & """,""" & _
+                        get_xml_player_stat(player_node,  "known_name",pPlayerID)  & """,""" & _
+                        get_xml_player_stat(player_node,  "known_name",pPlayerID)  & """,""" & _
+                        sHeight & """,""" & sWeight & """,""" & sBornDate & """,""" & _
+                        get_xml_player_stat(player_node, "country",pPlayerID)     & """,""" & _
+                        pPlayerID & """)"
+        
+                    if TSP.ExecSQL(sql) then
+
+                    else
+                        cc.sf.debugtext sql, clRed
+                    end if
+
+                    jersey = get_xml_player_stat(player_node, "playerJerseyNr",0)
+                    if not IsNumeric(jersey) then jersey = 0
+
+                    ' WAR DAS DER BUG?! In Players_2 müssen die Spieler WARUMAUCHIMMER, Doppelt Vorkommen!
+                    
+                    'Achtung Spieler mit Spitname  !!!
+                    sql = "INSERT INTO PLAYERS_2 (player_name, player_id, team_id) VALUES (""" & _
+                    pname                 & """,""" & _
+                    TSP_get_info_from_db("PLAYERS_1", "DB_ID", "text1", pPlayerID)  & """,""" & _
+                    "0"     & """)"
+                    if TSP.ExecSQL(sql) then
+
+                    else
+                        cc.sf.debugtext sql, clRed
+                    end if
+                     dim posig
+                     posig= player_node.SelectSingleNode(".//position").Text
+                     if posig="F" then
+                        posig="Forward"
+                     elseif posig="D" then
+                         posig="Defender"
+                     elseif posig="G" then
+                        posig="GOALKEEPER"
+                     end if
+                    ' Jetzt brauch ich noch die Zuordnung zum Team und die Spieler Statistiken (kommen später)
+                    sql = "INSERT INTO PLAYERS_2 (player_name, OPTA_ID, dress_nr, pos_in_game, player_id, team_id) VALUES (""" & _
+                        pname                   & """,""" & _
+                        pPlayerID                                                       & """,""" & _
+                        jersey                                                          & """,""" & _
+                        posig              & """,""" & _
+                        TSP_get_info_from_db("PLAYERS_1", "DB_ID", "text1", pPlayerID)  & """,""" & _
+                        TSP_get_info_from_db("TEAMS", "DB_ID", "TV_NAME_3", tTeamID)      & """)"
+                    if TSP.ExecSQL(sql) then
+
+                    else
+                        cc.sf.debugtext sql, clRed
+                    end if
+                end if
+            next
+        next
+    end if
+
+    ' Objektreferenzen zerstören
+    Set objNode     = Nothing
+    set NodeList    = Nothing
+    set player_node = Nothing
+    set player_list = Nothing
+    cc.SF.HideSplashForm
+End Sub
+
+
+' Durchsucht ein OPTA XML Directory nach -result.xml files.
+' Sammelt aus allen gefundenen Files Competition- und Season IDs und packt sie in die ComboBox zur Auswahl
+sub traverse_XML_directory(dir,all)
+    cc.SF.ShowSplashForm "Importiere HockeyData Daten..."
+    dim tmp, season, compID, i
+    
+    ' TODO: Zum Einen wollen wir sessions und competitions laden, gleichzeitig aber die alten Settings drin lassen
+    dim flist : flist = CC.Files.GetFileList(dir, "*.xml")
+    if IsArray(flist) then
+          for i = 0 to UBound(flist)
+                call HD_FILE_CHANGED(Nothing, dir & "\" & flist(i), -1,all)         ' Und wir schauen mal rein was wir da gefunden haben
+          next
+    else
+          msgbox "Cannot find any XML files in " & dir
+    end if
+    cc.SF.HideSplashForm
+end sub
+
+' Öffnet den Dialog zur Auswahl des XML Ordners
+sub pgData_Edit1Click (Sender)
+    dim dir : dir = CC.Dialogs.DirDialog(pgData.ed_XML_Path.Text)
+    if dir = "" then exit sub
+    System.DirSeeker.Active = False
+    pgData.ed_XML_Path.Text = dir
+    if CC.Files.DirectoryExists(pgData.ed_XML_Path.Text) then
+        traverse_XML_directory pgData.ed_XML_Path.Text,true
+
+        System.DirSeeker.DirPath = pgData.ed_XML_Path.Text
+        System.DirSeeker.Active = True
+      
+      '  System.FileDog.Active = false
+       ' System.FileDog.files.Clear
+       ' System.FileDog.files.Add pgData.ed_XML_Path.Text & "\CHANGELOG.txt"
+       ' System.FileDog.Active = true
+    else
+        msgbox "This is not a readable directory!"
+    end if
+end sub
+
+
+' Lädt alle Spiele einer Competition in die Listbox zur späteren Auswahl
+sub parse_games_list(file)
+    dim NodeList,i,objNode, oList, sql
+    dim GameId, sDate, sVenue, sCity
+    On Error resume Next
+
+    cc.SF.ShowSplashForm "Importing Games"
+
+    If not oXML.load(file) Then
+       DbgErr "XML-File konnte nicht geladen werden! " & file
+       cc.SF.HideSplashForm
+       Exit Sub
+    End If
+
+    dim compID ,compIDO
+    Set NodeList = oXML.SelectNodes("//data/rows")
+
+    If NodeList.Length = 0 Then
+       DbgErr "Found no MatchData", clRed
+    Else
+        For i = 0 to NodeList.Length - 1
+
+            Set objNode = NodeList.Item(i)
+            compID = objNode.SelectSingleNode(".//divisionId").Text
+            GameId = objNode.SelectSingleNode(".//id").Text
+            sDate  = objNode.SelectSingleNode(".//scheduledDate/value").Text & " " &  objNode.SelectSingleNode(".//scheduledTime").Text'convert_to_local_time(objNode.SelectSingleNode(".//gameUtcTimestamp").Text, "GMT")
+            sVenue = ""
+            sCity  = ""
+            compIDO=CompID
+            
+            dim gName
+            select case compID
+            case "34"
+                gName  = "Grunddurchgang 2015/16"
+            case "810"
+                gName  = "Grunddurchgang 2016/17"
+            case "807"
+                gName  = "Grunddurchgang 2016/17"
+                compID="810"
+            case "1143"
+                gName  = "Zwischenrunde 2016/17"
+                compID="810"
+            case "1144"
+                gName  = "Zwischenrunde 2016/17"
+                compID="810"
+            case "1145"
+                gName  = "Playoff 2016/17"
+                compID="810"
+            case "1147"
+                gName  = "Playoff QF1 2016/17"
+                compID="810"
+            case "1148"
+                gName  = "Playoff QF2 2016/17"
+                compID="810"
+            case "1149"
+                gName  = "Playoff QF3 2016/17"
+                compID="810"
+            case "1150"
+                gName  = "Playoff QF4 2016/17"
+                compID="810"
+            case "1152"
+                gName  = "Playoff SF1 2016/17"
+                compID="810"
+            case "1153"
+                gName  = "Playoff SF2 2016/17"
+                compID="810"
+            case "1155"
+                gName  = "Playoff FIN 2016/17"
+                compID="810"
+            case default
+                gName  = "NOCH NICHT"
+            end select
+        gName  = "Season 2016/17"
+        compID="810"
+
+    ' Ich brauche die GruppenID (DB) der aktuellen Gruppe. Notfalls leg ich sie neu an
+    dim internal_grp_id : internal_grp_id = TSP_get_info_from_db("GROUPS", "DB_ID", "text_1", compID)
+    'cc.sf.DebugText "GroupID:" &internal_grp_id
+    if trim(internal_grp_id) = "" then  ' Existiert noch nicht
+        out_.SQL          = "SELECT * FROM GROUPS.DBF"
+        out_.RequestLive  = True
+        out_.Active       = True
+        out_.Insert
+        out_.FieldByName("LONG_NAME")  = gName
+        out_.FieldByName("SHORT_NAME") = compID
+        out_.FieldByName("TEXT_1")     = compID
+        out_.FieldByNumber(3) = 2016  ' = YEAR, aber YEAR ist reserviert. TODO: Per Regexp versuchen Jahreszahl aus dem Namen zu holen?
+        out_.Post
+        out_.RequestLive  = False
+        out_.Active       = False
+        internal_grp_id = TSP_get_info_from_db("GROUPS", "DB_ID", "text_1", gID)
+    end if
+
+
+            ' Todo: referee auch?!
+            ' todo: status?
+        if text(objNode.SelectSingleNode(".//gameRound")) <> "" then
+            'cc.SF.DebugText "GID "& GameID& " "&TSP_get_info_from_db("ROUNDS_LIST", "DB_ID", "text", GameId)
+            if trim(TSP_get_info_from_db("ROUNDS_LIST", "DB_ID", "text", GameId)) = "" then
+                sql = "INSERT INTO ROUNDS_LIST (round, team_a_name, team_b_name, score_a, score_b, match_date, league_id, team_a_id, team_b_id, Ort, Game_Nr, text, Gruppe) VALUES (""" & _
+                    text(objNode.SelectSingleNode(".//gameRound")) & """,""" & _
+                    TSP_get_info_from_db("TEAMS", "long_name", "tv_name_3", TExt(objNode.SelectSingleNode(".//homeTeamId")))  & """,""" & _
+                    TSP_get_info_from_db("TEAMS", "long_name", "tv_name_3", Text(objNode.SelectSingleNode(".//awayTeamId")))  & """,""" & _
+                    Text(objNode.SelectSingleNode(".//homeTeamScore"))  & """,""" & _
+                    Text(objNode.SelectSingleNode(".//awayTeamScore"))  & """,""" & _
+                    sDate & """,""" & _
+                    TSP_get_info_from_db("GROUPS", "DB_ID", "text_1", compID)   & """,""" & _
+                    TSP_get_info_from_db("TEAMS", "DB_ID", "tv_name_3", TExt(objNode.SelectSingleNode(".//homeTeamId")))  & """,""" & _
+                    TSP_get_info_from_db("TEAMS", "DB_ID", "tv_name_3", Text(objNode.SelectSingleNode(".//awayTeamId")))  & """,""" & _
+                    sCity     & """,""" & _
+                    "" & """,""" & _
+                    GameId  & """,""" & _
+                    compIDO & """)"
+                    
+                if TSP.ExecSQL(sql) then
+
+                else
+                    cc.sf.debugtext sql, clRed
+                end if
+                
+            end if
+            Set oList = Nothing
+        end if
+        Next
+        Set objNode = Nothing
+    End If
+    Set Nodelist = Nothing
+    cc.SF.HideSplashForm
+end sub
+
+Function ConvertUTCToLocal( varTime )
+    Dim myObj, MyDate
+    MyDate = CDate( varTime )
+    Set myObj = CreateObject( "WbemScripting.SWbemDateTime" )
+    myObj.Year = Year( MyDate )
+    myObj.Month = Month( MyDate )
+    myObj.Day = Day( MyDate )
+    myObj.Hours = Hour( MyDate )
+    myObj.Minutes = Minute( myDate )
+    myObj.Seconds = Second( myDate )
+    ConvertUTCToLocal = myObj.GetVarDate( True )
+End Function
+
+sub pgData_PageShow (Sender)
+    save_gui_settings
+    LAST_TABSHEET = Sender.Name
+end sub
+
+sub pgData_bt_importDBClick (Sender)
+    if msgbox("Import Data into TSP Database?", vbYesNo) = vbYes then
+        'Dim o
+        'Set o = CreateObject("MSXML2.XMLHTTP")
+        'o.open "GET", "http://www.hlportal.de", False
+        'o.send
+
+        Set objFSO = CreateObject("Scripting.FileSystemObject")
+        objStartFolder = pgData.ed_XML_Path.Text
+        Set objFolder = objFSO.GetFolder(objStartFolder)
+        Set colFiles = objFolder.Files
+        For Each objFile in colFiles
+            If InStr (objFile.name ,"HD_Team_"&pgData.cb_season.Text&"_"&pgdata.cb_competition.Text) >0 Then
+            cc.SF.DebugText objFile.name
+            XML_import_teams pgData.ed_XML_Path.Text & "\"&objFile.name,pgData.cb_competition.Text,pgData.cb_season.Text
+            End If
+        Next
+        'XML_import_teams(pgData.ed_XML_Path.Text & "\srml-" & pgData.cb_competition.Text & "-" & pgData.cb_season.Text & "-squads.xml")    ' erstmal kurz die Teams und Ligen in die DB
+        if msgbox("Import Games List?", vbYesNo) = vbYes then
+            parse_games_list(pgData.ed_XML_Path.Text & "\HD_Schedule_" & pgData.cb_season.Text & "_" & pgData.cb_competition.Text & ".xml")   ' Spiele anlegen
+        end if
+    end if
+    'if cc.Files.DirectoryExists(pgData.ed_XML_Path.Text) then traverse_XML_directory(pgData.ed_XML_Path.Text)
+end sub
+
+sub pgData_ed_TSP_PathClick (Sender)
+    dim dir : dir =  CC.Dialogs.DirDialog(Sender.Text)
+    if trim(dir) = "" then exit sub
+    System.BdeDataSource1.Active = False
+    System.BdeDataSource1.DatabasePath = dir
+    Sender.Text = dir
+end sub
+
+sub pgData_bt_importDB_PeneltyClick (Sender)
+    dim srcpath
+    srcpath=pgData.ed_XML_Events.Text
+    dim dirs:dirs= cc.Files.GetDirList(srcpath)
+    dim tdir
+    if IsArray(dirs) then
+        for i = 0 to UBound(dirs)
+            tdir=srcpath+"\"+dirs(i)
+            dim flist : flist = CC.Files.GetFileList(tdir, "f24-*.xml")
+            if IsArray(flist) then
+                for j = 0 to UBound(flist)
+                    OPTA_UPDATE_F24_PENALTY(tdir+"\"+flist(j))
+                next
+            else
+                cc.sf.DebugText "Cannot find any XML files in " & dirs(i)
+            end if
+        next
+    else
+          msgbox "Cannot find any XML files in " & srcpath
+    end if
+end sub
+
+sub OPTA_UPDATE_F24_PENALTY(file)
+    dim NodeList,i,objNode, oList, sql, tID, tTSPID
+    dim q_list, q_node, pID, pTSPID, team_id,ispenatly
+    dim eventid,playday,x,y,typeid
+    
+    On Error resume Next
+
+    If not oXML.load(file) Then
+       DbgErr "Cannot find or read XML-File! " & file
+       Exit Sub
+    End If
+    
+    playday  = oXML.SelectSingleNode(".//Game/@matchday").Text
+
+    Set NodeList = oXML.SelectNodes("//Event")
+    If NodeList.Length = 0 Then
+       DbgErr "Found no Events", clRed
+    Else
+        For i = 0 to NodeList.Length - 1
+            Set objNode = NodeList.Item(i)
+            typeid= objNode.GetAttribute("type_id")
+            if typeid ="13" or typeid ="14" or typeid ="15" or typeid ="16" then
+                ispenalty=false
+                set q_list = objNode.SelectNodes("./Q")
+                for each q_node in q_list
+                    if q_node.GetAttribute("qualifier_id")="9" then
+                        ispenalty=true
+                    end if
+                next
+                if ispenalty then
+
+                    eventid=  objNode.GetAttribute("id")
+
+                    dim internal_id : internal_id = TSP_get_info_from_db("penalty", "DB_ID", "EVENT_ID", eventid)
+                    if trim(internal_id) = "" then  ' Existiert noch nicht
+
+                        pID    = "p" & objNode.GetAttribute("player_id")
+                        pTSPID = TSP_get_info_from_db("PLAYERS_1", "DB_ID", "TEXT1", pID)
+                        tID    = "t"&objNode.GetAttribute("team_id")
+                        tTSPID=TSP_get_info_from_db("TEAMS", "DB_ID", "TV_NAME_3", tID)
+                        if pTSPID="" then
+                            pTSPID=0
+                        end if
+                        if typeid ="16" then
+                            outcome=1
+                        else
+                            outcome=0
+                        end if
+                        for each q_node in q_list
+                            if q_node.GetAttribute("qualifier_id")="102" then
+                                x=q_node.GetAttribute("value")
+                            end if
+                             if q_node.GetAttribute("qualifier_id")="103" then
+                                y=q_node.GetAttribute("value")
+                            end if
+                        next
+                        
+                        sql = "INSERT INTO PENALTY (PLAYER_ID, TEAM_ID, EVENT_ID, PLAYDAY, OUTCOME,X,Y) VALUES " & _
+                        "("& pTSPID & "," & tTSPID & "," & eventid & "," & playday & "," & _
+                            outcome & "," & CINT(x*10) & "," & cINT(y*10) & ")"
+
+                        if TSP.ExecSQL(sql) then
+
+                        else
+                            cc.sf.debugtext sql, clRed
+                        end if
+                        'out_.SQL          = "SELECT * FROM PENATLY.DBF"
+                        'out_.RequestLive  = True
+                        'out_.Active       = True
+                        'out_.Insert
+                        'out_.FieldByName("PLAYER_ID")  = pTSPID
+                        'out_.FieldByName("TEAM_ID") = tTSPID
+                        'out_.FieldByName("EVENT_ID")     = eventid
+                        'out_.FieldByName("PLAYDAY")     = playday
+                        'out_.FieldByName("OUTCOME")     = outcome
+                        'out_.FieldByName("X")     = x
+                        'out_.FieldByName("Y")     = y
+
+                        'out_.Post
+                        'out_.RequestLive  = False
+                        'out_.Active       = False
+                    end if
+                end if
+            end if
+        next
+    end if
+end sub
+
+sub pgData_bt_clear_penaltyClick (Sender)
+  dim sql
+  sql="DELETE FROM PENALTY"
+  if TSP.ExecSQL(sql) then
+
+  else
+    cc.sf.debugtext sql, clRed
+  end if
+end sub
+
+sub pgData_ed_XML_EventsClick (Sender)
+ dim dir : dir =  CC.Dialogs.DirDialog(Sender.Text)
+    if trim(dir) = "" then exit sub
+    Sender.Text = dir
+end sub
+
+sub pgData_Button2Click (Sender)
+  ' script pgData_Button2Click generated on 8/24/2016 at 12:23:46 PM
+  ' description of params:
+  ' Sender as IccButton
+
+end sub
+
+sub pgData_bt_importDB1Click (Sender)
+    if msgbox("Import Data into TSP Database?", vbYesNo) = vbYes then
+
+        Set objFSO = CreateObject("Scripting.FileSystemObject")
+        objStartFolder = pgData.ed_XML_Path.Text
+        Set objFolder = objFSO.GetFolder(objStartFolder)
+        Set colFiles = objFolder.Files
+
+        if msgbox("Import Games List?", vbYesNo) = vbYes then
+            parse_games_list(pgData.ed_XML_Path.Text & "\HD_Schedule_" & pgData.cb_season.Text & "_" & pgData.cb_competition.Text & ".xml")   ' Spiele anlegen
+        end if
+    end if
+
+end sub
+
+sub pgData_Memo2Change (Sender)
+  ' script pgData_Memo2Change generated on 02.02.2018 at 10:39:11
+  ' description of params:
+  ' Sender as IccMemo
+
+end sub
+
+</script_body>
+</script>

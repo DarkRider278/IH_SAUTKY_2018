@@ -1,0 +1,19 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_spielwechsel_OKExecute (Sender)
+    Hide_DSS
+    AllTV.TV__Trenner tw_spielwechsel.cb_trenner.ItemIndex + 1
+    if tw_spielwechsel.cb_DSS.Checked then
+        AUTO_DSS = True
+    end if
+end sub
+
+sub tw_spielwechsel_Show (Sender)
+  AUTO_DSS = False
+end sub
+
+</script_body>
+</script>

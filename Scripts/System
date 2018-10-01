@@ -1,0 +1,365 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+dim ka_score
+dim ka_side
+
+dim pentime_h1
+dim pentime_h2
+dim pentime_g1
+dim pentime_g2
+
+
+Sub OnRunMode (Sender)
+'    cc.SF.ShowSplashForm "PLEASE WAIT WHILE INITIALIZING GUI..."
+    KEINE_TRENNER_FRAGE = True  ' Nur beim ersten Wechsel in den Run Modus ist das True
+   ' pgMain.Panel4.Visible = True
+   ' pgMain.TrackBar1.Position = 2500
+    if cc.SF.ActivePage is pgMain then restore_gui_settings
+    Set AllTV = New cls_Grafikaufrufe
+    set oXML = CreateObject("Microsoft.XMLDOM")
+    OpenLanguageDatabase
+    SET objTeamStat = CreateObject("Scripting.Dictionary")
+    LoadNameTranslations
+    ToolWindow1.Visible = true
+    tw_konferenz.Visible = false
+ '   cc.SF.HideSplashForm
+
+    System.FileDog.Active = false
+    System.debugTimer.Interval = 5000
+
+    ' Schauen wir mal was wir schon fuer XML Files hier finden
+    'if cc.Files.DirectoryExists(pgData.ed_XML_Path.Text) then traverse_XML_directory(pgData.ed_XML_Path.Text)
+    TSP_MATCH_CHANGE ' das aktuelle Spiel im TSP nochmal triggern
+    
+end sub
+
+sub System_ScriptHotkey1Execute (Sender)
+
+    AllTV.TV__ClearAll
+end sub
+
+sub System_ScriptHotkey2Execute (Sender)
+    pgMain_Btn_Hide_DSS_ZusatzClick (Sender)
+end sub
+
+sub System_AppEventsTVConnectionChange (Sender, ConnID)
+    cc.SF.DebugText "TV CONNECTIONS CHANGED!! ", clRed
+    ReadTVConnections
+end sub
+
+sub System_AppEventsOpenProject (Sender)
+    cc.sf.ClearDebugWindow
+    LAST_TABSHEET = pgMain.Name
+    ReadTVConnections
+end sub
+
+sub System_AppEventsDesignMode (Sender)
+    save_gui_settings
+end sub
+
+sub System_AppEventsCloseProject (Sender)
+    save_gui_settings
+    System.BdeDataSource1.Active = False   ' Datenbank aus
+end sub
+
+' Hier
+sub System_DirSeekerDirectoryChanged (Sender, FileName)
+        '   FileDog_ChangeLog_Changed Sender, pgData.ed_XML_Path.Text & "\CHANGELOG.txt", 1
+
+
+
+
+    exit sub
+    if right(FileName, 4) <> ".xml" then exit sub '  Ich ignoriere mal alles nicht XML artige
+   ' cc.sf.debugtext "[DirSeeker] File Changed: " & FileName, vbMagenta
+    FileName = Sender.DirPath & "\" & FileName
+    
+    if cc.Files.FileExists(fileName) then
+        if System.FileDog.files.IndexOf(FileName) = -1 then
+            System.FileDog.files.Add FileName
+        end if
+        call HD_FILE_CHANGED(Sender, FileName, -1)     ' Eigentlich würde nur der Directory Watcher ausreichen denk ich
+        cc.sf.wait 250
+    else
+        if System.FileDog.files.IndexOf(FileName) <> -1 then System.FileDog.files.Delete System.FileDog.files.IndexOf(FileName)
+    end if
+   ' system.FileDog.Active = true
+end sub
+
+
+' Zu Testzwecken, simuliert aller "paar Sekunden" das DatenUpdate einer zufälligen Opta Datei
+sub System_debugTimerTimer (Sender)
+'    FILE_COUNT = FILE_COUNT + 1
+    'FILE_COUNT = FILE_COUNT mod System.FileDog.files.Count
+'    dim random : random = cint((100 * rnd()) mod System.FileDog.files.Count)
+
+ '   call OPTA_FILE_CHANGED(Sender, System.FileDog.files.Strings(FILE_COUNT), FILE_COUNT)
+    call FileDog_ChangeLog_Changed (Sender, pgData.ed_XML_Path.Text & "\CHANGELOG.txt", 0)
+end sub
+
+sub System_ScriptHotkey3Execute (Sender)
+    pgMain.Btn_ShowDSS.Down = not pgMain.Btn_ShowDSS.Down ' Maus Klick simulieren
+    pgMain_Btn_ShowDSSClick pgMain.Btn_ShowDSS
+end sub
+
+sub FileDog_ChangeLog_Changed (Sender, FileName, FileIndex)
+    dim changed_files, file
+
+    if not cc.Files.FileExists(FileName) then exit sub
+    changed_files = cc.Strings.LoadFromFile(FileName, false)
+    cc.Files.DeleteFile(FileName)
+    changed_files = mid(changed_files,4)    ' Da sind irgendwelche Steuerzeichen am Anfang
+
+    if len(changed_files) < 4 then exit sub
+    for each file in split(changed_files, vbNewLine)
+        'if not right(file, 12) = "-results.xml" then
+        HD_FILE_CHANGED Sender, file, 0             ' Die -results möchte ich lieber nicht in Echtzeit aktualisieren
+    next
+end sub
+
+sub System_bt_karusellTimer (Sender)
+     if tw_konferenz.cb_manual_karusell.Checked=false then
+         tw_konferenz_bt_nextkarusellClick tw_konferenz.bt_nextkarusell
+    end if
+end sub
+
+sub System_bt_pen_a_1Timer (Sender)
+    pgMain.Btn_pen_a1_2.Down=false
+    pgMain_Btn_pen_a1_2Click pgMain.Btn_pen_a1_2
+end sub
+
+sub System_bt_pen_a_2Timer (Sender)
+    pgMain.Btn_pen_a2_2.Down=false
+    pgMain_Btn_pen_a2_2Click pgMain.Btn_pen_a2_2
+end sub
+
+sub System_bt_pen_b_1Timer (Sender)
+    pgMain.Btn_pen_b1_2.Down=false
+    pgMain_Btn_pen_b1_2Click pgMain.Btn_pen_b1_2
+end sub
+
+sub System_bt_pen_b_2Timer (Sender)
+    pgMain.Btn_pen_b2_2.Down=false
+    pgMain_Btn_pen_b2_2Click pgMain.Btn_pen_b2_2
+end sub
+
+sub System_bg_pentimesTimer (Sender)
+  ' script System_bg_pentimesTimer generated on 8/19/2016 at 1:56:31 PM
+  ' description of params:
+  ' Sender as IccBackgroundTimer
+
+end sub
+
+sub Container1_TCPClientInterface1Connected (remote)
+    system.TCPClientInterface1.SendBuffer Chr(2) & "!CONNECT" & Chr(3)
+end sub
+
+dim ppactive:ppactive=""
+
+Sub ParseData(ByVal data)
+    dim values
+    dim isOk
+    'cc.sf.DebugText data
+    values = split(data,"|")
+    If NOT ( IsArray(values) And UBound(values)>1 ) THEN EXIT SUB
+    isOk = true
+
+    SELECT CASE true
+        case (values(0) = "MS" AND UBound(values)>=8)  ' "MS|1|1:2|0:0|1|0017:05|0017:04.4|0|-1|-2"
+            ' MAIN SCORE & TIME
+
+            ' PERIOD
+            SELECT CASE CInt(values(1))
+                CASE 1, 2, 3: If TSP.GetTime(TSP_HalfTime) <> CInt(values(1))then tsp.SetHalfTime(values(1))
+                Case 11: If TSP.GetTime(TSP_HalfTime) <> 4 then tsp.SetHalfTime(4)
+                Case 12: If TSP.GetTime(TSP_HalfTime) <> 5 then tsp.SetHalfTime(5)
+                Case 13: If TSP.GetTime(TSP_HalfTime) <> 6 then tsp.SetHalfTime(6)
+                Case 14: If TSP.GetTime(TSP_HalfTime) <> 7 then tsp.SetHalfTime(7)
+                Case 15: If TSP.GetTime(TSP_HalfTime) <> 8 then tsp.SetHalfTime(8)
+                Case 16: If TSP.GetTime(TSP_HalfTime) <> 9 then tsp.SetHalfTime(9)
+                Case 17: If TSP.GetTime(TSP_HalfTime) <> 10 then tsp.SetHalfTime(10)
+                Case 99: If TSP.GetTime(TSP_HalfTime) <> 11 then tsp.SetHalfTime(11)
+            END SELECT
+
+
+            'SCORE
+            dim score ,time ,time2
+            score = split(values(2), ":")
+            if UBound(score) = 1 then
+
+                dim os,ns
+                os=tsp.GetScore( -1, TSP_A )
+                ns= CInt(score(0))
+
+                if ns>os then
+
+
+                    tsp.SetScore -1, TSP_A, ns
+                    'if (pgMain.Grd_Scorer.RowCount-1)<ns then pgMain.Grd_Scorer.AddRow
+                    'time= Clng(((20*60000)-TSP.GetTime(TSP_Time, 0))/1000)
+
+                    'time2=fix(time/60)
+                    'time=time-(time2*60)
+                    'if time<10 then  time="0"& time
+                    'pgMain.Grd_Scorer.Cells(ns,0)= time2&":"&time
+                elseif ns<os then
+
+                    tsp.SetScore -1, TSP_A, ns
+                end if
+                
+                os=tsp.GetScore( -1, TSP_B)
+                ns= CInt(score(1))
+                if ns>os then
+                    tsp.SetScore -1, TSP_B, ns
+                    'if (pgMain.Grd_Scorer.RowCount-1)<ns then pgMain.Grd_Scorer.AddRow
+                    'time= Clng(((20*60000)-TSP.GetTime(TSP_Time, 0))/1000)
+
+                    'time2=fix(time/60)
+                    'time=time-(time2*60)
+                    'if time<10 then  time="0"& time
+                    'pgMain.Grd_Scorer.Cells(ns,3)=time2&":"&time
+                elseif ns<os then
+                    tsp.SetScore -1, TSP_B, ns
+                end if
+                'tsp.SetScore -1, TSP_A, ns
+                'tsp.SetScore -1, TSP_B, CInt(score(1))
+                'TabSheet1.ScoreA.Caption = score(0)
+                'TabSheet1.ScoreB.Caption = score(1)
+            end if
+
+            ' TIME
+            dim cortime
+            cortime = split(values(5), ":")
+            time = split(values(6), ":")
+
+            if UBound(cortime) = 2 then
+                tsp.SetMainTime cortime(0), cortime(1), cortime(2), 0
+                'TabSheet1.ClockMain.Minutes = cortime(1)
+                'TabSheet1.ClockMain.Seconds = cortime(2)
+            end if
+            dim pph,ppa
+            pph=Cint(values(8))
+            ppa=CInt(values(9))
+
+            if pph=ppa then
+                if ppactive="A" then
+                    AllTV.TV__Show_PP "HEIM",""
+                elseif ppactive = "B" Then
+                    AllTV.TV__Show_PP "GAST",""
+                end if
+                ppactive=""
+
+            elseif pph<ppa then
+               if ppactive="" then
+                  AllTV.TV__Show_PP "GAST","GAST"
+                  ppactive="B"
+               end if
+            else
+                if ppactive="" then
+                  AllTV.TV__Show_PP "HEIM","HEIM"
+                  ppactive="A"
+               end if
+            end if
+
+        case (values(0) = "TO" AND UBound(values)>=5)    ' "TO|0|0|0|1|0"
+            ' TIMEOUT
+
+        case (values(0) = "PT" AND UBound(values)>=4)   ' "PT|1|0|02|1:42"
+
+            ' PENALTIES
+            dim tt
+            tt= split(values(4), ":")(0)*60+ split(values(4), ":")(1)
+
+            select case values(1)
+                case 1
+
+                    if values(2) = "-1" and pentime_h1 > -1 then
+                        'AllTV.TV__Set_PenClock 1,pentime_h1
+
+                        AllTV.TV__Stop_PenClock 1
+                        pentime_h1=-1
+                    elseif tt > 0 and pentime_h1 = -1 then
+
+                        AllTV.TV__Start_PenClock 1,tt
+                        pentime_h1=tt
+                    elseif tt >= 0 and pentime_h1 > -1 then
+                        if pentime_h1 <> tt then
+                            pentime_h1=tt
+                            AllTVTV__Set_PenClock 1,tt
+                        end if
+                    end if
+                case 2
+                    if values(2) = "-1" and pentime_h2 > -1 then
+                        'AllTV.TV__Set_PenClock 2,pentime_h2
+                        AllTV.TV__Stop_PenClock 2
+                        pentime_h2=-1
+                    elseif tt > 0 and pentime_h2 = -1 then
+                        AllTV.TV__Start_PenClock 2,tt
+                        pentime_h2=tt
+                    elseif tt >= 0 and pentime_h2 > -1 then
+                        if pentime_h2 <> tt then
+                            pentime_h2=tt
+                            AllTVTV__Set_PenClock 2,tt
+                        end if
+                    end if
+                case 3
+                    if values(2) = "-1" and pentime_g1 > -1 then
+                        'AllTV.TV__Set_PenClock 3,pentime_g1
+                        AllTV.TV__Stop_PenClock 3
+                        pentime_g1=-1
+                    elseif tt > 0 and pentime_g1 = -1 then
+                        AllTV.TV__Start_PenClock 3,tt
+                        pentime_g1=tt
+                    elseif tt >= 0 and pentime_g1 > -1 then
+                        if pentime_g1 <> tt then
+                            pentime_g1=tt
+                            AllTVTV__Set_PenClock 3,tt
+                        end if
+                    end if
+                case 4
+                    if values(2) = "-1" and pentime_g2 > -1 then
+                        'AllTV.TV__Set_PenClock 3,pentime_g2
+                        AllTV.TV__Stop_PenClock 4
+                        pentime_g2=-1
+                    elseif tt > 0 and pentime_g2 = -1 then
+                        AllTV.TV__Start_PenClock 4,tt
+                        pentime_g2=tt
+                    elseif tt >= 0 and pentime_g2 > -1 then
+                        if pentime_g2 <> tt then
+                            pentime_g2=tt
+                            AllTVTV__Set_PenClock 4,tt
+                        end if
+                    end if
+            end select
+            'TabSheet1.ComponentByName("Clock"&values(1)).Minutes = split(values(4), ":")(0)
+            'TabSheet1.ComponentByName("Clock"&values(1)).Seconds = split(values(4), ":")(1)
+
+        case else
+            isOk = false
+
+    END SELECT
+
+    IF isOk Then
+
+    else
+        CC.SF.DebugText "INVALID PROTOCOL: " & data, clRed
+    end if
+END SUB
+
+sub Container1_ProtocolParser1Protocol (data, remote)
+    Call ParseData(data)
+end sub
+
+sub System_TCPClockConnected (remote)
+  cc.sf.DebugText "TCP Clock connected",clBlue
+
+end sub
+
+sub System_TCPClockDisconnected (remote, error, message)
+  cc.sf.DebugText "TCP Clock disconnected",clBlue
+end sub
+
+</script_body>
+</script>

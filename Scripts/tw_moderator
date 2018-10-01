@@ -1,0 +1,61 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_moderator_cb_ModeratorChange (Sender)
+    dim p,fn,n ,pos
+    p=Trim(tw_moderator.cb_Moderator.Text)
+        pos=CC.Strings.StrPos(" ",p)
+        if(pos>0 )then
+            fn=Trim(Left(p,pos))
+            n=Right(p,Len(p)-pos)
+        else
+            n=p
+            fn=""
+        end if
+     pgMain.ed_Name.Text=n
+     pgMain.ed_FName.Text=fn
+     pgMain.ed_nr.text=""
+     pgMain.cb_bb_typ.ItemIndex=0
+     pgMain.Memo1.Lines.Clear
+     'pgMain.Memo1.Lines.Add "Moderator"
+     pgMain.ed_logo.Text=""
+end sub
+
+sub tw_moderator_cb_Moderator1Change (Sender)
+    dim p,fn,fkt,n ,pos ,logo
+    p=Trim(tw_moderator.cb_Moderator1.Text)
+    pos=CC.Strings.StrPos(" ",p)
+    if(pos>0 )then
+        fn=Trim(Left(p,pos))
+        n=Right(p,Len(p)-pos)
+    else
+        n=p
+        fn=""
+    end if
+    pos =cc.Strings.StrPos("#",n)
+    if(pos>0 )then
+        fkt=split(n,"#")(1)
+        n=split(n,"#")(0)
+    else
+        fkt=""
+    end if
+    pos =cc.Strings.StrPos(";",fkt)
+    if(pos>0 )then
+        logo=split(fkt,";")(1)
+        fkt=split(fkt,";")(0)
+    else
+        logo=""
+    end if
+     pgMain.ed_Name.Text=n
+     pgMain.ed_FName.Text=fn
+     pgMain.ed_nr.text=""
+     pgMain.cb_bb_typ.ItemIndex=0
+     pgMain.Memo1.Lines.Clear
+     pgMain.Memo1.Lines.Add fkt
+     pgMain.ed_logo.Text=logo
+end sub
+
+</script_body>
+</script>

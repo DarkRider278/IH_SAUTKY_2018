@@ -1,0 +1,29 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_ttree_bt_showClick (Sender)
+    dim tmp,tmp2, i
+    dim Data  : Set Data = CreateObject("Scripting.Dictionary")
+    
+    Data.Item("TITLE")      = tw_ttree.ed_title_new.Text
+    Data.Item("SUBTITLE")      = tw_ttree.ed_subtitle_new.Text
+    for i=1 to 14
+        tmp=tw_ttree.ComponentByName("cb_team_"&i).Text
+        tmp2=tmp
+        Data.item("NAME"&i)=TSP_get_info_from_db("TEAMS", "Short_Name", "LONG_Name", tmp)
+        tmp=TSP_get_info_from_db("TEAMS", "LOGO", "LONG_Name", tmp2)
+        if tmp  = "" then tmp="placeholder"
+        Data.item("LOGO"&i)=tmp
+        Data.item("ERG"&i)=tw_ttree.ComponentByName("erg_"&i).Text
+    next
+    
+    Hide_DSS
+    HideVorlaufLogos
+    AllTV.TV__VB_Tree Data
+    set Data = Nothing
+end sub
+
+</script_body>
+</script>

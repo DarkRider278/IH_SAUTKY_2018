@@ -1,0 +1,18 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_quiz_bt_showClick (Sender)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("PHONE")  = tw_quiz.ed_phone.Text
+    Data.Item("HINT")   = tw_quiz.ed_hint.Text
+    Data.Item("TEXT")   = tw_quiz.frage.Lines.Text
+    Data.Item("CHOICE1")= tw_quiz.ed_antwort_a.Text
+    Data.Item("CHOICE2")= tw_quiz.ed_antwort_b.Text
+    AllTV.TV__Quiz Data
+    set Data = Nothing
+end sub
+
+</script_body>
+</script>

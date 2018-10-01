@@ -1,0 +1,173 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tv_programm_cb_name1Change (Sender)
+    if (Sender.UserData = True) then exit sub
+    dim i,k
+    if len(Sender.Text) < 1 then exit sub
+    for i = 0 to Sender.Items.Count - 1
+        if Sender.text = left(sender.Items.Strings(i), len(Sender.Text)) then
+            k = len(Sender.Text)
+            Sender.Text      = sender.Items.Strings(i)
+            Sender.SelStart  = k
+            Sender.SelLength = len(Sender.Text) - k
+            exit for
+        end if
+    next
+end sub
+
+sub tv_programm_cb_name1KeyPress (Sender, Key)
+    Sender.UserData = ( (Key < 65) or (Key > 172) ) ' Steuerzeichen ignorieren
+end sub
+
+sub tv_programm_bt_show_VBClick (Sender)
+    dim i,j,k, name1,name2
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    k = 0
+    for i = 1 to 5
+        name1 = trim(tv_programm.ComponentByName("cb_name" & i).Text)
+        name2 = trim(tv_programm.ComponentByName("cb_name" & 12+i).Text)
+        
+        if (name1 <> "") and (name2 <> "") and (tv_programm.ComponentByName("cb_show" & i).checked) then
+            k = k + 1
+            if (Sender is tv_programm.bt_show_IB) then   'Wenn nur als Infobox, dann kurze Team Namen
+                Data.Item("NAME_A" & k) = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "LONG_NAME", name1)
+                Data.Item("NAME_B" & k) = TSP_get_info_from_db("TEAMS", "SHORT_NAME", "LONG_NAME", name2)
+            else
+                Data.Item("NAME_A" & k) = name1
+                Data.Item("NAME_B" & k) = name2
+            end if
+            ' Die Logos dazu
+
+            Data.Item("LOGO_A" & k) = TSP_get_info_from_db("TEAMS", "LOGO", "LONG_NAME", name1)
+            Data.Item("LOGO_B" & k) = TSP_get_info_from_db("TEAMS", "LOGO", "LONG_NAME", name2)
+
+            Data.Item("TIME" & k) = tv_programm.ComponentByName("ed_Zeit" & i).Text
+            if i<6 then
+                Data.Item("QH" & k) = tv_programm.ComponentByName("tb_q_h_" & i).Text
+                Data.Item("QG" & k) = tv_programm.ComponentByName("tb_q_g_" & i).Text
+                Data.Item("QD" & k) = tv_programm.ComponentByName("tb_q_d_" & i).Text
+
+            end if
+        end if
+    next
+    if k = 0 then exit sub
+    Data.Item("ITEMCOUNT")  = k
+    'Data.Item("BACKGROUND") = pgMain.cb_Background.checked
+    Data.Item("HEADER")     = tv_programm.ed_title.text
+    Data.Item("AS_INFOBOX") = (Sender is tv_programm.bt_show_IB)
+    if Data.Item("AS_INFOBOX") = False then Hide_DSS      ' Nur bei VB hiden
+    AllTV.TV__VB_IB_Programm Data
+    set Data = Nothing
+end sub
+
+sub tv_programm_cb_allClick (Sender)
+    dim i
+    for i = 1 to 5
+        tv_programm.ComponentByName("cb_show" & i).checked = Sender.checked
+    next
+end sub
+
+sub tv_programm_bt_show_quotenClick (Sender)
+    AllTV.TV__QuotenStart
+end sub
+
+sub tv_programm_cb_day1Change (Sender)
+    tv_programm.ed_title.Text=tv_programm.cb_time.Text
+end sub
+
+sub tv_programm_bt_updateClick (Sender)
+  dim today : today = now()
+    dim match_date
+
+    ' Daten aus TSP SpielDB lesen
+    ' Alle Spiele wo das aktuelle team beteiligt ist und später als das aktuelle statt finden
+    If TSP.LoadSQLData("SELECT * FROM ROUNDS_LIST WHERE round='"&tv_programm.edt_round.text& "' AND league_id='" & tv_programm.cb_league.ItemIndex +1  & "'ORDER BY DB_ID ASC") Then
+        If TSP.SetSQLPos("First") Then
+            i = 0
+            Do
+                i = i + 1
+                if i <= 12 then ' Mehr kann ich nicht darstellen
+                    tv_programm.ComponentByName("cb_name" & i).ItemIndex    = tv_programm.cb_name1.Items.IndexOf(TSP.GetSQLData("team_a_name"))
+                    tv_programm.ComponentByName("cb_name" & 12+i).ItemIndex = tv_programm.cb_name1.Items.IndexOf(TSP.GetSQLData("team_b_name"))
+
+                    match_date = cdate(tsp.GetSQLData("match_date"))        ' Wenn das SPiel heute stattfindet, nur die Uhrzeit anzeigen
+                    if (day(now) = day(match_date)) and (month(now) = month(match_date)) then
+                        tv_programm.ComponentByName("ed_Zeit" & i).Text = split(tsp.GetSQLData("match_date"), " ")(1)
+                    else
+                        tv_programm.ComponentByName("ed_Zeit" & i).Text = tsp.GetSQLData("match_date")
+                    end if
+
+                    ' Das Datum wird mit Sekunden angegeben (":00") die will ich wegschneiden!
+                    tv_programm.ComponentByName("ed_Zeit" & i).Text = left(tv_programm.ComponentByName("ed_Zeit" & i).Text, len(tv_programm.ComponentByName("ed_Zeit" & i).Text) - 3)
+                end if
+            Loop While TSP.SetSQLPos("Next")
+        end if
+    end if
+
+    for i = i + 1 to 12
+        tv_programm.ComponentByName("ed_Zeit" & i).Text = ""
+    next
+
+end sub
+
+sub downtv (Sender)
+    dim id : id = right(Sender.Name,1)
+    dim tmp
+    tmp = tv_programm.ComponentByName("cb_name" & id+1).ItemIndex
+    tv_programm.ComponentByName("cb_name" & id+1).ItemIndex = tv_programm.ComponentByName("cb_name" & id).ItemIndex
+    tv_programm.ComponentByName("cb_name" & id).ItemIndex = tmp
+
+    tmp = tv_programm.ComponentByName("cb_name" & (id+12)+1).ItemIndex
+    tv_programm.ComponentByName("cb_name" & (id+12)+1).ItemIndex = tv_programm.ComponentByName("cb_name" & (id+12)).ItemIndex
+    tv_programm.ComponentByName("cb_name" & (id+12)).ItemIndex = tmp
+
+    tmp = tv_programm.ComponentByName("cb_show" & id+1).checked
+    tv_programm.ComponentByName("cb_show" & id+1).checked = tv_programm.ComponentByName("cb_show" & id).checked
+    tv_programm.ComponentByName("cb_show" & id).checked = tmp
+
+    tmp = tv_programm.ComponentByName("tb_q_h_" & id+1).text
+    tv_programm.ComponentByName("tb_q_h_" & id+1).text = tv_programm.ComponentByName("tb_q_h_" & id).text
+    tv_programm.ComponentByName("tb_q_h_" & id).text = tmp
+
+    tmp = tv_programm.ComponentByName("tb_q_d_" & id+1).text
+    tv_programm.ComponentByName("tb_q_d_" & id+1).text = tv_programm.ComponentByName("tb_q_d_" & id).text
+    tv_programm.ComponentByName("tb_q_d_" & id).text = tmp
+
+    tmp = tv_programm.ComponentByName("tb_q_g_" & id+1).text
+    tv_programm.ComponentByName("tb_q_g_" & id+1).text = tv_programm.ComponentByName("tb_q_g_" & id).text
+    tv_programm.ComponentByName("tb_q_g_" & id).text = tmp
+end sub
+
+sub uptv (Sender)
+    dim id : id = right(Sender.Name,1)
+    dim tmp
+    tmp = tv_programm.ComponentByName("cb_name" & id-1).ItemIndex
+    tv_programm.ComponentByName("cb_name" & id-1).ItemIndex = tv_programm.ComponentByName("cb_name" & id).ItemIndex
+    tv_programm.ComponentByName("cb_name" & id).ItemIndex = tmp
+
+    tmp = tv_programm.ComponentByName("cb_name" & (id+12)-1).ItemIndex
+    tv_programm.ComponentByName("cb_name" & (id+12)-1).ItemIndex = tv_programm.ComponentByName("cb_name" & (id+12)).ItemIndex
+    tv_programm.ComponentByName("cb_name" & (id+12)).ItemIndex = tmp
+
+    tmp = tv_programm.ComponentByName("cb_show" & id-1).checked
+    tv_programm.ComponentByName("cb_show" & id-1).checked = tv_programm.ComponentByName("cb_show" & id).checked
+    tv_programm.ComponentByName("cb_show" & id).checked = tmp
+
+    tmp = tv_programm.ComponentByName("tb_q_h_" & id-1).text
+    tv_programm.ComponentByName("tb_q_h_" & id-1).text = tv_programm.ComponentByName("tb_q_h_" & id).text
+    tv_programm.ComponentByName("tb_q_h_" & id).text = tmp
+    
+    tmp = tv_programm.ComponentByName("tb_q_d_" & id-1).text
+    tv_programm.ComponentByName("tb_q_d_" & id-1).text = tv_programm.ComponentByName("tb_q_d_" & id).text
+    tv_programm.ComponentByName("tb_q_d_" & id).text = tmp
+    
+    tmp = tv_programm.ComponentByName("tb_q_g_" & id-1).text
+    tv_programm.ComponentByName("tb_q_g_" & id-1).text = tv_programm.ComponentByName("tb_q_g_" & id).text
+    tv_programm.ComponentByName("tb_q_g_" & id).text = tmp
+end sub
+
+</script_body>
+</script>

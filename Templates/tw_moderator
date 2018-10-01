@@ -1,0 +1,87 @@
+object tw_moderator: TccToolWindow
+  Tag = 5
+  FloatingBorderStyle = bsNone
+  Caption = 'Moderator'
+  Color = 3289650
+  ClientAreaHeight = 102
+  ClientAreaWidth = 285
+  DockableTo = []
+  LastDock = frmMain.dckLeft
+  Resizable = False
+  TabOrder = 0
+  Visible = False
+  Floating = True
+  ParentColor = False
+  Float = True
+  SavedAtRunTime = True
+  object cb_Moderator: TptComboBox
+    Left = 10
+    Top = 20
+    Width = 271
+    Height = 21
+    TabOrder = 0
+    Text = 'Guido Friedrich'
+    Items.WideStrings = (
+      'Guido Friedrich'
+      'Stefan Kitzmüller'
+      'Johannes Brandl'
+      'Jörg Künne'
+      'Thomas Trukesitz'
+      'Martin Konrad'
+      'Gerfried Pröll'
+      'Andreas Trippolt'
+      'Roland Streinz'
+      'Constanze Weiss'
+      '')
+    Items.WideStrings_UTF7 = (
+      'Guido Friedrich'
+      'Stefan Kitzm+APw-ller'
+      'Johannes Brandl'
+      'J+APY-rg K+APw-nne'
+      'Thomas Trukesitz'
+      'Martin Konrad'
+      'Gerfried Pr+APY-ll'
+      'Andreas Trippolt'
+      'Roland Streinz'
+      'Constanze Weiss'
+      '')
+    ItemIndex = 0
+    DroppedWidth = 271
+    DropDownAutoSize = False
+    FixedStyle = False
+    SaveStyle = cbssStandard
+    Locked = False
+    EventDataNames = 'OnChange=tw_moderator_cb_ModeratorChange'
+  end
+  object cb_Moderator1: TptComboBox
+    Left = 9
+    Top = 55
+    Width = 271
+    Height = 21
+    TabOrder = 1
+    Text = 'Gerhard Unterluggauer#Sky Experte'
+    Items.WideStrings = (
+      'Herbert Hohenberger#Sky Experte'
+      'Rick Nasheim#Sky Experte'
+      'Gerhard Unterluggauer#Sky Experte'
+      'Bernd Brückler#Sky Experte'
+      'Gregor Baumgartner#Sky Experte'
+      'David Schuller#Sky Experte'
+      'Gary Venner#Sky Experte')
+    Items.WideStrings_UTF7 = (
+      'Herbert Hohenberger#Sky Experte'
+      'Rick Nasheim#Sky Experte'
+      'Gerhard Unterluggauer#Sky Experte'
+      'Bernd Br+APw-ckler#Sky Experte'
+      'Gregor Baumgartner#Sky Experte'
+      'David Schuller#Sky Experte'
+      'Gary Venner#Sky Experte')
+    ItemIndex = 2
+    DroppedWidth = 271
+    DropDownAutoSize = False
+    FixedStyle = False
+    SaveStyle = cbssStandard
+    Locked = False
+    EventDataNames = 'OnChange=tw_moderator_cb_Moderator1Change'
+  end
+end

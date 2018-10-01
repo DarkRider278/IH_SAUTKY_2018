@@ -1,0 +1,11 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_init_graphic_OKExecute (Sender)
+    AllTV.TV__InitLayouts tw_init_graphic.rg_type.ItemIndex
+end sub
+
+</script_body>
+</script>

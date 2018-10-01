@@ -1,0 +1,23 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_referee_bt_showClick (Sender)
+    Dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim n ,i
+    n=tw_referee.cb_ref_1.Text
+    i=cc.Strings.StrPos(" ",n)
+    Data.Item("NAME")      = right(n,len(n)-i)
+    Data.Item("FNAME")      = left(n,i)
+    Data.Item("REF2")      = tw_referee.cb_ref_2.Text
+    Data.Item("REF3")      = tw_referee.cb_ref_3.Text
+    Data.Item("LIN1")      = tw_referee.cb_ref_4.Text
+    Data.Item("LIN2")      = tw_referee.cb_ref_5.Text
+    AllTV.TV__BB_Referee Data
+    set Data = Nothing
+    tw_referee.Visible = False
+end sub
+
+</script_body>
+</script>

@@ -1,0 +1,30 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_tvTipps_bt_show_commentClick (Sender)
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    dim i, k
+    k = 0
+    for i = 1 to 4
+        if Trim(tw_tvTipps.ComponentByName("ed_event" & i).Text) <> "" then
+            k = k + 1
+            Data.Item("EVENT" & k) = tw_tvTipps.ComponentByName("ed_event" & i).Text
+            Data.Item("DAY"   & k) = tw_tvTipps.ComponentByName("cb_day"   & i).Text
+            Data.Item("TIME"  & k) = tw_tvTipps.ComponentByName("ed_time"  & i).Text
+            Data.Item("LIVE"  & k) = tw_tvTipps.ComponentByName("cb_live"  & i).checked
+        end if
+    next
+    
+    if k = 0 then exit sub
+    Data.Item("HEADER")    = tw_tvTipps.ed_title.text
+    Data.Item("ITEMCOUNT") = k
+    
+    AllTV.TV__TVTipps Data
+    
+    set Data = Nothing
+end sub
+
+</script_body>
+</script>

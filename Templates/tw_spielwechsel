@@ -1,0 +1,86 @@
+object tw_spielwechsel: TccDialogWindow
+  Tag = -1
+  Left = 10
+  Top = 10
+  AutoScroll = False
+  BorderIcons = [biSystemMenu]
+  Caption = 'Game Change'
+  ClientHeight = 204
+  ClientWidth = 401
+  Color = 3289650
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  BtnHelpEnabled = True
+  BtnHelpVisible = False
+  BtnPreviewEnabled = True
+  BtnPreviewVisible = False
+  BtnCustomEnabled = True
+  BtnCustomVisible = False
+  BtnCustomCaption = 'Cu&stom'
+  BtnOKVisible = True
+  BtnOKEnabled = True
+  BtnCancelVisible = True
+  BtnCancelEnabled = True
+  ShowButtonFrame = True
+  CloseAfterPreviewClick = False
+  CloseAfterCustomClick = False
+  CloseAfterOKClick = True
+  CloseAfterCancelClick = True
+  CloseAfterHelpClick = True
+  ID = '{69FF6AE5-49D9-4B19-AB1E-50161BD598E3}'
+  PixelsPerInch = 96
+  TextHeight = 13
+  EventDataNames = 
+    'OnOKExecute=tw_spielwechsel_OKExecute,OnShow=tw_spielwechsel_Sho' +
+    'w'
+  object cb_trenner: TptRadioGroup
+    Left = 10
+    Top = 10
+    Width = 381
+    Height = 105
+    Caption = ' Trenner Abfahren? '
+    Columns = 3
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWhite
+    Font.Height = -13
+    Font.Name = 'Trebuchet MS'
+    Font.Style = [fsBold]
+    ItemIndex = 4
+    Items.WideStrings = (
+      'ADMIRAL'
+      'Bundesliga 1'
+      'Bundesliga 2'
+      'Bundesliga 3'
+      'KEINER')
+    ParentFont = False
+    TabOrder = 1
+    Data = '4'
+    Locked = False
+    ExtendedFocusing = True
+  end
+  object cb_DSS: TptCheckBox
+    Left = 10
+    Top = 125
+    Width = 97
+    Height = 17
+    Caption = 'DSS rein?'
+    Color = 3289650
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWhite
+    Font.Height = -13
+    Font.Name = 'Trebuchet MS'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 2
+    Visible = False
+    Locked = False
+    ColorFocused = 3289650
+    ColorMouseOver = 3289650
+  end
+end

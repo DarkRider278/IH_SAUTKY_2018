@@ -1,0 +1,43 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+dim CRAWL_SENDER
+
+sub tw_crawl_speichern_bt_showClick (Sender)
+    dim text
+    text= Trim(tw_crawl_speichern.ed_text.Text)
+    if trim(tw_crawl_speichern.ed_text.Text) = "" then exit sub
+    if trim(tw_crawl_speichern.ed_text1.Text) <> "" then text=text & " +++ "&trim(tw_crawl_speichern.ed_text1.Text)
+    if trim(tw_crawl_speichern.ed_text3.Text) <> "" then text=text & " +++ "&trim(tw_crawl_speichern.ed_text3.Text)
+    if trim(tw_crawl_speichern.ed_text4.Text) <> "" then text=text & " +++ "&trim(tw_crawl_speichern.ed_text4.Text)
+    if trim(tw_crawl_speichern.ed_text5.Text) <> "" then text=text & " +++ "&trim(tw_crawl_speichern.ed_text5.Text)
+    text=text& " +++ "
+    if     tw_crawl_speichern.cb_tw.checked=true then
+        AllTV.TV__Crawl_Social text, tw_crawl_speichern.ed_text2.text, tw_crawl_speichern.TrackBar.Position , "TwitterLogoBlue"
+    elseif tw_crawl_speichern.cb_fb.checked=true then
+        AllTV.TV__Crawl_Social text, tw_crawl_speichern.ed_text2.text, tw_crawl_speichern.TrackBar.Position , "FacebookColor"
+        'AllTV.TV__FB_Frage tw_crawl_speichern.ed_text.text, tw_crawl_speichern.ed_text2.text
+    elseif CRAWL_SENDER = "ADMIRAL Crawl" then
+        AllTV.TV__AdmiralCrawl text 'InputBox("Crawl Text", "Admiral AD crawl", GetIniOption("ADMIRAL_CRAWL", "Wetten, Sie gewinnen!"))
+    end if
+    tw_crawl.Visible = false
+end sub
+
+sub tw_crawl_speichern_bt_xmlClick (Sender)
+    dim url : url = InputBox("URL: ", "XML Import", GetIniOption("LASTXMLURL", ""))
+    
+    if (url <> "") then
+        call SetIniOption("LASTXMLURL", url)
+        dim i : i = import_twitter_xml(url)
+        if i then
+            msgbox "Imported " & i & " XML Feeds."
+        else
+            msgbox "XML import failed or contained no new feeds"
+        end if
+    end if
+end sub
+
+</script_body>
+</script>

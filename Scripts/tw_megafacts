@@ -1,0 +1,125 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_megafacts_RadioGroup1Click (Sender)
+    'tw_megafacts.lbl_title.Visible = (Sender.Itemindex > 0)
+    'tw_megafacts.ed_title.Visible = (Sender.Itemindex > 0)
+    tw_megafacts.ed_score.Visible =  (Sender.Itemindex = 4)
+    tw_megafacts.lbl_score.Visible =  (Sender.Itemindex = 4)
+    tw_megafacts.cb_name1.Visible =  (Sender.Itemindex = 1 or Sender.Itemindex>2)
+
+    tw_megafacts.cb_name2.Visible =  (Sender.Itemindex>1)
+    tw_megafacts.lbl_vs.Visible =  (Sender.Itemindex>2)
+end sub
+
+sub tw_megafacts_bt_showClick (Sender)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim i, k
+    k = 0
+        for i = 1 to 5
+            if Trim(tw_megafacts.ComponentByName("Memo" & i&"_new").Lines.Text) <> "" then
+                k = k + 1
+                Data.Item("TEXT1" & k) = tw_megafacts.ComponentByName("Memo" & i&"_new").Lines.Strings(0)
+                Data.Item("TEXT2" & k) = tw_megafacts.ComponentByName("Memo" & i&"_new").Lines.Strings(1)
+            end if
+        next
+        Data.Item("ITEMCOUNT")  = k
+        Data.Item("TITLE")      = tw_megafacts.ed_title_new.Text
+        Data.Item("SUBTITLE")      = tw_megafacts.ed_subtitle_new.Text
+        Data.Item("HEADER_TYPE")= tw_megafacts.RadioGroup2.ItemIndex
+
+        TSP.SaveSelection
+
+        'Data.Item("LOGO1") = TSP.GetTeamByName(tw_megafacts.cb_name1_new.Text, TSP.GetGroup(), TSP_LOGO)
+        'Data.Item("LOGO2") = TSP.GetTeamByName(tw_megafacts.cb_name2_new.Text, TSP.GetGroup(), TSP_LOGO)
+        Data.Item("LOGO1") = tw_megafacts.cb_name1_new.Text
+        Data.Item("LOGO2") = tw_megafacts.cb_name2_new.Text
+        'TSP_get_info_from_db("TEAMS", "LOGO", "LONG_NAME", tw_megafacts.cb_name2_new.Text)
+        TSP.RestoreSelection
+
+        if tw_megafacts.RadioGroup2.ItemIndex = 1 then Data.Item("LOGO1") = Data.Item("LOGO2")
+        
+        Data.item("FOTO")=tw_megafacts.cb_foto.Text
+        Data.item("FOTO2")=tw_megafacts.cb_foto_2.Text
+
+    Hide_DSS
+    HideVorlaufLogos
+    AllTV.TV__VB_Megafacts Data
+    set Data = Nothing
+end sub
+
+
+sub tw_megafacts_rg_statsTypeClick (Sender)
+    TSP.SaveSelection
+    TSP.SetTeamPos("A")
+    'tw_megafacts.cb_name1.ItemIndex = tw_megafacts.cb_name1.Items.IndexOf(TSP.GetSTeam(TSP_LONG_NAME))
+    tw_megafacts.cb_name1_new.ItemIndex = tw_megafacts.cb_name1_new.Items.IndexOf(TSP.GetSTeam("logo"))
+    TSP.SetTeamPos("B")
+    'tw_megafacts.cb_name2.ItemIndex = tw_megafacts.cb_name2.Items.IndexOf(TSP.GetSTeam(TSP_LONG_NAME))
+    tw_megafacts.cb_name2_new.ItemIndex = tw_megafacts.cb_name2_new.Items.IndexOf(TSP.GetSTeam("logo"))
+    TSP.RestoreSelection
+end sub
+
+sub tw_megafacts_Memo2Change (Sender)
+  ' script tw_megafacts_Memo2Change generated on 2/17/2014 at 4:30:13 PM
+  ' description of params:
+  ' Sender as IccMemo
+
+end sub
+
+sub tw_megafacts_Memo4Change (Sender)
+  ' script tw_megafacts_Memo4Change generated on 2/17/2014 at 4:31:10 PM
+  ' description of params:
+  ' Sender as IccMemo
+
+end sub
+
+sub tw_megafacts_RadioGroup2Click (Sender)
+    tw_megafacts.cb_name1_new.Visible =  (Sender.Itemindex <> 1 and Sender.Itemindex < 5)
+    tw_megafacts.cb_name2_new.Visible =  (Sender.Itemindex = 1 or Sender.Itemindex = 2 or Sender.Itemindex = 4)
+    tw_megafacts.lbl_vs1.Visible =  (Sender.Itemindex=2)
+    tw_megafacts.ed_nr.Visible =  ((Sender.Itemindex > 2 and Sender.Itemindex <5))
+    tw_megafacts.cb_foto.Visible =  (Sender.Itemindex=3 or Sender.Itemindex = 4)
+    tw_megafacts.lbl_ibnr.Visible =  (Sender.Itemindex=3)
+    tw_megafacts.cb_foto_2.Visible =  (Sender.Itemindex=4)
+end sub
+
+sub tw_megafacts_bt_show_ibClick (Sender)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim i, k
+    k = 0
+
+        for i = 1 to 5
+            if Trim(tw_megafacts.ComponentByName("Memo" & i&"_new").Lines.Text) <> "" then
+                k = k + 1
+                Data.Item("TEXT1" & k) = tw_megafacts.ComponentByName("Memo" & i&"_new").Lines.Strings(0)
+                Data.Item("TEXT2" & k) = tw_megafacts.ComponentByName("Memo" & i&"_new").Lines.Strings(1)
+            end if
+        next
+        Data.Item("ITEMCOUNT")  = k
+        Data.Item("TITLE")      = tw_megafacts.ed_title_new.Text
+        Data.Item("SUBTITLE")      = tw_megafacts.ed_subtitle_new.Text
+        Data.Item("HEADER_TYPE")= tw_megafacts.RadioGroup2.ItemIndex
+
+        TSP.SaveSelection
+
+        Data.Item("LOGO1") = tw_megafacts.cb_name1_new.Text
+        Data.Item("LOGO2") =tw_megafacts.cb_name2_new.Text
+        'TSP_get_info_from_db("TEAMS", "LOGO", "LONG_NAME",tw_megafacts.cb_name2_new.Text )
+        TSP.RestoreSelection
+
+
+        Data.item("FOTO")=tw_megafacts.ed_nr.Text
+
+
+
+
+    AllTV.TV__IB_Megafacts Data
+    set Data = Nothing
+
+end sub
+
+</script_body>
+</script>

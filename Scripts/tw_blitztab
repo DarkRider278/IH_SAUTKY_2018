@@ -1,0 +1,180 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_blitztab_bt_showClick (Sender)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim i,k
+    dim grd : set grd = tw_blitztab.Grid1
+    
+    if Sender is tw_blitztab.bt_show_goals then
+        Data.Item("HEADER1") = "TORE"
+    else
+        Data.Item("HEADER1") = "Diff"
+    end if
+    Data.Item("HEADER2") = "Pkt"
+    'Data.Item("USE7") = tw_blitztab.cb_7er.Checked
+
+    for i = 1 to tw_blitztab.Grid1.RowCount - 1
+        if Trim(grd.Cells(i, GetColIdx(grd, "Name"))) <> "" then
+            if grd.Cells(i, GetColIdx(grd, "Show?")) = "X" then
+                k = k + 1
+                Data.Item("PLACE" & k) = Trim(grd.Cells(i, GetColIdx(grd, "Place")))
+                Data.Item("NAME"  & k) = TSP.GetTeamByName(grd.Cells(i, GetColIdx(grd, "Name")), TSP.GetGroup(), TSP_SHORT_NAME) & TSP.GetTeamByName(grd.Cells(i, GetColIdx(grd, "Name")), TSP.GetGroup(), TSP_TV_NAME_2)
+                if Data.Item("NAME" & k)= "" then
+                    Data.Item("NAME" & k) =grd.Cells(i, GetColIdx(grd, "Name"))
+                end if
+                if Sender is tw_blitztab.bt_show_goals then
+                    Data.Item("GOALS" & k) = Trim(grd.Cells(i, GetColIdx(grd, "Goals")))
+                else
+                    Data.Item("GOALS" & k) = Trim(grd.Cells(i, GetColIdx(grd, "Diff")))
+                end if
+                Data.Item("POINTS"& k) = Trim(grd.Cells(i, GetColIdx(grd, "Pts")))
+                Data.Item("HL"& k) = (Trim(grd.Cells(i, GetColIdx(grd, "HL?")))="X")
+            end if
+        end if
+    next
+    Data.Item("HEADER") = tw_blitztab.ed_title.Text
+    if k = 0 then exit sub
+    Data.Item("ITEMCOUNT") = k
+    AllTV.TV__IB_BlitzTabelle Data
+    set grd  = Nothing
+    set Data = Nothing
+end sub
+
+sub tw_blitztab_Grid1DblClick (Sender)
+    if Sender.Cells(Sender.row, 1) = "X" then
+        Sender.Cells(Sender.row, 1) = ""
+    else
+        Sender.Cells(Sender.row, 1) = "X"
+    end if
+end sub
+
+sub tw_blitztab_Grid1ClickCell (Sender, AColumn, ARow)
+   if (AColumn = 1) and (ARow > 0) then
+        if Sender.Cells(ARow, AColumn) = "X" then
+            Sender.Cells(ARow, AColumn) = ""
+        else
+            Sender.Cells(ARow, AColumn) = "X"
+        end if
+    end if
+    if (AColumn = 7) and (ARow > 0) then
+        if Sender.Cells(ARow, AColumn) = "X" then
+            Sender.Cells(ARow, AColumn) = ""
+        else
+            Sender.Cells(ARow, AColumn) = "X"
+        end if
+    end if
+end sub
+
+sub tw_blitztab_Grid1MouseUp (Sender, Button, Shift, X, Y)
+dim i : i = 0
+   for i = 1 to tw_blitztab.Grid1.RowCount - 1
+        tw_blitztab.Grid1.Cells(i, 2)=i & "."
+   next
+end sub
+
+sub tw_blitztab_cb_templateChange (Sender)
+    tw_blitztab.ed_title.Text = tw_blitztab.cb_template.Text
+end sub
+
+sub tw_blitztab_cb_show1Click (Sender)
+    if tw_blitztab.cb_show1.Checked then
+        tw_blitztab.Grid1.Cells(1,1)="X"
+        tw_blitztab.Grid1.Cells(2,1)="X"
+        tw_blitztab.Grid1.Cells(3,1)="X"
+        tw_blitztab.Grid1.Cells(4,1)="X"
+        tw_blitztab.Grid1.Cells(5,1)="X"
+        tw_blitztab.Grid1.Cells(6,1)="X"
+        if tw_blitztab.cb_7er.Checked then
+            tw_blitztab.Grid1.Cells(6,1)="X"
+            tw_blitztab.Grid1.Cells(7,1)="X"
+        end if
+    else
+        tw_blitztab.Grid1.Cells(1,1)=""
+        tw_blitztab.Grid1.Cells(2,1)=""
+        tw_blitztab.Grid1.Cells(3,1)=""
+        tw_blitztab.Grid1.Cells(4,1)=""
+        tw_blitztab.Grid1.Cells(5,1)=""
+        tw_blitztab.Grid1.Cells(6,1)=""
+        if tw_blitztab.cb_7er.Checked then
+            tw_blitztab.Grid1.Cells(6,1)=""
+            tw_blitztab.Grid1.Cells(7,1)=""
+        end if
+    end if
+end sub
+
+sub tw_blitztab_cb_show2Click (Sender)
+  if tw_blitztab.cb_show2.Checked then
+        if tw_blitztab.cb_7er.Checked then
+            tw_blitztab.Grid1.Cells(4,1)="X"
+            tw_blitztab.Grid1.Cells(5,1)="X"
+        end if
+        tw_blitztab.Grid1.Cells(11,1)="X"
+        tw_blitztab.Grid1.Cells(12,1)="X"
+        tw_blitztab.Grid1.Cells(7,1)="X"
+        tw_blitztab.Grid1.Cells(8,1)="X"
+        tw_blitztab.Grid1.Cells(9,1)="X"
+        tw_blitztab.Grid1.Cells(10,1)="X"
+    else
+        if tw_blitztab.cb_7er.Checked then
+            tw_blitztab.Grid1.Cells(4,1)=""
+            tw_blitztab.Grid1.Cells(5,1)=""
+        end if
+        tw_blitztab.Grid1.Cells(11,1)=""
+        tw_blitztab.Grid1.Cells(12,1)=""
+        tw_blitztab.Grid1.Cells(7,1)=""
+        tw_blitztab.Grid1.Cells(8,1)=""
+        tw_blitztab.Grid1.Cells(9,1)=""
+        tw_blitztab.Grid1.Cells(10,1)=""
+    end if
+
+end sub
+
+sub tw_blitztab_bt_show_goals_dssClick (Sender)
+dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim i,k
+    dim grd : set grd = tw_blitztab.Grid1
+
+    if Sender is tw_blitztab.bt_show_goals_dss then
+        Data.Item("HEADER1") = "TORE"
+    else
+        Data.Item("HEADER1") = "Diff"
+    end if
+    Data.Item("HEADER2") = "Pkt"
+
+    for i = 1 to tw_blitztab.Grid1.RowCount - 1
+        if Trim(grd.Cells(i, GetColIdx(grd, "Name"))) <> "" then
+            if grd.Cells(i, GetColIdx(grd, "Show?")) = "X" then
+                k = k + 1
+                Data.Item("PLACE" & k) = Trim(grd.Cells(i, GetColIdx(grd, "Place")))
+                Data.Item("NAME"  & k) = TSP.GetTeamByName(grd.Cells(i, GetColIdx(grd, "Name")), TSP.GetGroup(), TSP_SHORT_NAME) & TSP.GetTeamByName(grd.Cells(i, GetColIdx(grd, "Name")), TSP.GetGroup(), TSP_TV_NAME_2)
+                if Data.Item("NAME" & k)= "" then
+                    Data.Item("NAME" & k) =grd.Cells(i, GetColIdx(grd, "Name"))
+                end if
+                if Sender is tw_blitztab.bt_show_goals_dss then
+                    Data.Item("GOALS" & k) = Trim(grd.Cells(i, GetColIdx(grd, "Goals")))
+                else
+                    Data.Item("GOALS" & k) = Trim(grd.Cells(i, GetColIdx(grd, "Diff")))
+                end if
+                Data.Item("POINTS"& k) = Trim(grd.Cells(i, GetColIdx(grd, "Pts")))
+                Data.Item("HL"& k) = (Trim(grd.Cells(i, GetColIdx(grd, "HL?")))="X")
+            end if
+        end if
+    next
+    Data.Item("HEADER") = tw_blitztab.ed_title.Text
+    if k = 0 then exit sub
+    if k>10 then k=10
+    Data.Item("ITEMCOUNT") = k
+    AllTV.TV__DSS_BlitzTabelle_Show Data
+    set grd  = Nothing
+    set Data = Nothing
+end sub
+
+sub tw_blitztab_bt_hide_dssClick (Sender)
+  AllTV.TV__DSS_BlitzTabelle_Hide
+end sub
+
+</script_body>
+</script>

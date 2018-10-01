@@ -1,0 +1,70 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_Restprogramm_bt_showClick (Sender)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim i, k
+    k = 0
+    for i = 1 to 6
+        if Trim(tw_Restprogramm.ComponentByName("cb_name" & i).Text) <> "" then
+            k = k + 1
+            if Sender is tw_Restprogramm.bt_show_ib then
+                Data.Item("NAME" & k) = TSP.GetTeamByName(Trim(tw_Restprogramm.ComponentByName("cb_name" & i).Text), TSP.GetGroup(), TSP_SHORT_NAME)
+            else
+                Data.Item("NAME" & k) = Trim(tw_Restprogramm.ComponentByName("cb_name" & i).Text)
+            end if
+            Data.Item("LOGO" & k) = tsp.GetTeamByName(tw_Restprogramm.ComponentByName("cb_name" & i).Text, tsp.GetGroup(), TSP_LOGO)
+            Data.Item("NR"   & k) = Trim(tw_Restprogramm.ComponentByName("ed_Nr" & i).Text)
+            Data.Item("HOME" & k) = tw_Restprogramm.ComponentByName("cb_home" & i).Checked
+        end if
+    next
+    
+    if k = 0 then exit sub
+    Data.Item("NAME") = GetNameTranslation("T",  TSP.GetSTeam(TSP_db_id), TSP_long_name)
+    Data.Item("LOGO") = TSP.GetSTeam(TSP_logo)
+  '  Data.Item("HEADER_TYPE") = tw_Restprogramm.rg_header.ItemIndex
+    'Data.Item("BACKGROUND") = pgMain.cb_Background.checked
+    Data.Item("ITEMCOUNT")  = k
+    Data.Item("AS_INFOBOX") = (Sender is tw_Restprogramm.bt_show_ib)
+ '   Hide_DSS
+    AllTV.TV__VB_IB_RestProgramm Data
+    set Data = Nothing
+end sub
+
+sub tw_Restprogramm_bt_show_dssClick (Sender)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim i, k
+    k = 0
+    for i = 1 to 6
+        if Trim(tw_Restprogramm.ComponentByName("cb_name" & i).Text) <> "" then
+            k = k + 1
+            if Sender is tw_Restprogramm.bt_show_ib then
+                Data.Item("NAME" & k) = TSP.GetTeamByName(Trim(tw_Restprogramm.ComponentByName("cb_name" & i).Text), TSP.GetGroup(), TSP_SHORT_NAME)
+            else
+                'Data.Item("NAME" & k) = Trim(tw_Restprogramm.ComponentByName("cb_name" & i).Text)
+                Data.Item("NAME" & k) = TSP.GetTeamByName(Trim(tw_Restprogramm.ComponentByName("cb_name" & i).Text), TSP.GetGroup(), TSP_SHORT_NAME)
+            end if
+            Data.Item("LOGO" & k) = tsp.GetTeamByName(tw_Restprogramm.ComponentByName("cb_name" & i).Text, tsp.GetGroup(), TSP_LOGO)
+            Data.Item("NR"   & k) = Trim(tw_Restprogramm.ComponentByName("ed_Nr" & i).Text)
+            Data.Item("HOME" & k) = tw_Restprogramm.ComponentByName("cb_home" & i).Checked
+        end if
+    next
+
+    if k = 0 then exit sub
+    Data.Item("NAME") = GetNameTranslation("T",  TSP.GetSTeam(TSP_db_id), TSP_short_name)
+
+  '  Data.Item("HEADER_TYPE") = tw_Restprogramm.rg_header.ItemIndex
+
+    Data.Item("ITEMCOUNT")  = k
+    AllTV.TV__DSS_RestProgramm_Show Data
+    set Data = Nothing
+end sub
+
+sub tw_Restprogramm_bt_hide_dssClick (Sender)
+ AllTV.TV__DSS_RestProgramm_Hide
+end sub
+
+</script_body>
+</script>

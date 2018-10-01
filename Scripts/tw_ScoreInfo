@@ -1,0 +1,12 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_ScoreInfo_Btn_CloseClick (Sender)
+    tw_ScoreInfo.Visible = false
+end sub
+
+
+</script_body>
+</script>

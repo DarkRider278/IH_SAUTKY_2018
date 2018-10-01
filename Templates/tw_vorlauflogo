@@ -1,0 +1,358 @@
+object tw_vorlauflogo: TccToolWindow
+  Tag = 3
+  Caption = 'Vorlauf Logo'
+  Color = 3289650
+  ClientAreaHeight = 249
+  ClientAreaWidth = 384
+  DockableTo = []
+  DockRow = 1
+  LastDock = frmMain.dckTop
+  Resizable = False
+  TabOrder = 0
+  Visible = False
+  Floating = True
+  ParentColor = False
+  Float = True
+  SavedAtRunTime = True
+  object lbl_vs1: TptLabel
+    Left = 160
+    Top = 51
+    Width = 21
+    Height = 20
+    Caption = 'vs.'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWhite
+    Font.Height = -15
+    Font.Name = 'Trebuchet MS'
+    Font.Style = [fsBold]
+    ParentFont = False
+    Locked = False
+  end
+  object lbl_score: TptLabel
+    Left = 105
+    Top = 145
+    Width = 28
+    Height = 13
+    Caption = 'Score'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Visible = False
+    Locked = False
+  end
+  object lbl_hour: TptLabel
+    Left = 260
+    Top = 145
+    Width = 23
+    Height = 13
+    Caption = 'Hour'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Locked = False
+  end
+  object lbl_min: TptLabel
+    Left = 295
+    Top = 145
+    Width = 32
+    Height = 13
+    Caption = 'Minute'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Locked = False
+  end
+  object lbl_text: TptLabel
+    Left = 60
+    Top = 145
+    Width = 21
+    Height = 13
+    Caption = 'Text'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Visible = False
+    Locked = False
+  end
+  object Panel1: TptPanel
+    Left = 0
+    Top = 210
+    Width = 384
+    Height = 39
+    Align = alBottom
+    BevelOuter = bvNone
+    Color = 1772219
+    Locked = False
+    TabOrder = 0
+    object bt_show: TptButton
+      Left = 125
+      Top = 6
+      Width = 93
+      Height = 26
+      Caption = 'Show'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Trebuchet MS'
+      Font.Style = [fsBold]
+      ModalResult = mrNone
+      ParentFont = False
+      TabOrder = 0
+      ParentColor = False
+      Color = clBtnFace
+      ColorMouseOver = clBtnFace
+      ColorFocused = clBtnFace
+      DrawFocusRect = False
+      MultiLineCaption = False
+      Alignment = alMiddleCenter
+      FontFocused.Charset = ANSI_CHARSET
+      FontFocused.Color = clMaroon
+      FontFocused.Height = -13
+      FontFocused.Name = 'Trebuchet MS'
+      FontFocused.Style = [fsBold]
+      FontMouseOver.Charset = ANSI_CHARSET
+      FontMouseOver.Color = clMaroon
+      FontMouseOver.Height = -13
+      FontMouseOver.Name = 'Trebuchet MS'
+      FontMouseOver.Style = [fsBold]
+      PreferFocused = False
+      FrameSize = 1
+      BackgroundTransparent = False
+      BackgroundStretch = True
+      BackgroundTransparentColor = clBlack
+      Down = False
+      DrawFocusBorder = True
+      Checkable = True
+      RightPressDown = False
+      StoreBackground = True
+      Hotkey.Shift = []
+      Hotkey.IsLong = False
+      Hotkey.Enabled = True
+      Locked = False
+      EventDataNames = 'OnClick=tw_vorlauflogo_bt_showClick'
+    end
+  end
+  object DataBar1: TptDataBar
+    Left = 0
+    Top = 0
+    Width = 384
+    Height = 35
+    Align = alTop
+    Color = 13816530
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 1
+    DataGroupName = 'tw_vorlauflogo'
+    DataGroupStyle = dsLocal
+    DataComboBoxWidth = 180
+    ButtonStyle = bsImageOnly
+    BorderWidth = 4
+    VisibleDataCbx = True
+    VisibleSaveBtn = True
+    VisibleRefreshBtn = True
+    VisibleDeleteBtn = True
+    VisibleNextBtn = False
+    VisiblePreviousBtn = False
+    DataVisibility = kfNone
+    Locked = False
+  end
+  object rg_typ: TptRadioGroup
+    Left = 0
+    Top = 80
+    Width = 341
+    Height = 56
+    Caption = 'Typ'
+    Columns = 4
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ItemIndex = 2
+    Items.WideStrings = (
+      'Clean'
+      'Score'
+      'Time'
+      'Text')
+    ParentFont = False
+    TabOrder = 2
+    Data = '2'
+    Locked = False
+    ExtendedFocusing = True
+    EventDataNames = 'OnClick=tw_vorlauflogo_rg_typClick'
+  end
+  object cb_name1: TptComboBox
+    Left = 10
+    Top = 50
+    Width = 145
+    Height = 21
+    Style = csDropDownList
+    Sorted = True
+    TabOrder = 3
+    Text = 'HC Orli Znojmo'
+    Items.WideStrings = (
+      'Dornbirn Bulldogs'
+      'EC Red Bull Salzburg'
+      'EC VSV'
+      'EC-KAC'
+      'EHC Liwest Black Wings Linz'
+      'Fehervar AV 19'
+      'HC Orli Znojmo'
+      'HC TWK Innsbruck '#39'Die Haie'#39
+      'HCB Südtirol Alperia'
+      'KHL Medvescak Zagreb'
+      'Meister'
+      'Moser Medical Graz99ers'
+      'Vienna Capitals')
+    Items.WideStrings_UTF7 = (
+      'Dornbirn Bulldogs'
+      'EC Red Bull Salzburg'
+      'EC VSV'
+      'EC-KAC'
+      'EHC Liwest Black Wings Linz'
+      'Fehervar AV 19'
+      'HC Orli Znojmo'
+      'HC TWK Innsbruck '#39'Die Haie'#39
+      'HCB S+APw-dtirol Alperia'
+      'KHL Medvescak Zagreb'
+      'Meister'
+      'Moser Medical Graz99ers'
+      'Vienna Capitals')
+    ItemIndex = 6
+    DroppedWidth = 145
+    DropDownAutoSize = False
+    FixedStyle = True
+    SaveStyle = cbssStandard
+    Locked = False
+    EventDataNames = 'OnKeyPress=tv_programm_cb_name1KeyPress'
+  end
+  object cb_name2: TptComboBox
+    Left = 189
+    Top = 50
+    Width = 145
+    Height = 21
+    Style = csDropDownList
+    Sorted = True
+    TabOrder = 4
+    Text = 'EHC Liwest Black Wings Linz'
+    Items.WideStrings = (
+      'Dornbirn Bulldogs'
+      'EC Red Bull Salzburg'
+      'EC VSV'
+      'EC-KAC'
+      'EHC Liwest Black Wings Linz'
+      'Fehervar AV 19'
+      'HC Orli Znojmo'
+      'HC TWK Innsbruck '#39'Die Haie'#39
+      'HCB Südtirol Alperia'
+      'KHL Medvescak Zagreb'
+      'Meister'
+      'Moser Medical Graz99ers'
+      'Vienna Capitals')
+    Items.WideStrings_UTF7 = (
+      'Dornbirn Bulldogs'
+      'EC Red Bull Salzburg'
+      'EC VSV'
+      'EC-KAC'
+      'EHC Liwest Black Wings Linz'
+      'Fehervar AV 19'
+      'HC Orli Znojmo'
+      'HC TWK Innsbruck '#39'Die Haie'#39
+      'HCB S+APw-dtirol Alperia'
+      'KHL Medvescak Zagreb'
+      'Meister'
+      'Moser Medical Graz99ers'
+      'Vienna Capitals')
+    ItemIndex = 4
+    DroppedWidth = 145
+    DropDownAutoSize = False
+    FixedStyle = True
+    SaveStyle = cbssStandard
+    Locked = False
+    EventDataNames = 'OnKeyPress=tv_programm_cb_name1KeyPress'
+  end
+  object ed_score: TptEdit
+    Left = 115
+    Top = 165
+    Width = 76
+    Height = 21
+    MaxLength = 0
+    TabOrder = 5
+    Text = '0:0'
+    Visible = False
+    Numeric = False
+    InputType = itAnything
+    Locked = False
+  end
+  object ed_hour: TptEdit
+    Left = 265
+    Top = 165
+    Width = 46
+    Height = 21
+    MaxLength = 0
+    TabOrder = 6
+    Text = '20'
+    Numeric = False
+    InputType = itAnything
+    Locked = False
+  end
+  object ed_min: TptEdit
+    Left = 325
+    Top = 165
+    Width = 46
+    Height = 21
+    MaxLength = 0
+    TabOrder = 7
+    Text = '20'
+    Numeric = False
+    InputType = itAnything
+    Locked = False
+  end
+  object cb_left: TptCheckBox
+    Left = 5
+    Top = 165
+    Width = 36
+    Height = 17
+    Caption = 'Links?'
+    Color = 3289650
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 8
+    Locked = False
+    ColorFocused = 3289650
+    ColorMouseOver = 3289650
+  end
+  object ed_text: TptEdit
+    Left = 65
+    Top = 165
+    Width = 196
+    Height = 21
+    MaxLength = 0
+    TabOrder = 9
+    Text = '3:4 OT'
+    Visible = False
+    Numeric = False
+    InputType = itAnything
+    Locked = False
+  end
+end

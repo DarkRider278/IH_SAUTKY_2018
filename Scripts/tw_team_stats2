@@ -1,0 +1,365 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+dim TEAM_STATS_SEASON : set TEAM_STATS_SEASON = CreateObject("Scripting.Dictionary")
+dim IS_PERCENTAGE     : set IS_PERCENTAGE = CreateObject("Scripting.Dictionary")
+
+TEAM_STATS_SEASON.item("")                          = "-------"
+TEAM_STATS_SEASON.item("Tore")              = "GOALS"
+TEAM_STATS_SEASON.item("Erhaltene Tore")            = "GOALS_AGAINST"
+TEAM_STATS_SEASON.item("5 0n 5 Goals for/against")  = "55_FA"
+TEAM_STATS_SEASON.item("Erzielte Powerplay-Tore")   = "PPGF"
+TEAM_STATS_SEASON.item("Erhaltene Powerplay-Tore")  = "PPGA"
+TEAM_STATS_SEASON.item("Power Play-Möglichkeiten")  = "PP_PP"
+TEAM_STATS_SEASON.item("Power Play %")              = "PPP"
+TEAM_STATS_SEASON.item("Penalty Kill %")            = "PKP"
+TEAM_STATS_SEASON.item("Time on Powerplay")         = "TPP"
+TEAM_STATS_SEASON.item("Time while short-handed")   = "TSH"
+TEAM_STATS_SEASON.item("Shots on Goal")             = "S"
+TEAM_STATS_SEASON.item("Shots against")             = "SA"
+TEAM_STATS_SEASON.item("Bullyquote")                = "FOP"
+TEAM_STATS_SEASON.item("Bully-Saldo")               = "FO_plusminus"
+TEAM_STATS_SEASON.item("Aktuelle Serie")            = "Streak"
+TEAM_STATS_SEASON.item("Penalty Time")              = "PIM"
+TEAM_STATS_SEASON.item("Time on Attack")   = "AT"
+TEAM_STATS_SEASON.item("Bullies")                   = "FO"
+TEAM_STATS_SEASON.item("Goals")                   = "GOALS"
+TEAM_STATS_SEASON.item("Blocked Shots")                   = "GOALS"
+
+
+
+dim TEAM_STATS_MATCH : set TEAM_STATS_MATCH = CreateObject("Scripting.Dictionary")
+TEAM_STATS_MATCH.item("")                          = "-------"
+TEAM_STATS_MATCH.item("Tore")               = "GOALS"
+TEAM_STATS_MATCH.item("Erhaltene Tore")            = "GOALS_AGAINST"
+TEAM_STATS_MATCH.item("5 0n 5 Goals for/against")  = "55_FA"
+TEAM_STATS_MATCH.item("Erzielte Powerplay-Tore")   = "PPGF"
+TEAM_STATS_MATCH.item("Erhaltene Powerplay-Tore")  = "PPGA"
+TEAM_STATS_MATCH.item("Power Play-Möglichkeiten")  = "PP_PP"
+TEAM_STATS_MATCH.item("Power Play %")              = "PPP"
+TEAM_STATS_MATCH.item("Penalty Kill %")            = "PKP"
+TEAM_STATS_MATCH.item("Time on Powerplay")         = "TPP"
+TEAM_STATS_MATCH.item("Time while short-handed")   = "TSH"
+TEAM_STATS_MATCH.item("Shots on Goal")             = "S"
+TEAM_STATS_MATCH.item("Shots against")             = "SA"
+TEAM_STATS_MATCH.item("Bullyquote")                = "FOP"
+TEAM_STATS_MATCH.item("Bully-Saldo")               = "FO_plusminus"
+TEAM_STATS_MATCH.item("Aktuelle Serie")            = "Streak"
+TEAM_STATS_MATCH.item("Penalty Time")              = "PIM"
+TEAM_STATS_MATCH.item("Time on Attack")   = "AT"
+TEAM_STATS_MATCH.item("Bullies")                   = "FO"
+TEAM_STATS_Match.item("Goals")                   = "GOALS"
+TEAM_STATS_Match.item("Blocked Shots")                   = "SB" '"GOALS"
+TEAM_STATS_Match.item("Bodychecks")              = "HITS"
+TEAM_STATS_Match.item("Saves")              = "SV"
+TEAM_STATS_Match.item("Strafen")              = "PEN"
+
+IS_PERCENTAGE.item("Power Play")      = true
+IS_PERCENTAGE.item("Penalty Kill") = true
+IS_PERCENTAGE.item("Bullyquote") = true
+IS_PERCENTAGE.item("Trefferqoute") = true
+IS_PERCENTAGE.item("Bullyquote") = true
+IS_PERCENTAGE.item("Fangquote") = true
+
+sub tw_team_stats_REFRESH_DATA()
+    dim i, param, db_param, sql
+    ' TODO: Lieber nur den geänderten Eintrag aktualisieren anstatt immer ALLES?!
+    
+    ' Brauchen wir Season oder Match Statistiken?
+    if tw_team_stats2.rg_statsType.ItemIndex = 0 then
+        sql = "SELECT * FROM TEAMS WHERE long_name='"&tw_team_stats2.cb_name1.Text&"' or long_name='"&tw_team_stats2.cb_name2.Text&"'"
+        if TSP.LoadSQLData(sql) then
+        ' Season Stats -> aus TSP DB
+            for i = 1 to 8
+                db_param = TEAM_STATS_SEASON.item(tw_team_stats2.ComponentByName("cb_param" & i).Text)
+                ' Die Daten aus der TSP DB laden.
+                if db_param <> "" then
+                    If TSP.SetSQLPos("First") Then
+                        Do
+                            if TSP.GetSQLData("long_name") = tw_team_stats2.cb_name1.Text then
+                                tw_team_stats2.Grid1.Cells(i, 1) = (TSP.GetSQLData(db_param))      ' HEIM    EmptyToZero
+                            else
+                                tw_team_stats2.Grid1.Cells(i, 3) = (TSP.GetSQLData(db_param))      ' GAST  EmptyToZero
+                            end if
+                        Loop While TSP.SetSQLPos("Next")
+                    end if
+                end if
+            next
+        end if
+    else
+        ' Match Stats -> aus Dictionary
+        if CURRENT_MATCH_DATA.count = 0 then
+            cc.sf.debugtext "KEINE MATCHDATEN VORHANDEN!", clRed
+            exit sub
+        end if
+
+        dim p,pt
+        p= tw_team_stats2.rg_period.ItemIndex
+        pt=p+1
+        if p=3 then pt="OT"
+        for i = 1 to 8
+            'tmp_match_data.item("HOME|PS" & i & "|GOALS")
+            db_param = TEAM_STATS_MATCH.item(tw_team_stats2.ComponentByName("cb_param" & i).Text)
+            if db_param <> "" then
+
+                if p < 4 then
+
+                    tw_team_stats2.Grid1.Cells(i, 1) = EmptyToZero(CURRENT_MATCH_DATA.item("HOME|PS"&pt&"|" & db_param))
+                    tw_team_stats2.Grid1.Cells(i, 3) = EmptyToZero(CURRENT_MATCH_DATA.item("AWAY|PS"&pt&"|" & db_param))
+                else
+                    tw_team_stats2.Grid1.Cells(i, 1) = EmptyToZero(CURRENT_MATCH_DATA.item("HOME|" & db_param))
+                    tw_team_stats2.Grid1.Cells(i, 3) = EmptyToZero(CURRENT_MATCH_DATA.item("AWAY|" & db_param))
+                end if
+
+
+            end if
+        next
+    end if
+
+    ' Prozent Werte?
+    for i = 1 to 8
+        if IS_PERCENTAGE(tw_team_stats2.ComponentByName("cb_param" & i).Text) then
+          'tw_team_stats2.Grid1.Cells(i, 3)=100-tw_team_stats2.Grid1.Cells(i, 1)
+          tw_team_stats2.Grid1.Cells(i, 1) = tw_team_stats2.Grid1.Cells(i, 1) & "%"
+          tw_team_stats2.Grid1.Cells(i, 3) = tw_team_stats2.Grid1.Cells(i, 3) & "%"
+        end if
+    next
+end sub
+
+sub tw_team_stats2_rg_statsTypeClick (Sender)
+    dim i, param
+    if tw_team_stats2.rg_statsType.ItemIndex = 1 then
+        TSP.SaveSelection
+        TSP.SetTeamPos("A")
+        tw_team_stats2.cb_name1.ItemIndex = tw_team_stats2.cb_name1.Items.IndexOf(TSP.GetSTeam(TSP_LONG_NAME))
+        TSP.SetTeamPos("B")
+        tw_team_stats2.cb_name2.ItemIndex = tw_team_stats2.cb_name2.Items.IndexOf(TSP.GetSTeam(TSP_LONG_NAME))
+        TSP.RestoreSelection
+        tw_team_stats2.bt_show_erg.Enabled = True
+        for i = 1 to 8
+            with tw_team_stats2.ComponentByName("cb_param" & i)
+                .UserData = .Text
+                .Items.clear
+                for each param in TEAM_STATS_MATCH.keys()
+                    .Items.add param
+                next
+                '.Items.Add " "
+                .Text = .Items.Strings(.Items.IndexOf(.UserData))
+            end with
+        next
+    else
+'        tw_team_stats2.bt_show_erg.Enabled = False      ' Es macht keinen Sinn den Score anzuzeigen wenn sich die GRafik nicht auf das aktuelle Spiel bezieht
+        for i = 1 to 8
+            with tw_team_stats2.ComponentByName("cb_param" & i)
+                .UserData = .Text
+                .Items.clear
+                for each param in TEAM_STATS_SEASON.keys()
+                    .Items.add param
+                next
+                '.Items.Add " "
+                .Text = .Items.Strings(.Items.IndexOf(.UserData))
+            end with
+        next
+    end if
+    tw_team_stats_REFRESH_DATA
+end sub
+
+sub tw_team_stats2_Grid1DblClick (Sender)
+  if Trim(Sender.Cells(Sender.Row,0)) = "X" then
+        Sender.Cells(Sender.Row, 0) = ""
+    else
+        Sender.Cells(Sender.row, 0) = "X"
+    end if
+end sub
+
+sub tw_team_stats2_bt_show_ergClick (Sender, Button, Shift, X, Y)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim k,i
+    Data.Item("HL") =tw_team_stats2.edt_headline.Text
+    Data.Item("NAME1") = tw_team_stats2.cb_name1.Text
+    Data.Item("NAME2") = tw_team_stats2.cb_name2.Text
+    Data.Item("LOGO1") = TSP.GetTeamByName(tw_team_stats2.cb_name1.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("LOGO2") = TSP.GetTeamByName(tw_team_stats2.cb_name2.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("SCORE") = TSP.GetScore(0, TSP_A) + TSP.GetScore(1,TSP_A) & ":" & TSP.GetScore(0, TSP_B) + TSP.GetScore(1,TSP_B)
+
+    k = 0
+    for i = 1 to tw_team_stats2.Grid1.RowCount - 1
+        if Trim(tw_team_stats2.ComponentByName("cb_param" & i).Text) <> "" then
+            if Trim(tw_team_stats2.Grid1.Cells(i,0)) <> "" then
+                k = k + 1
+                Data.Item("PARAM_A" & k) = tw_team_stats2.Grid1.Cells(i,1)
+                Data.Item("PARAM_B" & k) = tw_team_stats2.Grid1.Cells(i,3)
+                Data.Item("TEXT"    & k) = Trim(tw_team_stats2.ComponentByName("cb_param" & i).Text)     ' Hmm lieber SprachDB?
+            end if
+        end if
+    next
+    if k = 0 then exit sub
+    Data.Item("ITEMCOUNT")  = k
+    Data.Item("WITH_SCORE") = (Button = 1)
+    if Data.Item("WITH_SCORE") and (tw_team_stats2.rg_statsType.ItemIndex = 0) then
+        msgbox "Sorry, Team-Stats MIT Scores geht nur bei ""Current Match"""
+        exit sub
+    end if
+    HideVorlaufLogos
+    AllTV.TV__VB_TeamStats Data
+    set Data = Nothing
+end sub
+
+sub tw_team_stats2_bt_show_BBClick (Sender, Button, Shift, X, Y)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim k,i
+    Data.Item("NAME1") = tw_team_stats2.cb_name1.Text
+    Data.Item("NAME2") = tw_team_stats2.cb_name2.Text
+    Data.Item("LOGO1") = TSP.GetTeamByName(tw_team_stats2.cb_name1.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("LOGO2") = TSP.GetTeamByName(tw_team_stats2.cb_name2.Text, TSP.GetGroup(), TSP_LOGO)
+    Data.Item("SCORE") = TSP.GetScore(0, TSP_A) + TSP.GetScore(1,TSP_A) & ":" & TSP.GetScore(0, TSP_B) + TSP.GetScore(1,TSP_B)
+    Data.item("HL") =tw_team_stats2.edt_headline.Text
+
+    k = 0
+    for i = 1 to tw_team_stats2.Grid1.RowCount - 1
+        if (Trim(tw_team_stats2.Grid1.Cells(i, 0) = "X")) then
+            k = k + 1
+            Data.Item("PARAM_A" & k) = tw_team_stats2.Grid1.Cells(i,1)
+            Data.Item("PARAM_B" & k) = tw_team_stats2.Grid1.Cells(i,3)
+            Data.Item("TEXT"    & k) = Trim(tw_team_stats2.ComponentByName("cb_param" & i).Text)     ' Hmm lieber SprachDB?
+        end if
+    next
+    if k = 0 then exit sub
+    Data.Item("ITEMCOUNT") = k
+    if k > 6 then
+        msgbox "BB Graphic is limited to 6 entries!"
+        Data.Item("ITEMCOUNT") = 6
+    end if
+
+    'if Button = 0 then
+        'AllTV.TV__StatBB Data
+    'else
+        AllTV.TV__BB_TeamStats Data
+    'end if
+
+    set Data = Nothing
+end sub
+
+sub tw_team_stats2_cb_name1Change (Sender)
+    tw_team_stats_REFRESH_DATA
+    if (Sender.UserData = True) then exit sub
+    dim i,k
+    if len(Sender.Text) < 1 then exit sub
+    for i = 0 to Sender.Items.Count - 1
+        if Sender.text = left(sender.Items.Strings(i), len(Sender.Text)) then
+            k = len(Sender.Text)
+            Sender.Text      = sender.Items.Strings(i)
+            Sender.SelStart  = k
+            Sender.SelLength = len(Sender.Text) - k
+            exit for
+        end if
+    next
+end sub
+
+sub tw_team_stats2_bt_clearClick (Sender)
+   dim i
+   for i = 0 to Sender.parent.ComponentCount() - 1
+        if Sender.parent.Components(i).ComponentType = "TptComboBox" then
+            Sender.parent.Components(i).Text = ""
+        end if
+   next
+   tw_team_stats2.Grid1.Clear(False)
+end sub
+
+sub tw_team_stats2_bt_show_DSS_ADDClick (Sender)
+    dim i, add,time
+    if tw_team_stats2.rg_period.ItemIndex=0 then
+        time="1. Drittel"
+    elseif tw_team_stats2.rg_period.ItemIndex=1 then
+        time="2. Drittel"
+    elseif tw_team_stats2.rg_period.ItemIndex=2 then
+        time="3. Drittel"
+    elseif tw_team_stats2.rg_period.ItemIndex=3 then
+        time="Overtime"
+    else
+        time="Gesamt"
+    end if
+    for i = 1 to tw_team_stats2.Grid1.RowCount - 1
+        if (Trim(tw_team_stats2.Grid1.Cells(i, 0) = "X")) then
+            add = Trim(tw_team_stats2.ComponentByName("cb_param" & i).Text) & "  " & tw_team_stats2.Grid1.Cells(i,1) & ":" & tw_team_stats2.Grid1.Cells(i,3)
+            pgMain.ed_dss.Text = time& ": " &add
+ '           pgMain.Btn_DSS_Zusatz.Down = True          ' Zum automatischen Einblenden wieder auskommentieren!
+'            AllTV.TV__DSS_Zusatz add
+            exit sub
+        end if
+    next
+end sub
+
+sub tw_team_stats2_bt_defaultClick (Sender)
+    tw_team_stats2.cb_param1.ItemIndex = tw_team_stats2.cb_param1.Items.IndexOf("Goals")
+    tw_team_stats2.cb_param2.ItemIndex = tw_team_stats2.cb_param2.Items.IndexOf("Shots on Goal")
+    tw_team_stats2.cb_param3.ItemIndex = tw_team_stats2.cb_param3.Items.IndexOf("Blocked Shots")
+    tw_team_stats2.cb_param4.ItemIndex = tw_team_stats2.cb_param4.Items.IndexOf("Penalty Time")
+    tw_team_stats2.cb_param5.ItemIndex = tw_team_stats2.cb_param5.Items.IndexOf("Time on Attack")
+    tw_team_stats2.cb_param6.ItemIndex = tw_team_stats2.cb_param5.Items.IndexOf("Bullies")
+    tw_team_stats2.cb_param7.ItemIndex = 0
+    tw_team_stats2.cb_param8.ItemIndex = 0
+    dim i : for i = 1 to 5 : tw_team_stats2.Grid1.Cells(i,0) = "X" : next
+
+    tw_team_stats_REFRESH_DATA
+end sub
+
+sub tw_team_stats2_Grid1MouseUp (Sender, Button, Shift, X, Y)
+
+end sub
+
+sub tw_team_stats2_Grid1ClickCell (Sender, AColumn, ARow)
+
+    select case tw_team_stats2.rg_period.ItemIndex
+        case 0
+            add ="1. Drittel: "
+        case 1
+            add ="2. Drittel: "
+        case 2
+            add ="3. Drittel: "
+        case 3
+            add ="Overtime: "
+        case 4
+            add =""
+    end select
+  add = Trim(add &tw_team_stats2.ComponentByName("cb_param" & ARow).Text) & "  " & tw_team_stats2.Grid1.Cells(ARow,1) & " : " & tw_team_stats2.Grid1.Cells(ARow,3)
+            pgMain.ed_dss.Text = add
+end sub
+
+sub tw_team_stats2_Grid1Click (Sender)
+
+
+end sub
+
+sub tw_team_stats2_Grid1KeyUp (Sender, Key, Shift)
+
+
+end sub
+
+sub tw_team_stats2_rg_periodClick (Sender)
+    select case tw_team_stats2.rg_period.ItemIndex
+        case 0
+            tw_team_stats2.edt_headline.Text ="Spielstatistik - 1. Drittel"
+        case 1
+            tw_team_stats2.edt_headline.Text ="Spielstatistik - 2. Drittel"
+        case 2
+            tw_team_stats2.edt_headline.Text ="Spielstatistik - 3. Drittel"
+        case 3
+            tw_team_stats2.edt_headline.Text ="Spielstatistik - Overtime"
+        case 4
+        tw_team_stats2.edt_headline.Text ="Spielstatistik"
+    end select
+
+
+end sub
+
+sub tw_team_stats2_edt_headlineChange (Sender)
+  ' script tw_team_stats2_edt_headlineChange generated on 07.12.2016 at 19:03:49
+  ' description of params:
+  ' Sender as IccEdit
+
+end sub
+
+</script_body>
+</script>

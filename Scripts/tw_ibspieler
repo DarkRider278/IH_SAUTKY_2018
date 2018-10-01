@@ -1,0 +1,31 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_ibspieler_bt_showClick (Sender)
+  dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim i, k
+    k = 0
+    for i = 1 to 7
+        if Trim(tw_ibspieler.ComponentByName("ed_line_" & i).Text) <> "" then
+            k = k + 1
+            Data.Item("TEXT" & k) = tw_ibspieler.ComponentByName("ed_line_" & i).Text
+        end if
+    next
+    Data.Item("ITEMCOUNT")  = k
+    Data.Item("TITLE")      = tw_ibspieler.ed_title.Text
+
+    TSP.SaveSelection
+    Data.Item("LOGO") = tw_ibspieler.cb_name1.Text
+    TSP.RestoreSelection
+    Data.item("NAME")= tw_ibspieler.ed_Name.Text
+    Data.item("FNAME")= tw_ibspieler.ed_FName.Text
+    Data.item("NR")= tw_ibspieler.ed_NR.Text
+
+    AllTV.TV__IB_Spieler Data
+    set Data = Nothing
+end sub
+
+</script_body>
+</script>

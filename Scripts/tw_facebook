@@ -1,0 +1,26 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_facebook_bt_show_tableClick (Sender)
+    dim Data : set Data = CreateObject("Scripting.Dictionary")
+    dim i, k
+    k = 0
+    for i = 0 to tw_facebook.Grid1.RowCount - 1
+        if Trim(tw_facebook.Grid1.Cells(i,1)) <> "" then
+            k = k + 1
+            Data.Item("NR"   & i+1) = tw_facebook.Grid1.Cells(i,0)
+            Data.Item("TEXT" & i+1) = tw_facebook.Grid1.Cells(i,1)
+        end if
+    next
+    if k = 0 then exit sub
+    Data.Item("TITLE")   = tw_facebook.ed_Title.Text
+    Data.Item("SUBLINE") = tw_facebook.ed_subline.Text
+    Data.Item("ITEMCOUNT") = k
+    AllTV.TV__FB_Freetable Data
+    set Data = Nothing
+end sub
+
+</script_body>
+</script>

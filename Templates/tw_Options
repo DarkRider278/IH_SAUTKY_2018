@@ -1,0 +1,183 @@
+object tw_Options: TccToolWindow
+  Tag = 3
+  Caption = 'Options'
+  Color = clBtnFace
+  ClientAreaHeight = 161
+  ClientAreaWidth = 360
+  DockableTo = []
+  DockRow = 3
+  LastDock = frmMain.dckTop
+  MaxClientHeight = 161
+  MaxClientWidth = 360
+  MinClientHeight = 161
+  MinClientWidth = 360
+  TabOrder = 0
+  Visible = False
+  Floating = True
+  ParentColor = False
+  Float = True
+  SavedAtRunTime = True
+  object Panel1: TptPanel
+    Left = 0
+    Top = 0
+    Width = 360
+    Height = 91
+    Align = alTop
+    Locked = False
+    TabOrder = 0
+    object Label1: TptLabel
+      Left = 1
+      Top = 1
+      Width = 358
+      Height = 15
+      Align = alTop
+      AutoSize = False
+      Caption = ' VT Reserve'
+      Color = 10440704
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWhite
+      Font.Height = -11
+      Font.Name = 'MS Sans Serif'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+      Layout = tlCenter
+      Locked = False
+    end
+    object chb_HighlightGK: TptCheckBox
+      Left = 190
+      Top = 30
+      Width = 156
+      Height = 17
+      Caption = 'Highlight goal keeper (GK)'
+      Checked = True
+      Color = clBtnFace
+      ParentColor = False
+      State = cbChecked
+      TabOrder = 0
+      Locked = False
+      ColorFocused = clBtnFace
+      ColorMouseOver = clBtnFace
+    end
+    object rg_GKPosition: TptRadioGroup
+      Left = 10
+      Top = 20
+      Width = 171
+      Height = 61
+      Caption = 'Goal Keeper Position'
+      ItemIndex = 1
+      Items.WideStrings = (
+        'Default (OCX order/last line)'
+        '1st line'
+        'In numeric order')
+      TabOrder = 1
+      Data = '1'
+      Locked = False
+      ExtendedFocusing = True
+    end
+  end
+  object pnl_Footer: TptPanel
+    Left = 0
+    Top = 108
+    Width = 360
+    Height = 53
+    Align = alBottom
+    Color = 10440704
+    Locked = False
+    TabOrder = 1
+    object Btn_Close: TptButton
+      Left = 280
+      Top = 15
+      Width = 75
+      Height = 25
+      Caption = 'Close'
+      Font.Charset = EASTEUROPE_CHARSET
+      Font.Color = clMaroon
+      Font.Height = -13
+      Font.Name = 'Arial'
+      Font.Style = []
+      ModalResult = mrNone
+      ParentFont = False
+      TabOrder = 0
+      ParentColor = False
+      Color = clSilver
+      ColorMouseOver = clSilver
+      ColorFocused = clSilver
+      DrawFocusRect = False
+      MultiLineCaption = False
+      Alignment = alMiddleCenter
+      FontFocused.Charset = DEFAULT_CHARSET
+      FontFocused.Color = clWindowText
+      FontFocused.Height = -11
+      FontFocused.Name = 'MS Sans Serif'
+      FontFocused.Style = []
+      FontMouseOver.Charset = DEFAULT_CHARSET
+      FontMouseOver.Color = clWindowText
+      FontMouseOver.Height = -11
+      FontMouseOver.Name = 'MS Sans Serif'
+      FontMouseOver.Style = []
+      PreferFocused = False
+      FrameSize = 1
+      BackgroundTransparent = False
+      BackgroundStretch = True
+      BackgroundTransparentColor = clBlack
+      Down = False
+      DrawFocusBorder = True
+      Checkable = False
+      RightPressDown = False
+      StoreBackground = True
+      Hotkey.Shift = []
+      Hotkey.IsLong = False
+      Hotkey.Enabled = True
+      Locked = False
+      EventDataNames = 'OnClick=tw_Options_Btn_CloseClick'
+    end
+    object Btn_Save: TptButton
+      Left = 10
+      Top = 15
+      Width = 75
+      Height = 25
+      Caption = 'Save'
+      Font.Charset = EASTEUROPE_CHARSET
+      Font.Color = clMaroon
+      Font.Height = -13
+      Font.Name = 'Arial'
+      Font.Style = []
+      ModalResult = mrNone
+      ParentFont = False
+      TabOrder = 1
+      ParentColor = False
+      Color = clSilver
+      ColorMouseOver = clSilver
+      ColorFocused = clSilver
+      DrawFocusRect = False
+      MultiLineCaption = False
+      Alignment = alMiddleCenter
+      FontFocused.Charset = DEFAULT_CHARSET
+      FontFocused.Color = clWindowText
+      FontFocused.Height = -11
+      FontFocused.Name = 'MS Sans Serif'
+      FontFocused.Style = []
+      FontMouseOver.Charset = DEFAULT_CHARSET
+      FontMouseOver.Color = clWindowText
+      FontMouseOver.Height = -11
+      FontMouseOver.Name = 'MS Sans Serif'
+      FontMouseOver.Style = []
+      PreferFocused = False
+      FrameSize = 1
+      BackgroundTransparent = False
+      BackgroundStretch = True
+      BackgroundTransparentColor = clBlack
+      Down = False
+      DrawFocusBorder = True
+      Checkable = False
+      RightPressDown = False
+      StoreBackground = True
+      Hotkey.Shift = []
+      Hotkey.IsLong = False
+      Hotkey.Enabled = True
+      Locked = False
+      EventDataNames = 'OnClick=tw_Options_Btn_SaveClick'
+    end
+  end
+end

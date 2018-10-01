@@ -1,0 +1,16 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_vartafel_ListBox1DblClick (Sender)
+    dim scene : scene = sender.Items.Strings(sender.itemindex)
+    if trim(scene) <> "" then AllTV.TV__Vartafel scene
+end sub
+
+sub tw_vartafel_bt_showClick (Sender)
+    tw_vartafel_ListBox1DblClick tw_vartafel.ListBox1
+end sub
+
+</script_body>
+</script>

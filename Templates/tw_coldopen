@@ -1,0 +1,181 @@
+object tw_coldopen: TccToolWindow
+  Tag = 5
+  FloatingBorderStyle = bsNone
+  Caption = 'tw_coldopen'
+  Color = 3289650
+  ClientAreaHeight = 266
+  ClientAreaWidth = 366
+  DockableTo = []
+  LastDock = frmMain.dckLeft
+  Resizable = False
+  TabOrder = 0
+  Visible = False
+  Floating = True
+  ParentColor = False
+  Float = True
+  SavedAtRunTime = True
+  object Label1: TptLabel
+    Left = 15
+    Top = 50
+    Width = 20
+    Height = 13
+    Caption = 'Titel'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Locked = False
+  end
+  object Label2: TptLabel
+    Left = 15
+    Top = 105
+    Width = 35
+    Height = 13
+    Caption = 'Subline'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Locked = False
+  end
+  object Label3: TptLabel
+    Left = 15
+    Top = 165
+    Width = 29
+    Height = 13
+    Caption = 'Line 1'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ParentFont = False
+    Locked = False
+  end
+  object Panel1: TptPanel
+    Left = 0
+    Top = 227
+    Width = 366
+    Height = 39
+    Align = alBottom
+    BevelOuter = bvNone
+    Color = 1772219
+    Locked = False
+    TabOrder = 0
+    object bt_show: TptButton
+      Left = 40
+      Top = 6
+      Width = 93
+      Height = 26
+      Caption = 'Show'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Trebuchet MS'
+      Font.Style = [fsBold]
+      ModalResult = mrNone
+      ParentFont = False
+      TabOrder = 0
+      ParentColor = False
+      Color = clBtnFace
+      ColorMouseOver = clBtnFace
+      ColorFocused = clBtnFace
+      DrawFocusRect = False
+      MultiLineCaption = False
+      Alignment = alMiddleCenter
+      FontFocused.Charset = ANSI_CHARSET
+      FontFocused.Color = clMaroon
+      FontFocused.Height = -13
+      FontFocused.Name = 'Trebuchet MS'
+      FontFocused.Style = [fsBold]
+      FontMouseOver.Charset = ANSI_CHARSET
+      FontMouseOver.Color = clMaroon
+      FontMouseOver.Height = -13
+      FontMouseOver.Name = 'Trebuchet MS'
+      FontMouseOver.Style = [fsBold]
+      PreferFocused = False
+      FrameSize = 1
+      BackgroundTransparent = False
+      BackgroundStretch = True
+      BackgroundTransparentColor = clBlack
+      Down = False
+      DrawFocusBorder = True
+      Checkable = False
+      RightPressDown = False
+      StoreBackground = True
+      Hotkey.Shift = []
+      Hotkey.IsLong = False
+      Hotkey.Enabled = True
+      Locked = False
+      EventDataNames = 'OnClick=tw_coldopen_bt_showClick'
+    end
+  end
+  object DataBar1: TptDataBar
+    Left = 0
+    Top = 0
+    Width = 366
+    Height = 35
+    Align = alTop
+    Color = 13816530
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 1
+    DataGroupName = 'tw_coldopen'
+    DataGroupStyle = dsLocal
+    DataComboBoxWidth = 180
+    ButtonStyle = bsImageOnly
+    BorderWidth = 4
+    VisibleDataCbx = True
+    VisibleSaveBtn = True
+    VisibleRefreshBtn = True
+    VisibleDeleteBtn = True
+    VisibleNextBtn = False
+    VisiblePreviousBtn = False
+    DataVisibility = kfNone
+    Locked = False
+  end
+  object ed_page_1: TptEdit
+    Left = 15
+    Top = 75
+    Width = 331
+    Height = 21
+    MaxLength = 0
+    TabOrder = 2
+    Text = '111'
+    Numeric = False
+    InputType = itAnything
+    Locked = False
+  end
+  object ed_page_2: TptEdit
+    Left = 15
+    Top = 130
+    Width = 331
+    Height = 21
+    MaxLength = 0
+    TabOrder = 3
+    Text = '222'
+    Numeric = False
+    InputType = itAnything
+    Locked = False
+  end
+  object ed_page_3: TptEdit
+    Left = 15
+    Top = 190
+    Width = 331
+    Height = 21
+    MaxLength = 0
+    TabOrder = 4
+    Text = '333'
+    Numeric = False
+    InputType = itAnything
+    Locked = False
+  end
+end

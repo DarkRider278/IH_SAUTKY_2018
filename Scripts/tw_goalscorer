@@ -1,0 +1,70 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+function ceil(num)
+    if round(num) = num then
+        ceil = num
+    else
+        ceil = round(num + 0.5)
+    end if
+end function
+
+sub tw_goalscorer_bt_showClick (Sender)
+    dim Data : Set Data = CreateObject("Scripting.Dictionary")
+    Data.Item("NAME")      = tw_goalscorer.ed_name.Text
+    Data.Item("FNAME")      = tw_goalscorer.ed_fname.Text
+    Data.Item("LOGO")      = tw_goalscorer.cb_logo.Text
+    Data.Item("LINE1")     = tw_goalscorer.ed_info.text
+    Data.Item("ITEMCOUNT") = 1
+    Data.Item("NR")     = tw_goalscorer.ed_NR.text
+    Data.Item("SHOWHS")     = tw_goalscorer.cb_showHS.Checked
+    ' auto Highlights
+    dim min : min = ceil(tsp.GetTime(TSP_Time) / 60000)
+    dim per : per = TSP.GetTime(TSP_HalfTime)
+    dim logo_a, logo_b
+    tsp.SaveSelection
+    TSP.SetTeamPos(TSP_A)
+    logo_a = TSP.GetSTeam(TSP_logo)
+    TSP.SetTeamPos(TSP_B)
+    logo_b = TSP.GetSTeam(TSP_logo)
+    tsp.RestoreSelection
+    if per>=4 then
+        min=20-min+1
+    else
+        min=20-min +1
+        end if
+    if per = 1 then
+        per="1. Drittel - "
+    elseif per = 2 then
+        min=min+20
+        per="2. Drittel - "
+    elseif per=3 then
+        min=min+40
+        per="3. Drittel - "
+    elseif per>=4 then
+        min=min+60
+
+        per="OT - "
+    end if
+
+    'tw_highlights.list.Items.Add  per & min & ". Min|" & Data.Item("FNAME")&" "&Data.Item("NAME") & "|" & "Tor zum " & tsp.GetScore(0,TSP_A) & ":" & tsp.GetScore(0,TSP_B) & "|" & logo_a & "|" & logo_b
+    tw_highlights.cb_player.text=Data.Item("FNAME") &" "& Data.Item("NAME")
+    tw_highlights.ed_info.text= "Tor zum " & tsp.GetScore(0,TSP_A) & ":" & tsp.GetScore(0,TSP_B)
+    tw_highlights.ed_min.text= per & min & ". Min"
+    tw_highlights.cb_logo_home.text=logo_a
+    tw_highlights.cb_logo_away.text=logo_b
+    call tw_highlights_bt_addClick(Sender)
+    'tw_highlights.list.Items.add tw_highlights.cb_player.Text, tw_highlights.ed_min.Text, logo1, logo2
+    AllTV.TV__BB_Player Data, false
+    set Data = nothing
+end sub
+
+sub tw_goalscorer_btn_eigentorClick (Sender)
+  tw_goalscorer.ed_info.Text="Eigentor"
+
+end sub
+
+</script_body>
+</script>

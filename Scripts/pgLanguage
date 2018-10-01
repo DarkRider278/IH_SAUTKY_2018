@@ -1,0 +1,77 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+Sub OpenLanguageDatabase()
+    'dim strPath : strPath = CC.DEFS.AppPath & "\Data\" & cc.DEFS.ProjectName & "\Data\Database\"
+    dim strPath : strPath = CC.DEFS.ProjectDataPath & "\Data\Database\"
+    dim strFile : strFile = "Language.dbf"
+    dim str__ConnString
+
+
+    System.BDE_DS_Language.Active = False
+    If CC.Files.FileExists(strPath & strFile) Then
+       str__ConnString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & strPath & strFile & ";Persist Security Info=False"
+       System.BDE_DS_Language.DatabasePath = strPath
+       System.BDE_DS_Language.Active = True
+
+       Dbg "Language_DB succesfully loaded!"
+
+       SetGerFirstCol
+
+    Else
+       CC.SF.DebugText "File not found: " & strFile & " in Directory: " & strPath, clRed
+    End If
+End Sub
+
+'Set GER as First Language
+Sub SetGerFirstCol()
+  Dim strCmd
+    System.BDE_DS_Language.Active = False
+
+    If pgLanguage.CheckBox_Ger_firstRow.Checked then
+       strCmd = "SELECT ITEM, GER, ENG FROM LANGUAGE.DBF"
+       pgLanguage.bt_1.Caption = "ITEM"
+       pgLanguage.bt_2.Caption = "GER"
+       pgLanguage.bt_3.Caption = "ENG"
+    Else
+       strCmd = "SELECT ITEM, ENG, GER FROM LANGUAGE.DBF"
+       pgLanguage.bt_1.Caption = "ITEM"
+       pgLanguage.bt_2.Caption = "ENG"     ' TODO: Das kann man ordentlicher programmieren...
+       pgLanguage.bt_3.Caption = "GER"
+    End if
+
+    System.BDE_DS_Language.SQL = strCmd
+    System.BDE_DS_Language.Active = True
+    pgLanguage.Ado_Language.ColumnsWidth.CommaText = "330,310,310"
+End Sub
+
+sub Sort_Table (Sender)
+    if pgLanguage.CheckBox_Ger_firstRow.Checked then
+       System.BDE_DS_Language.SQL = "SELECT ITEM, GER, ENG FROM Language ORDER BY " & Sender.Caption
+    else
+       System.BDE_DS_Language.SQL = "SELECT ITEM, ENG, GER FROM Language ORDER BY " & Sender.Caption
+    end if
+    if Sender.down then
+        System.BDE_DS_Language.SQL = System.BDE_DS_Language.SQL & " ASC"
+    else
+        System.BDE_DS_Language.SQL = System.BDE_DS_Language.SQL & " DESC"
+    end if
+    System.BDE_DS_Language.Active = True
+    pgLanguage.Ado_Language.ColumnsWidth.CommaText = "330,310,310"
+end sub
+
+sub pgLanguage_PageShow (Sender)
+    save_gui_settings
+    LAST_TABSHEET = Sender.Name
+end sub
+
+sub pgLanguage_Ado_LanguageClick (Sender)
+  ' script pgLanguage_Ado_LanguageClick generated on 02.12.2016 at 18:59:27
+  ' description of params:
+  ' Sender as IccAdoGrid
+
+end sub
+
+</script_body>
+</script>

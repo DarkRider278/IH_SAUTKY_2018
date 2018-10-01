@@ -1,0 +1,199 @@
+object pgLanguage: TccTabSheet
+  Caption = 'Language'
+  Visible = True
+  EventDataNames = 'OnPageShow=pgLanguage_PageShow'
+  object Ado_Nav_Language: TptAdoNavigator
+    Left = 5
+    Top = 5
+    Width = 1010
+    Height = 26
+    DataSource = System.BDE_DS_Language
+    Flat = True
+    Hints.Strings = (
+      'Erster Eintrag'
+      'Vorheriger Eintrag'
+      'Nächster Eintrag'
+      'Letzter Eintrag'
+      'Eintrag hinzufügen'
+      'Eintrag löschen'
+      'Eintrag bearbeiten'
+      'Änderungen übernehmen'
+      'Änderungen verwerfen'
+      'Daten aktualisieren')
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 0
+    Locked = False
+  end
+  object CheckBox_Ger_firstRow: TptCheckBox
+    Left = 0
+    Top = 530
+    Width = 220
+    Height = 17
+    Caption = 'Deutsch als ersten Spracheintrag zeigen'
+    Checked = True
+    Color = clBtnFace
+    ParentColor = False
+    State = cbChecked
+    TabOrder = 1
+    Locked = False
+    ColorFocused = clBtnFace
+    ColorMouseOver = clBtnFace
+    EventDataNames = 'OnClick=SetGerFirstCol'
+  end
+  object Ado_Language: TptAdoGrid
+    Left = 5
+    Top = 40
+    Width = 1011
+    Height = 466
+    DataSource = System.BDE_DS_Language
+    TabOrder = 2
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'MS Sans Serif'
+    TitleFont.Style = []
+    SelectionRowColor = 8421631
+    ColumnsWidth.WideStrings = (
+      '330'
+      '310'
+      '310')
+    ColumnsFiltered = False
+    SelectedFont.Charset = DEFAULT_CHARSET
+    SelectedFont.Color = clWindowText
+    SelectedFont.Height = -11
+    SelectedFont.Name = 'MS Sans Serif'
+    SelectedFont.Style = []
+    Locked = False
+    EventDataNames = 'OnClick=pgLanguage_Ado_LanguageClick'
+  end
+  object bt_1: TptButton
+    Left = 20
+    Top = 42
+    Width = 331
+    Height = 16
+    Cursor = crHandPoint
+    Caption = 'ITEM'
+    ModalResult = mrNone
+    TabOrder = 3
+    Flat = True
+    ParentColor = False
+    Color = clBtnFace
+    ColorMouseOver = 8454016
+    ColorFocused = clBtnFace
+    DrawFocusRect = False
+    MultiLineCaption = False
+    Alignment = alMiddleLeft
+    FontFocused.Charset = DEFAULT_CHARSET
+    FontFocused.Color = clWindowText
+    FontFocused.Height = -11
+    FontFocused.Name = 'MS Sans Serif'
+    FontFocused.Style = []
+    FontMouseOver.Charset = DEFAULT_CHARSET
+    FontMouseOver.Color = clWindowText
+    FontMouseOver.Height = -11
+    FontMouseOver.Name = 'MS Sans Serif'
+    FontMouseOver.Style = []
+    PreferFocused = False
+    FrameSize = 0
+    BackgroundTransparent = False
+    BackgroundStretch = True
+    BackgroundTransparentColor = clBlack
+    Down = True
+    DrawFocusBorder = True
+    Checkable = True
+    RightPressDown = False
+    StoreBackground = True
+    Hotkey.Shift = []
+    Hotkey.IsLong = False
+    Hotkey.Enabled = True
+    Locked = False
+    EventDataNames = 'OnClick=Sort_Table'
+  end
+  object bt_2: TptButton
+    Left = 350
+    Top = 42
+    Width = 311
+    Height = 16
+    Cursor = crHandPoint
+    Caption = 'GER'
+    ModalResult = mrNone
+    TabOrder = 4
+    Flat = True
+    ParentColor = False
+    Color = clBtnFace
+    ColorMouseOver = 8454016
+    ColorFocused = clBtnFace
+    DrawFocusRect = False
+    MultiLineCaption = False
+    Alignment = alMiddleLeft
+    FontFocused.Charset = DEFAULT_CHARSET
+    FontFocused.Color = clWindowText
+    FontFocused.Height = -11
+    FontFocused.Name = 'MS Sans Serif'
+    FontFocused.Style = []
+    FontMouseOver.Charset = DEFAULT_CHARSET
+    FontMouseOver.Color = clWindowText
+    FontMouseOver.Height = -11
+    FontMouseOver.Name = 'MS Sans Serif'
+    FontMouseOver.Style = []
+    PreferFocused = False
+    FrameSize = 0
+    BackgroundTransparent = False
+    BackgroundStretch = True
+    BackgroundTransparentColor = clBlack
+    Down = False
+    DrawFocusBorder = True
+    Checkable = True
+    RightPressDown = False
+    StoreBackground = True
+    Hotkey.Shift = []
+    Hotkey.IsLong = False
+    Hotkey.Enabled = True
+    Locked = False
+    EventDataNames = 'OnClick=Sort_Table'
+  end
+  object bt_3: TptButton
+    Left = 660
+    Top = 42
+    Width = 281
+    Height = 16
+    Cursor = crHandPoint
+    Caption = 'ENG'
+    ModalResult = mrNone
+    TabOrder = 5
+    Flat = True
+    ParentColor = False
+    Color = clBtnFace
+    ColorMouseOver = 8454016
+    ColorFocused = clBtnFace
+    DrawFocusRect = False
+    MultiLineCaption = False
+    Alignment = alMiddleLeft
+    FontFocused.Charset = DEFAULT_CHARSET
+    FontFocused.Color = clWindowText
+    FontFocused.Height = -11
+    FontFocused.Name = 'MS Sans Serif'
+    FontFocused.Style = []
+    FontMouseOver.Charset = DEFAULT_CHARSET
+    FontMouseOver.Color = clWindowText
+    FontMouseOver.Height = -11
+    FontMouseOver.Name = 'MS Sans Serif'
+    FontMouseOver.Style = []
+    PreferFocused = False
+    FrameSize = 0
+    BackgroundTransparent = False
+    BackgroundStretch = True
+    BackgroundTransparentColor = clBlack
+    Down = True
+    DrawFocusBorder = True
+    Checkable = True
+    RightPressDown = False
+    StoreBackground = True
+    Hotkey.Shift = []
+    Hotkey.IsLong = False
+    Hotkey.Enabled = True
+    Locked = False
+    EventDataNames = 'OnClick=Sort_Table'
+  end
+end

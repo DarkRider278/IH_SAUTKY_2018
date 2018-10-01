@@ -1,0 +1,153 @@
+object System: TccContainer
+  Caption = 'System'
+  TabVisible = False
+  object AppEvents: TptApplicationEvents
+    Left = 54
+    Top = 13
+    EventDataNames = 
+      'OnRunMode=OnRunMode,OnTVConnectionChange=System_AppEventsTVConne' +
+      'ctionChange,OnOpenProject=System_AppEventsOpenProject,OnTVDialog' +
+      'Close=System_AppEventsTVConnectionChange,OnDesignMode=System_App' +
+      'EventsDesignMode,OnCloseProject=System_AppEventsCloseProject'
+  end
+  object BDE_DS_Language: TptBdeDataSource
+    Active = True
+    DatabasePath = 'D:\dr_projekte\cc\IH_SKY_AUSTRIA_2018_09_13\Data\Database\'
+    SQL = 'SELECT ITEM, GER, ENG FROM LANGUAGE.DBF'#13#10
+    Filtered = False
+    RequestLive = True
+    Left = 11
+    Top = 12
+  end
+  object ScriptHotkey1: TptScriptHotkey
+    Hotkey.LongKeyData = '99'
+    Hotkey.Shift = [ssCtrl]
+    Hotkey.IsLong = True
+    Hotkey.Enabled = True
+    Left = 55
+    Top = 55
+    EventDataNames = 'OnExecute=System_ScriptHotkey1Execute'
+  end
+  object ScriptHotkey2: TptScriptHotkey
+    Hotkey.LongKeyData = '88'
+    Hotkey.Shift = [ssCtrl]
+    Hotkey.IsLong = True
+    Hotkey.Enabled = True
+    Left = 55
+    Top = 95
+    EventDataNames = 'OnExecute=System_ScriptHotkey2Execute'
+  end
+  object BdeDataSource1: TptBdeDataSource
+    Active = False
+    DatabasePath = 'D:\TSP_IH_2018_09_13'
+    SQL = 'SELECT LOGO FROM TEAMS.DBF WHERE LONG_NAME='#39'Dornbirn Bulldogs'#39#13#10
+    Filtered = False
+    RequestLive = False
+    Left = 160
+    Top = 20
+  end
+  object FileDog: TptFileDog
+    active = False
+    files.Strings = (
+      'C:\Users\siebauer.m\Desktop\OPTA_VOM_FILEWATCHER\CHANGELOG.txt')
+    Left = 355
+    Top = 125
+    EventDataNames = 'OnFileChange=FileDog_ChangeLog_Changed'
+  end
+  object DirSeeker: TptDirSeeker
+    DirPath = 'D:\hockeydata'
+    WatchSubTree = False
+    Active = True
+    Left = 320
+    Top = 125
+    EventDataNames = 'OnDirectoryChanged=System_DirSeekerDirectoryChanged'
+  end
+  object debugTimer: TptBackgroundTimer
+    Enabled = True
+    Interval = 5000
+    Left = 425
+    Top = 125
+    EventDataNames = 'OnTimer=System_debugTimerTimer'
+  end
+  object ScriptHotkey3: TptScriptHotkey
+    Hotkey.LongKeyData = '11'
+    Hotkey.Shift = [ssCtrl]
+    Hotkey.IsLong = True
+    Hotkey.Description = 'DSS'
+    Hotkey.Enabled = True
+    Left = 55
+    Top = 135
+    EventDataNames = 'OnExecute=System_ScriptHotkey3Execute'
+  end
+  object bt_karusell: TptTimer
+    Enabled = False
+    Interval = 7000
+    Left = 415
+    Top = 20
+    EventDataNames = 'OnTimer=System_bt_karusellTimer'
+  end
+  object bt_pen_a_1: TptTimer
+    Enabled = False
+    Interval = 120000
+    Left = 335
+    Top = 265
+    EventDataNames = 'OnTimer=System_bt_pen_a_1Timer'
+  end
+  object bt_pen_a_2: TptTimer
+    Enabled = False
+    Interval = 120000
+    Left = 375
+    Top = 265
+    EventDataNames = 'OnTimer=System_bt_pen_a_2Timer'
+  end
+  object bt_pen_b_1: TptTimer
+    Enabled = False
+    Interval = 120000
+    Left = 335
+    Top = 305
+    EventDataNames = 'OnTimer=System_bt_pen_b_1Timer'
+  end
+  object bt_pen_b_2: TptTimer
+    Enabled = False
+    Interval = 120000
+    Left = 375
+    Top = 305
+    EventDataNames = 'OnTimer=System_bt_pen_b_2Timer'
+  end
+  object bg_pentimes: TptBackgroundTimer
+    Enabled = True
+    Interval = 500
+    Left = 425
+    Top = 265
+    EventDataNames = 'OnTimer=System_bg_pentimesTimer'
+  end
+  object TCPClientInterface1: TptTCPClientInterface
+    Active = False
+    Host = '127.0.0.1'
+    Port = 25026
+    Left = 608
+    Top = 22
+    EventDataNames = 'OnConnected=Container1_TCPClientInterface1Connected'
+  end
+  object ProtocolParserTCP: TptProtocolParser
+    DataInterface = TCPClientInterface1
+    ParseProtocol = True
+    BOP = #2
+    EOP = #3
+    Active = True
+    SynchronizeEvents = False
+    Left = 608
+    Top = 65
+    EventDataNames = 'OnProtocol=Container1_ProtocolParser1Protocol'
+  end
+  object TCPClock: TptTCPClientInterface
+    Active = False
+    Host = '192.168.101.150'
+    Port = 6100
+    Left = 663
+    Top = 182
+    EventDataNames = 
+      'OnConnected=System_TCPClockConnected,OnDisconnected=System_TCPCl' +
+      'ockDisconnected'
+  end
+end

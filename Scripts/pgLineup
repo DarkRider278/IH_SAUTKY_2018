@@ -1,0 +1,182 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+sub PG3_Btn_ClearLineupClick (Sender)
+    dim Auswahl : Auswahl = Right(Lineup.ActiveLineup, 1)
+    If (Auswahl <> "A") and (Auswahl <> "B") then Exit Sub
+    Lineup.ActiveLineup = "Team " & Auswahl
+    Lineup.ClearPlayers(Auswahl)
+    dim c
+    dim r
+    if Auswahl ="A" then
+        for r=1 to 11
+            pgLineup.gr_lineup_hl_a.Cells(r,0)=""
+            pgLineup.gr_lineup_hl_a.Cells(r,1)=""
+        next
+    else
+        for r=1 to 11
+            pgLineup.gr_lineup_hl_b.Cells(r,0)=""
+            pgLineup.gr_lineup_hl_b.Cells(r,1)=""
+        next
+    end if
+end sub
+
+sub PG3_Btn_AddPlayerClick (Sender)
+    dim Auswahl : Auswahl = Right(Lineup.ActiveLineup, 1)
+    TSP.SetTeamPos Auswahl
+    Lineup.ActiveLineup = "Team " & Auswahl
+    Lineup.ClearPlayers Lineup_ACT
+    dim NomPlayer : NomPlayer = 0
+    dim tab
+    if Auswahl ="A" then
+        Team = "A"
+        LineupID = Lineup_A
+        Set tab=pgLineup.gr_lineup_hl_a
+    else
+        Team = "B"
+        LineupID = Lineup_B
+        Set tab=pgLineup.gr_lineup_hl_b
+    end if
+    Tsp.SetPlayerPos "First", "ALL", "Actual"
+    Do
+        If (TSP.GetTPlayer(TSP_status) = "G") or (TSP.GetTPlayer(TSP_status) = "I") then
+
+           NomPlayer = NomPlayer + 1
+           nname = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), "TV_NAME")
+           name= GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_second_name )
+           if  nname <> "" then
+                name=nname
+            end if
+           Lineup.Addplayer name, TSP.GetTPlayer(TSP_dress_nr), Auswahl
+        end If
+    Loop Until TSP.SetPlayerPos("NEXT", "ALL", "Actual") = False
+    
+    If NomPlayer < 6 Then Msgbox "Nur " & NomPlayer & " Spieler nominiert! Korrigieren"
+    Lineup.ProcessUpdate Auswahl
+    For i = 1 to 6
+        P_Nr   = Trim(Lineup.GetPlayer(Lineup_Nr, i, LineupID))
+        tab.Cells(i,0)=P_Nr
+        P_Nr= TSP_get_info_from_db("PLAYERS_2","POS_X", "PLAYER_ID",TSP.GetPlayerByNR(TSP_TPlayer, P_Nr, Team, TSP_player_id) )
+        if (P_Nr = "1") then
+            tab.Cells(i,1)="X"
+        else
+            tab.Cells(i,1)=""
+        end if
+    next
+end sub
+
+sub PG3_Btn_UpdateClick (Sender)
+    dim Auswahl : Auswahl = Right(Lineup.ActiveLineup, 1)
+    If (Auswahl <> "A") and (Auswahl <> "B") then Msgbox "Ungültige Eingabe!", 1, "Fehler" : Exit Sub
+
+    TSP.SetTeamPos Auswahl
+    Tsp.SetPlayerPos "First", "ALL", "Actual"
+    dim tab
+    if Auswahl ="A" then
+        Team = "A"
+        LineupID = Lineup_A
+        Set tab=pgLineup.gr_lineup_hl_a
+    else
+        Team = "B"
+        LineupID = Lineup_B
+        Set tab=pgLineup.gr_lineup_hl_b
+    end if
+    Do
+      If (TSP.GetTPlayer(TSP_status) = "G") or (TSP.GetTPlayer(TSP_status) = "I") then
+          nname = GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), "TV_NAME")
+           name= GetNameTranslation("P", TSP.GetTPlayer(TSP_player_id), TSP_second_name )
+           if  nname <> "" then name=nname
+          Lineup.AddUpdatePlayer name, TSP.GetTPlayer(TSP_dress_nr), Auswahl
+      End If
+    Loop Until TSp.SetPlayerPos("Next", "ALL", "Actual") = False
+    
+    Lineup.ProcessUpdate Auswahl
+    For i = 1 to 6
+        P_Nr   = Trim(Lineup.GetPlayer(Lineup_Nr, i, LineupID))
+        tab.Cells(i,0)=P_Nr
+        P_Nr= TSP_get_info_from_db("PLAYERS_2","POS_X", "PLAYER_ID",TSP.GetPlayerByNR(TSP_TPlayer, P_Nr, Team, TSP_player_id) )
+        if (P_Nr = "1") then
+            tab.Cells(i,1)="X"
+        else
+            tab.Cells(i,1)=""
+        end if
+    next
+end sub
+
+Sub PG3_Btn_ShowLineupClick (Sender, Button, Shift, X, Y)
+    dim oData : set oData = CreateObject("Scripting.Dictionary")
+    dim Team, i
+
+    if (sender is tw_vorlauf.bt_vbLineup) or (sender is tw_spiel.bt_vbLineup) then
+        Team = tsp.GetActualTeam(0)
+        Lineup.ActiveLineup = "Team " & UCase(Team)
+    end if
+    Team = split(Lineup.ActiveLineup)(1)
+    
+    If Lineup.PlayerCount < 6 Then
+       Msgbox "Ungenügend Spieler in Taktischer Aufstellung"
+       Exit Sub
+    End If
+
+    TSP.SaveSelection
+    For i = 1 to 2
+       If i = 1 then TSP.SetTeamPos "A" else TSP.SetTeamPos "B"
+       oData.Item("COACH"    & i) = GetNameTranslation("C", TSP.GetSTeam("coach_1_id"), TSP_Player_name)
+       oData.Item("T_LNAME_" & i) = TSP.GetSTeam(TSP_LONG_NAME)
+       oData.Item("T_LOGO_"  & i) = TSP.GetSTeam(TSP_LOGO)
+    Next
+    TSP.RestoreSelection
+    oData.Item("CURR_TEAM") = UCase(Team)
+    HideVorlaufLogos
+    Hide_DSS
+    AllTV.TV__FP_TactLineup oData
+    set oData = Nothing
+    tw_lineupphoto.Visible=true
+    tw_lineupphoto.BringToFront
+end sub
+
+sub pgLineup_Button1Click (Sender)
+    X_Pos = Lineup.GetPlayer(Lineup_Name_X, 1, "A")
+    Y_Pos = Lineup.GetPlayer(Lineup_Name_Y, 1, "A")
+end sub
+
+sub pgLineup_PageShow (Sender)
+    save_gui_settings
+    LAST_TABSHEET = Sender.Name
+end sub
+
+sub pgLineup_gr_lineup_hlClickCell (Sender, AColumn, ARow)
+    if Sender.Cells(ARow,AColumn) <> "" then
+        Sender.Cells(ARow,AColumn)=""
+    else
+        Sender.Cells(ARow,AColumn)="X"
+    end if
+end sub
+
+function isPlayerHL(nr,team)
+    if team="A" then
+        for i=1 to 11
+            if pgLineup.gr_lineup_hl_a.Cells(i,0) = nr  and  pgLineup.gr_lineup_hl_a.Cells(i,1) <> "" then
+                isPlayerHL=true
+                exit function
+            end if
+        next
+    else
+        for i=1 to 11
+            if pgLineup.gr_lineup_hl_b.Cells(i,0) = nr  and  pgLineup.gr_lineup_hl_b.Cells(i,1) <> "" then
+                isPlayerHL=true
+                exit function
+            end if
+        next
+    end if
+    isPlayerHL=false
+end function
+
+sub pgLineup_btn_lineupphotoClick (Sender)
+tw_lineupphoto.Visible=true
+    tw_lineupphoto.BringToFront
+end sub
+
+</script_body>
+</script>

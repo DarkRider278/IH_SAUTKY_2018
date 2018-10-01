@@ -1,0 +1,90 @@
+<script>
+<script_header>
+</script_header>
+<script_body>
+
+sub tw_gameSort_bt_loadClick (Sender)
+    dim i : i = 1
+    dim k
+    dim out_ : set out_ = System.BdeDataSource1
+    tw_gameSort.grid.Clear(False)
+    tw_gameSort.invisible_grid.clear(False)
+    tw_gameSort.grid.RowCount           = 1
+    tw_gameSort.invisible_grid.RowCount = 1
+    tw_gameSort.grid.AbortDrag
+    tw_gameSort.grid.row = 0    ' Ich versuch mal was
+    tw_gameSort.grid.col = 0
+
+    out_.SQL          = "SELECT * FROM ROUNDS_LIST.DBF WHERE ROUND='" & tw_gameSort.cb_day.Text & "' AND league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'"
+    out_.RequestLive  = True
+    out_.Active       = True
+
+    tw_gameSort.invisible_grid.ColCount = out_.FieldCount
+    out_.First
+    do
+        tw_gameSort.grid.AddRow
+        tw_gameSort.invisible_grid.AddRow
+        tw_gameSort.grid.Cells(tw_gameSort.grid.RowCount - 1, 0) = out_.FieldByName("DB_ID")
+        tw_gameSort.grid.Cells(tw_gameSort.grid.RowCount - 1, 1) = out_.FieldByName("TEAM_A_NAME")
+        tw_gameSort.grid.Cells(tw_gameSort.grid.RowCount - 1, 2) = out_.FieldByName("MATCH_DATE")
+        tw_gameSort.grid.Cells(tw_gameSort.grid.RowCount - 1, 3) = out_.FieldByName("TEAM_B_NAME")
+        
+        for k = 1 to out_.FieldCount   ' Das wird quasi meine "Kopie/Zwischenspeicher" der Original Daten
+            tw_gameSort.invisible_grid.Cells(tw_gameSort.invisible_grid.rowCount - 1, k-1) = out_.FieldByNumber(k)
+        next
+        
+        out_.Next
+    loop until out_.EOF
+    
+    tw_gameSort.grid.FixedRows = 1
+    out_.RequestLive  = False
+    out_.Active       = False
+    set out_ = Nothing
+end sub
+
+sub tw_gameSort_bt_saveClick (Sender)
+    dim i,k, copy
+    dim out_ : set out_ = System.BdeDataSource1
+    if msgbox("Are you SURE to modify the game database?", vbYesNo) = vbNo then exit sub
+    
+    out_.SQL          = "SELECT * FROM ROUNDS_LIST.DBF WHERE ROUND='" & tw_gameSort.cb_day.Text & "' AND league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'"
+    out_.RequestLive  = True
+    out_.Active       = True
+    out_.First
+    i = 1
+    do
+        if out_.FieldByName("DB_ID") <> tw_gameSort.grid.Cells(i, 0) then
+            out_.Edit      ' Mir wird schlecht wenn ich das lese
+            ' Wo haben wir die Daten zu diesem Datensatz?
+            copy = GetRowIdx(tw_gameSort.invisible_grid, tw_gameSort.grid.Cells(i, 0))
+            ' Jetzt alle Daten ersetzen
+            for k = 2 to out_.FieldCount    ' !!! ACHTUNG, die DB_ID (k = 1) ist nicht ersetzbar
+                if tw_gameSort.invisible_grid.Cells(copy, k-1) <> "" then  ' Das ist echt alles blöd. Problem ist, ich kann INT-DB_Felder nicht mit leeren Texten füllen.
+
+
+                    if IsNumeric(tw_gameSort.invisible_grid.Cells(copy, k-1)) then
+                        out_.FieldByNumber(k) = cInt(tw_gameSort.invisible_grid.Cells(copy, k-1))
+                    else
+                        out_.FieldByNumber(k) = tw_gameSort.invisible_grid.Cells(copy, k-1)
+                    end if
+                end if
+            next
+            out_.Post
+        end if
+        i = i + 1
+        out_.Next
+    loop until out_.EOF
+    out_.RequestLive  = False
+    out_.Active       = False
+    set out_ = nothing
+    
+    
+    for i = 1 to 5
+        tw_konferenz.ComponentByName("pn_game" & i).Visible  = false
+        tw_konferenz.ComponentByName("pn_game" & i).UserData = ""
+    next
+    msgbox "BITTE DIE KONFERENZ SPIELE NEU EINSTELLEN!"
+end sub
+
+</script_body>
+</script>
