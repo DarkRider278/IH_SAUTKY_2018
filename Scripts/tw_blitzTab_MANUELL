@@ -262,6 +262,16 @@ sub tw_blitzTab_MANUELL_bt_calc_tableClick (Sender)
     dim npos,gp
 
     ' Jetzt ist wirklich ALLES sortiert. --> Plätze vergeben und Tabelle raus
+    dim disq10:disq10=0
+    dim disq20:disq20=0
+    for i = 1 to tw_blitzTab_MANUELL.Grid1.RowCount-1
+        if tw_blitzTab_MANUELL.Grid1.Cells(i,8) ="40" then
+              disq10=disq10+1
+        end if
+        if tw_blitzTab_MANUELL.Grid1.Cells(i,8) ="30" Then
+            disq20=disq20+1
+        end if
+    next
     tw_blitztab.Visible = true
     tw_blitztab.BringToFront
     tw_blitztab.Grid1.Clear(false)
@@ -269,14 +279,20 @@ sub tw_blitzTab_MANUELL_bt_calc_tableClick (Sender)
     for i = 1 to tw_blitzTab_MANUELL.Grid1.RowCount-1
         npos=i
         gp=tw_blitzTab_MANUELL.Grid1.Cells(i,8)
+
         tw_blitztab.Grid1.Cells(i,1) = "X"
         tw_blitztab.Grid1.Cells(i,2) = i & "."
         if gp <> "" then
             if gp="10" then
-                npos=npos-6   'Sollte bei 6 Teams eigentlich immer klappen nach den sortieren
+                npos=npos-6-disq10   'Sollte bei 6 Teams eigentlich immer klappen nach den sortieren
+            elseif gp="20" then
+                npos=npos-disq20-disq10
+            else
+              tw_blitztab.Grid1.Cells(i,1) = ""
             end if
             tw_blitztab.Grid1.Cells(i,2) = npos & "."
             tw_blitztab.Grid1.Cells(i,0) =cint(gp)+npos
+
         end if
         tw_blitztab.Grid1.Cells(i,3) = TSP_get_info_from_db("TEAMS", "LONG_NAME", "SHORT_NAME",  tw_blitzTab_MANUELL.Grid1.Cells(i,0))
         ' Tore - TorDifferenz = Goals_against
@@ -293,10 +309,15 @@ sub tw_blitzTab_MANUELL_bt_calc_tableClick (Sender)
     tw_Blitzerg.BringToFront
     'tw_Blitzerg.Grid.Clear(false)
     for i = 1 to 6
-
-        tw_Blitzerg.ComponentByName("cb_name_A" & i).Text = tw_blitzTab_MANUELL.ComponentByName("teamA" & i).Text
-        tw_Blitzerg.ComponentByName("cb_name_B" & i).Text = tw_blitzTab_MANUELL.ComponentByName("teamB" & i).Text
-        tw_Blitzerg.ComponentByName("ed_result" & i).text = tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text & ":" & tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text
+        if tw_blitzTab_MANUELL.ComponentByName("teamA" & i).Visible =true then
+            tw_Blitzerg.ComponentByName("cb_name_A" & i).Text = tw_blitzTab_MANUELL.ComponentByName("teamA" & i).Text
+            tw_Blitzerg.ComponentByName("cb_name_B" & i).Text = tw_blitzTab_MANUELL.ComponentByName("teamB" & i).Text
+            tw_Blitzerg.ComponentByName("ed_result" & i).text = tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text & ":" & tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text
+        else
+             tw_Blitzerg.ComponentByName("cb_name_A" & i).Text=""
+             tw_Blitzerg.ComponentByName("cb_name_B" & i).Text=""
+             tw_Blitzerg.ComponentByName("ed_result" & i).text=""
+        end if
     next
      call tw_blitztab.Grid1.SortByCol(0,true)
     tw_blitztab.Grid1.FixedCols=1
@@ -309,6 +330,16 @@ sub tw_blitzTab_MANUELL_bt_calc_table1Click (Sender)
         call STABLE_sort_by_col(i)
     next
     call STABLE_sort_by_col(8)
+    dim disq10:disq10=0
+    dim disq20:disq20=0
+    for i = 1 to tw_blitzTab_MANUELL.Grid1.RowCount-1
+        if tw_blitzTab_MANUELL.Grid1.Cells(i,8) ="40" then
+              disq10=disq10+1
+        end if
+        if tw_blitzTab_MANUELL.Grid1.Cells(i,8) ="30" Then
+            disq20=disq20+1
+        end if
+    next
     dim npos,gp
         ' Jetzt ist wirklich ALLES sortiert. --> Plätze vergeben und Tabelle raus
     tw_standing.Visible = true
@@ -319,9 +350,13 @@ sub tw_blitzTab_MANUELL_bt_calc_table1Click (Sender)
         npos=i
         gp=tw_blitzTab_MANUELL.Grid1.Cells(i,8)
         tw_standing.grid.Cells(i,1) = i & ". "
+        'cc.sf.DebugText i& "< "&gp& "< " &disq10& "< " &disq20
         if gp <> "" then
             if gp="10" then
-                npos=npos-6   'Sollte bei 6 Teams eigentlich immer klappen nach den sortieren
+                npos=npos-6-disq10   'Sollte bei 6 Teams eigentlich immer klappen nach den sortieren
+            end if
+            if gp="20" then
+                npos=npos-disq20-disq10
             end if
             tw_standing.grid.Cells(i,1) = npos & "."
             tw_standing.grid.Cells(i,0) =cint(gp)+npos
@@ -355,9 +390,15 @@ sub tw_blitzTab_MANUELL_bt_calc_table1Click (Sender)
     tw_standing.grid.FixedCols=1
     tw_standing.grid.Cells(1,1) = "1. "
     for i = 1 to 6
-        tw_standing.Grid2.Cells(i, 1) = tw_blitzTab_MANUELL.ComponentByName("teamA" & i).Text
-        tw_standing.Grid2.Cells(i, 3) = tw_blitzTab_MANUELL.ComponentByName("teamB" & i).Text
-        tw_standing.Grid2.Cells(i, 2) = tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text & ":" & tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text
+        if tw_blitzTab_MANUELL.ComponentByName("teamA" & i).Visible =true then
+            tw_standing.Grid2.Cells(i, 1) = tw_blitzTab_MANUELL.ComponentByName("teamA" & i).Text
+            tw_standing.Grid2.Cells(i, 3) = tw_blitzTab_MANUELL.ComponentByName("teamB" & i).Text
+            tw_standing.Grid2.Cells(i, 2) = tw_blitzTab_MANUELL.ComponentByName("scoreA" & i).Text & ":" & tw_blitzTab_MANUELL.ComponentByName("scoreB" & i).Text
+        else
+            tw_standing.Grid2.Cells(i, 1) =""
+            tw_standing.Grid2.Cells(i, 2) =""
+            tw_standing.Grid2.Cells(i, 3) =""
+        end if
     next
 end sub
 

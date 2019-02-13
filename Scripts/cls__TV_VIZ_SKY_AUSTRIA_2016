@@ -1312,8 +1312,10 @@ public Sub SetTitelDefaultHeaderLF
          if Data.Item("ANIM_TYPE") =2 then
               SetVizData "0014",hcount
               SetVizData "0024",hcount
-         elseif Data.Item("ANIM_TYPE") =5 or Data.Item("ANIM_TYPE") =6 then
-             SetVizData "0004",6
+         elseif Data.Item("ANIM_TYPE") =5 then
+            SetVizData "0004",6
+         elseif Data.Item("ANIM_TYPE") =6 then
+             SetVizData "0004",5
          else
              SetVizData "0004",hcount
             end if
