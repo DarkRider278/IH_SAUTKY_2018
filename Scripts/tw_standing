@@ -102,6 +102,7 @@ sub fetch_standing_from_tsp()
      tw_standing.grid.FixedCols=1
     tw_standing.ed_header.text = games & ". Runde"
     tw_standing.grid2.FixedCols=0
+    tw_standing.Grid2.Clear(false)
     If TSP.LoadSQLData("SELECT * FROM ROUNDS_LIST WHERE (round='" & games & "') and (league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "')") then
         i = 0
         If TSP.SetSQLPos("First") Then
@@ -114,6 +115,32 @@ sub fetch_standing_from_tsp()
                     tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "hl?"))   = ""
                     tw_standing.Grid2.Cells(i, 0) = TSP.GetSQLData("gruppe")
                 end if
+            Loop While TSP.SetSQLPos("Next")
+        end if
+    end if
+    dim team
+    dim found
+    If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE (TEXT_1='1' OR TEXT_1='2') AND league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'") then
+        If TSP.SetSQLPos("First") Then
+            Do
+                team= TSP.GetSQLData("long_name")
+                'cc.SF.DebugText team
+                found=false
+                for i=1 to 6
+                    if tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 1"))=team or tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 2"))=team then
+                        found =true
+                    end if
+                next
+                if found=false then
+                    for i=1 to  6
+                        if tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 1"))="" then
+                            tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 1"))=team
+                            tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "result"))="Spielfrei"
+                            exit for
+                        end if
+                    next
+                end if
+
             Loop While TSP.SetSQLPos("Next")
         end if
     end if
