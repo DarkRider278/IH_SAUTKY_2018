@@ -2798,12 +2798,17 @@ public Sub SetTitelDefaultHeaderLF
         obj__TV.SetClock 4, clLimit, 0
         obj__TV.SetClock 4, clDirection, 0
         
-        if  b__VisiblePenH1 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efPlay
-        if  b__VisiblePenH2 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efPlay
-        if  b__VisiblePenG1 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efPlay
-        if  b__VisiblePenG2 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efPlay
+
 
         obj__TV.DoEffect elFrontLayer, "Default", efPlay
+        
+        if  b__VisiblePenH1 or  b__VisiblePenH2 or b__VisiblePenG1 or  b__VisiblePenG2 then
+             cc.SF.Wait 2000
+            if  b__VisiblePenH1 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efPlay
+            if  b__VisiblePenH2 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efPlay
+            if  b__VisiblePenG1 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efPlay
+            if  b__VisiblePenG2 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efPlay
+        end if
 
 
 
@@ -2823,6 +2828,10 @@ public Sub SetTitelDefaultHeaderLF
         'obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr*STAGE*DIRECTOR*STRAFZEIT_2_HEIM SHOW 0"
         'obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr*STAGE*DIRECTOR*STRAFZEIT_1_GAST SHOW 0"
         'obj__TV.SendCommand "SCENE*" & s__VizPath & "/DSS_Uhr*STAGE*DIRECTOR*STRAFZEIT_2_GAST SHOW 0"
+        if  b__VisiblePenH1 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efContinue
+        if  b__VisiblePenH2 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efContinue
+        if  b__VisiblePenG1 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efContinue
+        if  b__VisiblePenG2 = true then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efContinue
         IF b__VisibleADD THEN
             obj__TV.DoEffect elFrontLayer, "OVERTIME", efContinue
             cc.SF.Wait 350
@@ -2896,16 +2905,16 @@ public Sub SetTitelDefaultHeaderLF
         
         select case id
             case 1:
-                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efPlay
+                if b__VisibleDSS then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efPlay
                 b__VisiblePenH1 = true
             case 2:
-                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efPlay
+                if b__VisibleDSS then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efPlay
                 b__VisiblePenH2 = true
             case 3:
-                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efPlay
+                if b__VisibleDSS then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efPlay
                 b__VisiblePenG1 = true
             case 4:
-                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efPlay
+                if b__VisibleDSS then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efPlay
                 b__VisiblePenG2 = true
         end select
     End Sub
@@ -2918,16 +2927,16 @@ public Sub SetTitelDefaultHeaderLF
 
         select case id
             case 1:
-                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efContinue
+                if b__VisibleDSS then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_HEIM", efContinue
                 b__VisiblePenH1 = false
             case 2:
-                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efContinue
+                if b__VisibleDSS then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_HEIM", efContinue
                 b__VisiblePenH2 = false
             case 3:
-                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efContinue
+                if b__VisibleDSS then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_1_GAST", efContinue
                 b__VisiblePenG1 = false
             case 4:
-                obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efContinue
+                if b__VisibleDSS then obj__TV.DoEffect elFrontLayer, "STRAFZEIT_2_GAST", efContinue
                 b__VisiblePenG2 = false
         end select
     End Sub

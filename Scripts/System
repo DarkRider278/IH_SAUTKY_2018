@@ -274,13 +274,13 @@ Sub ParseData(ByVal data)
 
             select case values(1)
                 case 1
-
-                    if values(2) = "-1" and pentime_h1 > -1 then
+                    'cc.sf.DebugText tt& ">>"& pentime_h1&">>"&pgMain.Btn_ShowDSS.down
+                    if values(2) = "-1" and pentime_h1 > -1  then
                         'AllTV.TV__Set_PenClock 1,pentime_h1
 
                         AllTV.TV__Stop_PenClock 1
                         pentime_h1=-1
-                    elseif tt > 0 and pentime_h1 = -1 then
+                    elseif tt > 0 and pentime_h1 = -1  then
 
                         AllTV.TV__Start_PenClock 1,tt
                         pentime_h1=tt

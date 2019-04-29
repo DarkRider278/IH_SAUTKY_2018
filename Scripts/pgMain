@@ -167,6 +167,10 @@ Sub pgMain_Btn_ShowDSSClick (Sender)
     if not Sender.down Then
         Sender.Caption = "Show DSS <11>"
         set_pn_DSS_buttons false
+        if pentime_h1 > -1 then
+            'AllTV.TV__Stop_PenClock 1
+            'pentime_h1 = -1
+        end if
         AllTV.TV__DSS_Hide
         if tw_konferenz.bt_show_karusell.Down=true then
             tw_konferenz.bt_show_karusell.Down=false
