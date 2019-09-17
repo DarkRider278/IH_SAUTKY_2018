@@ -29,6 +29,7 @@ sub tw_Restprogramm_bt_showClick (Sender)
     Data.Item("ITEMCOUNT")  = k
     Data.Item("AS_INFOBOX") = (Sender is tw_Restprogramm.bt_show_ib)
  '   Hide_DSS
+ 'HideVorlaufLogos
     AllTV.TV__VB_IB_RestProgramm Data
     set Data = Nothing
 end sub

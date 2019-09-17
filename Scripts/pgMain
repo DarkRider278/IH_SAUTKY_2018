@@ -611,6 +611,7 @@ sub pgMain_bt_vbOpeningMouseUp (Sender, Button, Shift, X, Y)
         end if
     end if
     Hide_DSS
+    'HideVorlaufLogos
     AllTV.TV__VB_Opening Data
     set Data = Nothing
 end sub

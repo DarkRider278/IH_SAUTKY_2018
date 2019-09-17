@@ -1198,9 +1198,9 @@ public Sub SetTitelDefaultHeaderLF
         showp=false
         select case Data.Item("ANIM_TYPE")
             case 1  sScene = "VB_Erg"
-            case 2  sScene = "VB_Erg_Tab"
+            case 2  sScene = "VB_Erg6_Tab12"
             case 3  sScene = "VB_Tab_Erg"
-            case 4  sScene = "VB_Tab"
+            case 4  sScene = "VB_Tab_12"
             case 5  sScene = "VB_Erg3_Tab6"
             case 6  sScene = "VB_Erg3_Tab6_1"
         end select
@@ -1241,6 +1241,8 @@ public Sub SetTitelDefaultHeaderLF
             next
             if Data.Item("ANIM_TYPE") =5 or Data.Item("ANIM_TYPE") =6 then
                 SetVizData "0003",3'Data.Item("ITEMCOUNT")
+            elseif Data.Item("ANIM_TYPE") =2  then
+                SetVizData "0003",Data.Item("ITEMCOUNT")
             else
                 SetVizData "0004",Data.Item("ITEMCOUNT")
             end if
@@ -1254,12 +1256,12 @@ public Sub SetTitelDefaultHeaderLF
             count = Data.Item("ITEMCOUNTTAB")
             hcount=count
             if Data.Item("ANIM_TYPE") =2 then
-                if count>9 then
-                    page2=true
-                    hcount=Ceil(count/2.0)
-                end if
+                'if count>9 then
+'                    page2=true
+'                    hcount=Ceil(count/2.0)
+'                end if
             elseif Data.Item("ANIM_TYPE") =6 then
-
+            elseif Data.Item("ANIM_TYPE") =4 then
             else
                 if count>10 then
                     page2=true
@@ -1267,7 +1269,7 @@ public Sub SetTitelDefaultHeaderLF
                 end if
             end if
             ids =1100
-            if Data.Item("ANIM_TYPE") =2 or Data.Item("ANIM_TYPE") =3 then ids=ids+1000
+            if Data.Item("ANIM_TYPE") =2 or Data.Item("ANIM_TYPE") =3 or Data.Item("ANIM_TYPE") =4 then ids=ids+1000
 			if Data.Item("ANIM_TYPE") =5  or Data.Item("ANIM_TYPE") =6 then ids=ids+400
             ii=1
             if Data.Item("ANIM_TYPE")=6 then ii=7
@@ -1290,7 +1292,8 @@ public Sub SetTitelDefaultHeaderLF
               next
 
             ids =2100
-            if Data.Item("ANIM_TYPE") =2 or Data.Item("ANIM_TYPE") =3 then ids=ids+1000
+            if  Data.Item("ANIM_TYPE") =3  then ids=ids+1000
+            if Data.Item("ANIM_TYPE") =2 or Data.Item("ANIM_TYPE") =4 then ids=ids+2000
             for i = hcount+1 to hcount*2   ' FULL STANDINGS TABLE
                 SetVizDataBufferOn
                 SetVizData ids,Data.Item("PLACE" & i)
@@ -1311,7 +1314,7 @@ public Sub SetTitelDefaultHeaderLF
               next
          if Data.Item("ANIM_TYPE") =2 then
               SetVizData "0014",hcount
-              SetVizData "0024",hcount
+              SetVizData "0004",hcount
          elseif Data.Item("ANIM_TYPE") =5 then
             SetVizData "0004",6
          elseif Data.Item("ANIM_TYPE") =6 then

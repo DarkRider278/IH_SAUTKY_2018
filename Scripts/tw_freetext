@@ -7,6 +7,7 @@ sub tw_freetext_bt_show_vbClick (Sender)
     dim typ
 
     if     Sender is tw_freetext.bt_show_vb then
+        'HideVorlaufLogos
         AllTV.TV__VB_IB_BB_FreeText tw_freetext.ed_Title1.Text, tw_freetext.ed_Title2.Text, tw_freetext.freetext.Lines.Text, 1 ,0
     elseif Sender is tw_freetext.bt_show_ib then
         AllTV.TV__VB_IB_BB_FreeText tw_freetext.ed_Title1.Text, tw_freetext.ed_Title2.Text, tw_freetext.freetext.Lines, 2,tw_freetext.freetext.Lines.Count

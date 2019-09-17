@@ -25,7 +25,7 @@ sub tw_startingv_vb_btn_showClick (Sender)
 
     Data.Item("WERBUNG") =   tw_startingv_vb.cb_werbung.Checked
 
-
+   HideVorlaufLogos
     AllTV.TV__VB_Starting_Five Data
     set Data = Nothing
 

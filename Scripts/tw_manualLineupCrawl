@@ -246,6 +246,7 @@ sub tw_manualLineupCrawl_bt_show3Click (Sender)
    ' next
    ' Data.Item("TRAINER2") = savedata.Item("TRAINER2")
    ' Data.Item("ITEMCOUNT2") = savedata.Item("ITEMCOUNT2")
+   HideVorlaufLogos
      AllTV.TV__VB_LineupTab Data
     set Data = Nothing
 
@@ -281,6 +282,7 @@ sub tw_manualLineupCrawl_bt_show4Click (Sender)
     next
     Data.Item("TRAINER") = savedata.Item("TRAINER2")
     Data.Item("ITEMCOUNT") = savedata.Item("ITEMCOUNT2")
+    HideVorlaufLogos
     AllTV.TV__VB_LineupTab Data
     set Data = Nothing
 

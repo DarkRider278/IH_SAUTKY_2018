@@ -793,7 +793,8 @@ Class cls_Grafikaufrufe
             
             cc.sf.HideSplashForm
             ' Zur nächsten Seite wechseln!
-            if (Data.Item("ANIM_TYPE") = 2) or (Data.Item("ANIM_TYPE") = 3) or (Data.Item("ANIM_TYPE") = 4 and Data.Item("ITEMCOUNTTAB") >10) then
+            if (Data.Item("ANIM_TYPE") = 2) or (Data.Item("ANIM_TYPE") = 3)  then
+            'or (Data.Item("ANIM_TYPE") = 4 and Data.Item("ITEMCOUNTTAB") >10)
                 For i = 0 to int_TVCount
                    If not obj_TVList(i) is Nothing Then
                       If not obj_TVList(i).TVContent = 0 Then
@@ -805,7 +806,7 @@ Class cls_Grafikaufrufe
                     For i = 0 to int_TVCount
                        If not obj_TVList(i) is Nothing Then
                             If not obj_TVList(i).TVContent = 0 Then
-                                obj_TVList(i).Start "WECHSEL"
+                                obj_TVList(i).Continue "Default"
                           End If
                        End If
                     Next
@@ -823,27 +824,8 @@ Class cls_Grafikaufrufe
                        End If
                     Next
                     cc.sf.HideSplashForm
-                    if Data.Item("ANIM_TYPE") = 2 and Data.Item("ITEMCOUNTTAB") >9 then
-                        IF msgBox("Change TAB?", vbOkCancel, "QUESTION") = vbOK THEN
-                        For i = 0 to int_TVCount
-                           If not obj_TVList(i) is Nothing Then
-                                If not obj_TVList(i).TVContent = 0 Then
-                                    obj_TVList(i).Continue "WECHSEL"
-                              End If
-                           End If
-                        Next
-                        CC.SF.ShowSplashForm "Animation läuft .... ", clYellow
-                        CC.SF.Wait 1000
-                        For i = 0 to int_TVCount
-                           If not obj_TVList(i) is Nothing Then
-                              If not obj_TVList(i).TVContent = 0 Then
-                                    'obj_TVList(i).vbStanding_HL Data
-                                    obj_TVList(i).vbErgStanding_HL Data,2
-                              End If
-                           End If
-                        Next
-                    end if
-                    end if
+
+                    'end if
                     cc.sf.HideSplashForm
                 end if
             end if

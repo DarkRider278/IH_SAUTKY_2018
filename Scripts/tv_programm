@@ -59,6 +59,7 @@ sub tv_programm_bt_show_VBClick (Sender)
     Data.Item("HEADER")     = tv_programm.ed_title.text
     Data.Item("AS_INFOBOX") = (Sender is tv_programm.bt_show_IB)
     if Data.Item("AS_INFOBOX") = False then Hide_DSS      ' Nur bei VB hiden
+    'HideVorlaufLogos
     AllTV.TV__VB_IB_Programm Data
     set Data = Nothing
 end sub
