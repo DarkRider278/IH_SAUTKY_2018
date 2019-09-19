@@ -11,7 +11,6 @@ object tw_blitzTab_MANUELL: TccToolWindow
   LastDock = frmMain.dckTop
   Resizable = False
   TabOrder = 0
-  Visible = False
   Floating = True
   ParentColor = False
   Float = True
@@ -123,7 +122,7 @@ object tw_blitzTab_MANUELL: TccToolWindow
     Height = 246
     ColCount = 9
     DefaultRowHeight = 17
-    RowCount = 13
+    RowCount = 12
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goEditing, goAlwaysShowEditor]
     TabOrder = 0
     SelectedFont.Charset = DEFAULT_CHARSET
@@ -143,18 +142,30 @@ object tw_blitzTab_MANUELL: TccToolWindow
       'GP')
     RowHeaders.WideStrings = (
       'Team'
-      'Dornbirn'
-      'Salzburg'
-      'Capitals'
-      'Linz'
-      'Bozen'
-      'Fehervar'
-      'KAC'
-      'Znojmo'
-      'VSV'
-      'Zagreb'
-      'Innsbruck'
-      'Graz')
+      'EC Red Bull Salzburg'
+      'Moser Medical Graz99ers'
+      'EC-KAC'
+      'EC Panaceo VSV'
+      'spusu Vienna Capitals'
+      'Hydro Fehervar AV 19'
+      'Dornbirn Bulldogs'
+      'HC TWK Innsbruck '#39'Die Hai'
+      'EHC Liwest Black Wings Li'
+      'HC Orli Znojmo'
+      'HCB Südtirol Alperia')
+    RowHeaders.WideStrings_UTF7 = (
+      'Team'
+      'EC Red Bull Salzburg'
+      'Moser Medical Graz99ers'
+      'EC-KAC'
+      'EC Panaceo VSV'
+      'spusu Vienna Capitals'
+      'Hydro Fehervar AV 19'
+      'Dornbirn Bulldogs'
+      'HC TWK Innsbruck '#39'Die Hai'
+      'EHC Liwest Black Wings Li'
+      'HC Orli Znojmo'
+      'HCB S+APw-dtirol Alperia')
     FixedColWidth = 80
     FixedRowHeight = 17
     FixedFont.Charset = DEFAULT_CHARSET
@@ -172,12 +183,14 @@ object tw_blitzTab_MANUELL: TccToolWindow
     ProtectFixedCols = True
     DrawSortingArrow = True
     DataString = 
-      'Team,Points,Diff,Goals,Won,"Away Won",Games,Last_Rank,GP;Dornbir' +
-      'n,25,7,36,5,0,9,1,20;Salzburg,22,10,38,5,0,9,1,10;Capitals,21,7,' +
-      '34,4,0,9,2,10;Linz,20,3,36,5,0,9,3,10;Bozen,19,14,27,5,0,9,2,20;' +
-      'Fehervar,17,1,23,4,0,9,3,20;KAC,14,-7,21,4,0,9,4,10;Znojmo,13,5,' +
-      '25,3,0,9,4,20;VSV,12,-7,24,3,0,9,5,20;Zagreb,9,-5,25,2,0,9,5,10;' +
-      'Innsbruck,8,-8,27,2,0,9,6,10;Graz,8,-20,20,0,0,9,6,20;'
+      'Team,Points,Diff,Goals,Won,"Away Won",Games,Last_Rank,GP;"EC Red' +
+      ' Bull Salzburg",6,9,10,2,0,2,1,0;"Moser Medical Graz99ers",5,4,8' +
+      ',1,0,2,2,0;EC-KAC,4,4,7,1,0,2,3,0;"EC Panaceo VSV",3,5,7,1,0,1,4' +
+      ',0;"spusu Vienna Capitals",3,0,4,0,0,2,5,0;"Hydro Fehervar AV 19' +
+      '",3,-4,1,1,0,2,6,0;"Dornbirn Bulldogs",2,-4,2,0,0,2,7,0;"HC TWK ' +
+      'Innsbruck '#39'Die Hai",1,-1,1,0,0,1,8,0;"EHC Liwest Black Wings Li"' +
+      ',0,-1,0,0,0,1,9,0;"HC Orli Znojmo",0,-3,3,0,0,1,10,0;"HCB Südtir' +
+      'ol Alperia",0,-9,3,0,0,2,11,0;'
     RowSizing = False
     RowMoving = False
     ColSizing = True
@@ -208,8 +221,16 @@ object tw_blitzTab_MANUELL: TccToolWindow
       17
       17
       17
-      17
       17)
+    DataString_UTF7 = 
+      'Team,Points,Diff,Goals,Won,"Away Won",Games,Last_Rank,GP;"EC Red' +
+      ' Bull Salzburg",6,9,10,2,0,2,1,0;"Moser Medical Graz99ers",5,4,8' +
+      ',1,0,2,2,0;EC-KAC,4,4,7,1,0,2,3,0;"EC Panaceo VSV",3,5,7,1,0,1,4' +
+      ',0;"spusu Vienna Capitals",3,0,4,0,0,2,5,0;"Hydro Fehervar AV 19' +
+      '",3,-4,1,1,0,2,6,0;"Dornbirn Bulldogs",2,-4,2,0,0,2,7,0;"HC TWK ' +
+      'Innsbruck '#39'Die Hai",1,-1,1,0,0,1,8,0;"EHC Liwest Black Wings Li"' +
+      ',0,-1,0,0,0,1,9,0;"HC Orli Znojmo",0,-3,3,0,0,1,10,0;"HCB S+APw-' +
+      'dtirol Alperia",0,-9,3,0,0,2,11,0;'
   end
   object teamA1: TptEdit
     Left = 125
@@ -219,7 +240,7 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 1
-    Text = 'Vienna Capitals'
+    Text = 'EC-KAC'
     Numeric = False
     InputType = itAnything
     Locked = False
@@ -232,7 +253,7 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 2
-    Text = 'HC TWK Innsbruck '#39'Die Haie'#39
+    Text = 'Hydro Fehervar AV 19'
     Numeric = False
     InputType = itAnything
     Locked = False
@@ -269,7 +290,7 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 5
-    Text = 'EC-KAC'
+    Text = 'Moser Medical Graz99ers'
     Numeric = False
     InputType = itAnything
     Locked = False
@@ -282,11 +303,10 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 6
-    Text = 'HCB Südtirol Alperia'
+    Text = 'spusu Vienna Capitals'
     Numeric = False
     InputType = itAnything
     Locked = False
-    Text_UTF7 = 'HCB S+APw-dtirol Alperia'
   end
   object scoreA2: TptEdit
     Left = 290
@@ -320,7 +340,7 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 9
-    Text = 'EHC Liwest Black Wings Linz'
+    Text = 'HC TWK Innsbruck '#39'Die Haie'#39
     Numeric = False
     InputType = itAnything
     Locked = False
@@ -333,7 +353,7 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 10
-    Text = 'KHL Medvescak Zagreb'
+    Text = 'Dornbirn Bulldogs'
     Numeric = False
     InputType = itAnything
     Locked = False
@@ -370,10 +390,11 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 13
-    Text = 'EC Red Bull Salzburg'
+    Text = 'HCB Südtirol Alperia'
     Numeric = False
     InputType = itAnything
     Locked = False
+    Text_UTF7 = 'HCB S+APw-dtirol Alperia'
   end
   object teamB4: TptEdit
     Left = 365
@@ -383,7 +404,7 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 14
-    Text = 'Dornbirn Bulldogs'
+    Text = 'EC Red Bull Salzburg'
     Numeric = False
     InputType = itAnything
     Locked = False
@@ -420,8 +441,7 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 17
-    Text = 'Moser Medical Graz99ers'
-    Visible = False
+    Text = 'EHC Liwest Black Wings Linz'
     Numeric = False
     InputType = itAnything
     Locked = False
@@ -434,8 +454,7 @@ object tw_blitzTab_MANUELL: TccToolWindow
     MaxLength = 0
     ReadOnly = True
     TabOrder = 18
-    Text = 'Fehervar AV 19'
-    Visible = False
+    Text = 'EC Panaceo VSV'
     Numeric = False
     InputType = itAnything
     Locked = False
@@ -447,8 +466,6 @@ object tw_blitzTab_MANUELL: TccToolWindow
     Height = 21
     MaxLength = 0
     TabOrder = 19
-    Text = '1'
-    Visible = False
     Numeric = True
     InputType = itInteger
     Locked = False
@@ -461,8 +478,6 @@ object tw_blitzTab_MANUELL: TccToolWindow
     Height = 21
     MaxLength = 0
     TabOrder = 20
-    Text = '2'
-    Visible = False
     Numeric = True
     InputType = itInteger
     Locked = False

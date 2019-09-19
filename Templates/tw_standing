@@ -10,7 +10,6 @@ object tw_standing: TccToolWindow
   LastDock = frmMain.dckTop
   Resizable = False
   TabOrder = 0
-  Visible = False
   Floating = True
   ParentColor = False
   Float = True
@@ -1620,10 +1619,11 @@ object tw_standing: TccToolWindow
     Top = 136
     Width = 461
     Height = 280
+    Cursor = crHSplit
     ColCount = 9
     Ctl3D = True
     DefaultRowHeight = 20
-    RowCount = 13
+    RowCount = 12
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowMoving, goEditing, goAlwaysShowEditor]
     ParentCtl3D = False
     TabOrder = 2
@@ -1644,18 +1644,17 @@ object tw_standing: TccToolWindow
       'HL?')
     RowHeaders.WideStrings = (
       'MOVE'
-      '11.'
-      '12.'
-      '13.'
-      '14.'
-      '15.'
-      '16.'
-      '21.'
-      '22.'
-      '23.'
-      '24.'
-      '25.'
-      '26.')
+      '1'
+      '2'
+      '3'
+      '4'
+      '5'
+      '6'
+      '7'
+      '8'
+      '9'
+      '10'
+      '11')
     FixedColWidth = 41
     FixedRowHeight = 20
     FixedFont.Charset = DEFAULT_CHARSET
@@ -1673,15 +1672,14 @@ object tw_standing: TccToolWindow
     ProtectFixedCols = False
     DrawSortingArrow = True
     DataString = 
-      'MOVE,#,Trend,Club,Games,Goals,Diff,Pts,HL?;11.,1.,,"EC Red Bull ' +
-      'Salzburg",9,38:28,+10,22,;12.,2.,,"Vienna Capitals",9,34:27,+7,2' +
-      '1,;13.,3.,,"EHC Liwest Black Wings Linz",9,36:33,+3,20,;14.,4.,,' +
-      'EC-KAC,9,21:28,-7,14,;15.,5.,,"KHL Medvescak Zagreb",9,25:30,-5,' +
-      '9,;16.,6.,,"HC TWK Innsbruck '#39'Die Haie'#39'",9,27:35,-8,8,;21.,1.,,"' +
-      'Dornbirn Bulldogs",9,36:29,+7,25,;22.,2.,,"HCB Südtirol Alperia"' +
-      ',9,27:13,+14,19,;23.,3.,,"Fehervar AV 19",9,23:22,+1,17,;24.,4.,' +
-      ',"HC Orli Znojmo",9,25:20,+5,13,;25.,5.,,"EC VSV",9,24:31,-7,12,' +
-      ';26.,6.,,"Moser Medical Graz99ers",9,20:40,-20,8,;'
+      'MOVE,#,Trend,Club,Games,Goals,Diff,Pts,HL?;1,"1. ",,"EC Red Bull' +
+      ' Salzburg",2,10:1,+9,6,;2,2.,,"Moser Medical Graz99ers",2,8:4,+4' +
+      ',5,;3,3.,,EC-KAC,2,7:3,+4,4,;4,4.,,"EC Panaceo VSV",1,7:2,+5,3,;' +
+      '5,5.,,"spusu Vienna Capitals",2,4:4,0,3,;6,6.,,"Hydro Fehervar A' +
+      'V 19",2,1:5,-4,3,;7,7.,,"Dornbirn Bulldogs",2,2:6,-4,2,;8,8.,,"H' +
+      'C TWK Innsbruck '#39'Die Haie'#39'",1,1:2,-1,1,;9,9.,,"EHC Liwest Black ' +
+      'Wings Linz",1,0:1,-1,0,;10,10.,,"HC Orli Znojmo",1,3:6,-3,0,;11,' +
+      '11.,,"HCB Südtirol Alperia",2,3:12,-9,0,;'
     RowSizing = False
     RowMoving = True
     ColSizing = True
@@ -1712,18 +1710,16 @@ object tw_standing: TccToolWindow
       20
       20
       20
-      20
       20)
     DataString_UTF7 = 
-      'MOVE,#,Trend,Club,Games,Goals,Diff,Pts,HL?;11.,1.,,"EC Red Bull ' +
-      'Salzburg",9,38:28,+-10,22,;12.,2.,,"Vienna Capitals",9,34:27,+-7' +
-      ',21,;13.,3.,,"EHC Liwest Black Wings Linz",9,36:33,+-3,20,;14.,4' +
-      '.,,EC-KAC,9,21:28,-7,14,;15.,5.,,"KHL Medvescak Zagreb",9,25:30,' +
-      '-5,9,;16.,6.,,"HC TWK Innsbruck '#39'Die Haie'#39'",9,27:35,-8,8,;21.,1.' +
-      ',,"Dornbirn Bulldogs",9,36:29,+-7,25,;22.,2.,,"HCB S+APw-dtirol ' +
-      'Alperia",9,27:13,+-14,19,;23.,3.,,"Fehervar AV 19",9,23:22,+-1,1' +
-      '7,;24.,4.,,"HC Orli Znojmo",9,25:20,+-5,13,;25.,5.,,"EC VSV",9,2' +
-      '4:31,-7,12,;26.,6.,,"Moser Medical Graz99ers",9,20:40,-20,8,;'
+      'MOVE,#,Trend,Club,Games,Goals,Diff,Pts,HL?;1,"1. ",,"EC Red Bull' +
+      ' Salzburg",2,10:1,+-9,6,;2,2.,,"Moser Medical Graz99ers",2,8:4,+' +
+      '-4,5,;3,3.,,EC-KAC,2,7:3,+-4,4,;4,4.,,"EC Panaceo VSV",1,7:2,+-5' +
+      ',3,;5,5.,,"spusu Vienna Capitals",2,4:4,0,3,;6,6.,,"Hydro Feherv' +
+      'ar AV 19",2,1:5,-4,3,;7,7.,,"Dornbirn Bulldogs",2,2:6,-4,2,;8,8.' +
+      ',,"HC TWK Innsbruck '#39'Die Haie'#39'",1,1:2,-1,1,;9,9.,,"EHC Liwest Bl' +
+      'ack Wings Linz",1,0:1,-1,0,;10,10.,,"HC Orli Znojmo",1,3:6,-3,0,' +
+      ';11,11.,,"HCB S+APw-dtirol Alperia",2,3:12,-9,0,;'
     EventDataNames = 
       'OnDblClick=tw_standing_gridDblClick,OnMouseUp=tw_standing_gridMo' +
       'useUp'
@@ -1765,12 +1761,12 @@ object tw_standing: TccToolWindow
       'HL?')
     RowHeaders.WideStrings = (
       'MOVE'
-      '3460'
-      '3460'
-      '3460'
-      '3460'
-      '3460'
-      '3460')
+      '5235'
+      '5235'
+      '5235'
+      '5235'
+      '5235'
+      '')
     FixedColWidth = 36
     FixedRowHeight = 17
     FixedFont.Charset = DEFAULT_CHARSET
@@ -1788,12 +1784,12 @@ object tw_standing: TccToolWindow
     ProtectFixedCols = False
     DrawSortingArrow = True
     DataString = 
-      'MOVE,"Team 1",Result,"Team 2",HL?;3460,"EC Red Bull Salzburg",0:' +
-      '0,EC-KAC,;3460,"EC Panaceo VSV",0:0,"HC Orli Znojmo",;3460,"HCB ' +
-      'Südtirol Alperia",0:0,"Moser Medical Graz99ers",;3460,"Fehervar ' +
-      'AV 19",0:0,"KHL Medvescak Zagreb",;3460,"EHC Liwest Black Wings ' +
-      'Linz",0:0,"Vienna Capitals",;3460,"HC TWK Innsbruck '#39'Die Haie'#39'",' +
-      '0:0,"Dornbirn Bulldogs",;'
+      'MOVE,"Team 1",Result,"Team 2",HL?;5235,EC-KAC,:,"Hydro Fehervar ' +
+      'AV 19",;5235,"Moser Medical Graz99ers",:,"spusu Vienna Capitals"' +
+      ',;5235,"HC TWK Innsbruck '#39'Die Haie'#39'",:,"Dornbirn Bulldogs",;5235' +
+      ',"HCB Südtirol Alperia",:,"EC Red Bull Salzburg",;5235,"EHC Liwe' +
+      'st Black Wings Linz",:,"EC Panaceo VSV",;,"HC Orli Znojmo",Spiel' +
+      'frei,,;'
     RowSizing = False
     RowMoving = True
     ColSizing = True
@@ -1817,12 +1813,12 @@ object tw_standing: TccToolWindow
       17
       17)
     DataString_UTF7 = 
-      'MOVE,"Team 1",Result,"Team 2",HL?;3460,"EC Red Bull Salzburg",0:' +
-      '0,EC-KAC,;3460,"EC Panaceo VSV",0:0,"HC Orli Znojmo",;3460,"HCB ' +
-      'S+APw-dtirol Alperia",0:0,"Moser Medical Graz99ers",;3460,"Feher' +
-      'var AV 19",0:0,"KHL Medvescak Zagreb",;3460,"EHC Liwest Black Wi' +
-      'ngs Linz",0:0,"Vienna Capitals",;3460,"HC TWK Innsbruck '#39'Die Hai' +
-      'e'#39'",0:0,"Dornbirn Bulldogs",;'
+      'MOVE,"Team 1",Result,"Team 2",HL?;5235,EC-KAC,:,"Hydro Fehervar ' +
+      'AV 19",;5235,"Moser Medical Graz99ers",:,"spusu Vienna Capitals"' +
+      ',;5235,"HC TWK Innsbruck '#39'Die Haie'#39'",:,"Dornbirn Bulldogs",;5235' +
+      ',"HCB S+APw-dtirol Alperia",:,"EC Red Bull Salzburg",;5235,"EHC ' +
+      'Liwest Black Wings Linz",:,"EC Panaceo VSV",;,"HC Orli Znojmo",S' +
+      'pielfrei,,;'
     EventDataNames = 'OnDblClick=tw_standing_gridDblClick'
   end
   object ed_opt_title: TptEdit

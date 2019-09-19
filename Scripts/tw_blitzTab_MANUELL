@@ -116,7 +116,7 @@ sub tw_blitzTab_MANUELL_cb_dayChange (Sender)
             If TSP.SetSQLPos("First") Then
                 Do
                     rank = cInt(EmptyToZero(TSP.GetSQLData("RANK")))
-                    if (rank <= 12) and (rank > 0) then
+                    if (rank <= 11) and (rank > 0) then
                         i = i + 1
 
                         tw_blitzTab_MANUELL.Grid1.Cells(i, 0)  = TSP.GetSQLData("short_name")
@@ -400,6 +400,31 @@ sub tw_blitzTab_MANUELL_bt_calc_table1Click (Sender)
             tw_standing.Grid2.Cells(i, 3) =""
         end if
     next
+    
+    If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE (TEXT_1='1' OR TEXT_1='2' OR TEXT_1='0') AND league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'") then
+        If TSP.SetSQLPos("First") Then
+            Do
+                team= TSP.GetSQLData("long_name")
+                'cc.SF.DebugText team
+                found=false
+                for i=1 to 6
+                    if tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 1"))=team or tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 2"))=team then
+                        found =true
+                    end if
+                next
+                if found=false then
+                    for i=1 to  6
+                        if tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 1"))="" then
+                            tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "Team 1"))=team
+                            tw_standing.Grid2.Cells(i, GetColIdx(tw_standing.grid2, "result"))="Spielfrei"
+                            exit for
+                        end if
+                    next
+                end if
+
+            Loop While TSP.SetSQLPos("Next")
+        end if
+    end if
 end sub
 
 sub tw_blitzTab_MANUELL_bt_calc_lformClick (Sender)

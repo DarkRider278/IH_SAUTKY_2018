@@ -71,7 +71,7 @@ sub fetch_standing_from_tsp()
             Do
                 rank = cInt(EmptyToZero(TSP.GetSQLData("RANK")))
                 group = cInt(EmptyToZero(TSP.GetSQLData("TEXT_1")))*10
-                if (rank <= 12) and (rank > 0) then
+                if (rank <= 11) and (rank > 0) then
                     i = i + 1
                      tw_standing.grid.Cells(i, 0)=group+rank &"."
                     tw_standing.grid.Cells(i, GetColIdx(tw_standing.grid, "#"))     = rank &"."
@@ -120,7 +120,7 @@ sub fetch_standing_from_tsp()
     end if
     dim team
     dim found
-    If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE (TEXT_1='1' OR TEXT_1='2') AND league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'") then
+    If TSP.LoadSQLData("SELECT * FROM TEAMS WHERE (TEXT_1='1' OR TEXT_1='2' OR TEXT_1='0') AND league_id='" & TSP.GetRound(TSP_LEAGUE_ID) & "'") then
         If TSP.SetSQLPos("First") Then
             Do
                 team= TSP.GetSQLData("long_name")
